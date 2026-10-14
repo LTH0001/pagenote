@@ -18,7 +18,11 @@
     "format": "prettier --write src desktop mcp scripts server.mjs projects.mjs external-documents.mjs index.html locales tests/*.mjs",
     "format:check": "prettier --check src desktop mcp scripts server.mjs projects.mjs external-documents.mjs index.html locales",
     "package:source": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/source-archive.ps1",
-    "test:word": "node tests/default-word.mjs"
+    "test:word": "node tests/default-word.mjs",
+    "pretest:release": "node scripts/ensure-electron.mjs",
+    "pretest:mcp": "node scripts/ensure-electron.mjs",
+    "pretest:word": "node scripts/ensure-electron.mjs",
+    "pretest:markdown": "node scripts/ensure-electron.mjs"
   },
   "dependencies": {
     "express": "^5.1.0",
