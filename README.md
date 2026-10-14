@@ -6,11 +6,11 @@
 
 pagenote 是 Windows 本地文档与笔记工具：左侧阅读源文档，右侧整理逐页关联的 Markdown 笔记，并用 AI 标注记录解释或修改要求。
 
-**当前版本：2.0.0-beta.3。** 此版本提供商业产品发布所需的工程基础，仍属于测试版；未经代码签名、杀毒厂商复核和独立终端验收，不应宣称已达到正式商业发布标准。
+**当前版本：2.0.0-beta.4。** 此版本提供商业产品发布所需的工程基础，仍属于测试版；未经代码签名、杀毒厂商复核和独立终端验收，不应宣称已达到正式商业发布标准。
 
 ## 下载与安装
 
-[下载 Windows x64 安装包](https://github.com/laihong06/pagenote/releases/download/v2.0.0-beta.3/pagenote-2.0.0-beta.3-windows-x64-setup.exe) · [完整 ZIP 分发包](https://github.com/laihong06/pagenote/releases/download/v2.0.0-beta.3/pagenote-2.0.0-beta.3-windows-x64.zip) · [发布说明与校验值](https://github.com/laihong06/pagenote/releases/tag/v2.0.0-beta.3)
+[下载 Windows x64 安装包](https://github.com/laihong06/pagenote/releases/download/v2.0.0-beta.4/pagenote-2.0.0-beta.4-windows-x64-setup.exe) · [完整 ZIP 分发包](https://github.com/laihong06/pagenote/releases/download/v2.0.0-beta.4/pagenote-2.0.0-beta.4-windows-x64.zip) · [发布说明与校验值](https://github.com/laihong06/pagenote/releases/tag/v2.0.0-beta.4)
 
 1. 在本仓库的 **Releases** 中下载 `pagenote-版本-windows-x64-setup.exe`。浏览源码时的 **Code → Download ZIP** 是源码包，不能直接安装。
 2. 双击安装包，按向导选择安装位置。安装仅针对当前用户，通常不需要管理员权限。
@@ -63,7 +63,7 @@ beta.3 修复了部分 Windows 加密或重定向数据目录中的迁移、临�
 
 ## 从源码运行
 
-安装 Node.js 22 或更高版本，然后在项目根目录执行：
+安装 Node.js 22.13 或更高版本，然后在项目根目录执行：
 
 ```powershell
 npm ci

@@ -19,7 +19,7 @@ git push -u origin main
 
 ## 构建
 
-使用 Windows x64、Node.js 22+：
+使用 Windows x64、Node.js 22.13+：
 
 ```powershell
 npm ci
@@ -35,7 +35,7 @@ node scripts/release-artifacts.mjs
 
 1. 更新 `package.json` 与 `package-lock.json` 的版本。
 2. 验证本地或 CI 测试结果，并阅读发布准备报告。
-3. 在 GitHub 创建带版本号的 tag，例如 `v2.0.0-beta.3`。
+3. 在 GitHub 创建带版本号的 tag，例如 `v2.0.0-beta.4`。
 4. 使用 **Actions → Release artifacts** 手动运行工作流，或推送 tag。
 5. 工作流只生成构建产物，不自动公开发布。下载 artifacts，检查安装包、ZIP 和校验值。
 6. 在 **Releases → Draft a new release** 中填写中英文变更说明，上传 EXE、ZIP、`SHA256SUMS.txt`。测试版勾选 **pre-release**。

@@ -19,7 +19,7 @@ Review `.gitignore`. Exclude generated builds, dependencies, private projects, t
 
 ## Build
 
-On Windows x64 with Node.js 22+:
+On Windows x64 with Node.js 22.13+:
 
 ```powershell
 npm ci
@@ -35,7 +35,7 @@ Verify the setup EXE, Windows ZIP and `SHA256SUMS.txt` under `release/`. Test in
 
 1. Update the version and lockfile.
 2. Review tests and the readiness report.
-3. Create a version tag such as `v2.0.0-beta.3`.
+3. Create a version tag such as `v2.0.0-beta.4`.
 4. Run **Actions → Release artifacts**, or push the tag.
 5. The workflow builds artifacts only; it does not publish a public Release automatically.
 6. Download and inspect the artifacts. Create a draft Release with Chinese and English release notes, attach the EXE, ZIP and checksums, and mark beta versions as **pre-release**.

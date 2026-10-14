@@ -1,4 +1,4 @@
-# pagenote 2.0.0-beta.3 — 发布准备 / Release readiness
+# pagenote 2.0.0-beta.4 — 发布准备 / Release readiness
 
 检查日期 / Checked: 2026-10-15. 本报告描述本机检查结果，不等于完整安全审计或商业验收。 / Local validation is not a full security audit or commercial acceptance test.
 
@@ -8,7 +8,7 @@
 - 统一 pagenote 品牌、图标、版本与中英文术语；语言切换持久保存，文档和用户笔记不翻译。 / Brand, icon, version and bilingual terminology standardized; UI language persists without translating user content.
 - 统一源码格式、锁文件、发布测试、Windows 构建工作流、MIT 许可和第三方许可清单。 / Formatting, lockfile, release tests, Windows workflow and license notices prepared.
 - 安装向导使用按用户安装，可选择目录；ZIP 必须整体解压。项目使用 `project.pagenote` 和 `src/` 相对链接，兼容旧项目格式。 / Per-user wizard installer and full ZIP distribution; portable project links and legacy project compatibility.
-- PDF.js 更新至 6.2.108，KaTeX 更新至 0.18.7；PDF 阅读关闭脚本与 eval。 / PDF.js and KaTeX updated; PDF scripting/eval disabled.
+- PDF.js 更新至 6.4.299，KaTeX 为 0.18.7；PDF 阅读关闭脚本与 eval。 / PDF.js and KaTeX updated; PDF scripting/eval disabled.
 - 生产依赖 npm audit 报告为 0 条已知漏洞；完整依赖报告仍有 8 项中危，均来自打包工具依赖链。 / Production npm audit reports zero known advisories; full dependency audit retains eight moderate findings in the build-tool chain. See [production audit](audit-production.json) and [full audit](audit-all.json). This is not a guarantee of safety.
 
 参考 / References: [PDF.js advisory](https://github.com/advisories/GHSA-hq66-cqwq-w95j), [KaTeX advisory](https://github.com/advisories/GHSA-238p-pmpm-9mq7), [build-tool dependency advisory](https://github.com/advisories/GHSA-hp3w-g68c-fv3c).

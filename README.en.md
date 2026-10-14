@@ -6,11 +6,11 @@ English · [简体中文](README.md)
 
 pagenote is a local-first Windows document and notes workspace. Read a source document on the left, write page-linked Markdown notes on the right, and record requests for an AI client using annotations.
 
-**Current version: 2.0.0-beta.3.** This release establishes a maintainable distribution baseline. It is a beta, not a claim of commercial production readiness. Publisher signing, antivirus vendor review and independent end-user acceptance remain release requirements.
+**Current version: 2.0.0-beta.4.** This release establishes a maintainable distribution baseline. It is a beta, not a claim of commercial production readiness. Publisher signing, antivirus vendor review and independent end-user acceptance remain release requirements.
 
 ## Download and install
 
-[Windows x64 installer](https://github.com/laihong06/pagenote/releases/download/v2.0.0-beta.3/pagenote-2.0.0-beta.3-windows-x64-setup.exe) · [Complete Windows ZIP](https://github.com/laihong06/pagenote/releases/download/v2.0.0-beta.3/pagenote-2.0.0-beta.3-windows-x64.zip) · [Release notes and checksums](https://github.com/laihong06/pagenote/releases/tag/v2.0.0-beta.3)
+[Windows x64 installer](https://github.com/laihong06/pagenote/releases/download/v2.0.0-beta.4/pagenote-2.0.0-beta.4-windows-x64-setup.exe) · [Complete Windows ZIP](https://github.com/laihong06/pagenote/releases/download/v2.0.0-beta.4/pagenote-2.0.0-beta.4-windows-x64.zip) · [Release notes and checksums](https://github.com/laihong06/pagenote/releases/tag/v2.0.0-beta.4)
 
 1. Download `pagenote-VERSION-windows-x64-setup.exe` from this repository's **Releases**. **Code → Download ZIP** contains source code, not an installer.
 2. Run the installer and choose a location. Installation is per user and normally does not require administrator privileges.
@@ -63,7 +63,7 @@ Beta.3 fixes migration, staged file replacement and cross-volume copy failures i
 
 ## Build from source
 
-Install Node.js 22 or newer, then run:
+Install Node.js 22.13 or newer, then run:
 
 ```powershell
 npm ci

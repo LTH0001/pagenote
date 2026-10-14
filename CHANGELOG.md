@@ -1,5 +1,10 @@
 # Changelog / 更新日志
 
+## 2.0.0-beta.4 — 2026-10-15
+
+- Regenerate the dependency lockfile from the official npm registry, replacing unavailable tarball versions exposed by the first clean GitHub build. / 按 npm 官方源重新生成依赖锁，修正首次 GitHub 干净构建发现的不可下载版本。
+- Retain beta.3 functionality and Windows file-operation fixes. / 保留 beta.3 的功能与 Windows 文件操作修复。
+
 ## 2.0.0-beta.3 — 2026-10-15
 
 First public beta / 首次公开测试版。
