@@ -231,10 +231,21 @@ try {
       },
     }),
   );
-  const wide = await window
-    .locator('#noteBody')
-    .evaluate((e) => e.getBoundingClientRect().width);
-  assert.ok(wide > 600, 'wide default has enough writing space');
+  const wide = await window.locator('#noteBody').evaluate((paper) => {
+    const viewport = document.getElementById('noteScroll');
+    const style = getComputedStyle(viewport);
+    return {
+      width: paper.getBoundingClientRect().width,
+      available:
+        viewport.clientWidth -
+        parseFloat(style.paddingLeft) -
+        parseFloat(style.paddingRight),
+    };
+  });
+  assert.ok(
+    Math.abs(wide.width - Math.min(1000, wide.available)) <= 3,
+    'configured paper fills available writing space while staying bounded',
+  );
   const screenshotMain = await app.evaluate(async ({ BrowserWindow }) => {
     const main = BrowserWindow.getAllWindows().find((w) => w.isVisible());
     return (await main.webContents.capturePage(undefined, { stayAwake: true }))
