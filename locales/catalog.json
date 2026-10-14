@@ -1,0 +1,318 @@
+{
+  "文件": ["文件", "File"],
+  "编辑": ["编辑", "Edit"],
+  "查看": ["视图", "View"],
+  "设置": ["设置", "Settings"],
+  "帮助": ["帮助", "Help"],
+  "修改意见": ["AI 标注", "AI Annotations"],
+  "AI 批注": ["AI 标注", "AI annotations"],
+  "打 Tag": ["添加 AI 标注", "Add AI annotation"],
+  "删除 Tag": ["删除标注", "Delete annotation"],
+  "鼠标": ["选择工具", "Select"],
+  "抓手": ["手形工具", "Hand"],
+  "笔": ["画笔", "Pen"],
+  "黑笔": ["画笔", "Pen"],
+  "文字选择": ["选择文字", "Select text"],
+  "框选": ["区域选择", "Select area"],
+  "荧光笔": ["荧光笔", "Highlighter"],
+  "橡皮擦": ["橡皮擦", "Eraser"],
+  "颜色": ["颜色", "Color"],
+  "粗细": ["粗细", "Width"],
+  "导入左侧": ["导入文档（左侧）", "Import source (left)"],
+  "导入右侧": ["导入笔记（右侧）", "Import notes (right)"],
+  "新建项目": ["新建项目", "New project"],
+  "打开项目": ["打开项目", "Open project"],
+  "文件编辑": ["选择编辑区域", "Choose editing pane"],
+  "左侧修改意见": ["文档标注画布", "Source annotation canvas"],
+  "右侧修改意见": ["笔记标注画布", "Notes annotation canvas"],
+  "保存": ["保存", "Save"],
+  "退出": ["退出", "Quit"],
+  "打开数据文件夹": ["打开数据目录", "Open data folder"],
+  "适合窗口": ["适合窗口", "Fit to pane"],
+  "加宽笔记区域": ["加宽笔记区域", "Widen notes pane"],
+  "笔记纸张": ["笔记页面宽度", "Notes page width"],
+  "宽纸张（1000）": ["宽（1000）", "Wide (1000)"],
+  "紧凑纸张（760）": ["紧凑（760）", "Compact (760)"],
+  "铺满右侧": ["填满笔记区域", "Fill notes pane"],
+  "重置笔记字号": ["重置笔记缩放", "Reset notes zoom"],
+  "全屏": ["全屏", "Full screen"],
+  "复制 MCP 配置": ["复制 MCP 配置", "Copy MCP configuration"],
+  "打开 MCP 配置目录": ["打开 MCP 配置目录", "Open MCP configuration folder"],
+  "接口能力": ["AI 接口说明", "AI integration"],
+  "使用说明": ["使用说明", "User guide"],
+  "关于pagenote": ["关于 pagenote", "About pagenote"],
+  "原始文档": ["源文档", "Source document"],
+  "本页笔记": ["页面笔记", "Page notes"],
+  "完成编辑": ["完成编辑", "Finish editing"],
+  "返回双栏": ["返回双栏", "Restore split view"],
+  "手写批注": ["手写标注", "Ink annotations"],
+  "段落": ["段落", "Paragraph"],
+  "格式": ["格式", "Format"],
+  "插入": ["插入", "Insert"],
+  "字号": ["字号", "Font size"],
+  "标题": ["标题", "Heading"],
+  "一级标题": ["一级标题", "Heading 1"],
+  "二级标题": ["二级标题", "Heading 2"],
+  "三级标题": ["三级标题", "Heading 3"],
+  "列表": ["无序列表", "Bulleted list"],
+  "编号": ["有序列表", "Numbered list"],
+  "待办": ["任务列表", "Task list"],
+  "引用": ["引用", "Blockquote"],
+  "代码": ["代码块", "Code block"],
+  "公式": ["公式", "Equation"],
+  "表格": ["表格", "Table"],
+  "链接": ["链接", "Link"],
+  "图片": ["图片", "Image"],
+  "格式粘贴": ["保留格式粘贴", "Paste with formatting"],
+  "纯文本": ["纯文本", "Plain text"],
+  "下一段": ["新建段落", "New paragraph"],
+  "流程图 / 图表": ["图表", "Diagram"],
+  "链接地址": ["链接地址", "Link URL"],
+  "修改内容": ["编辑内容", "Edit content"],
+  "应用": ["应用", "Apply"],
+  "取消": ["取消", "Cancel"],
+  "名称": ["名称", "Name"],
+  "项目保存目录": ["项目保存位置", "Project location"],
+  "留空使用默认项目目录": [
+    "留空使用默认项目目录",
+    "Leave empty for the default project folder"
+  ],
+  "创建": ["创建", "Create"],
+  "未命名": ["未命名", "Untitled"],
+  "添加 AI 批注": ["添加 AI 标注", "Add AI annotation"],
+  "保存批注": ["保存标注", "Save annotation"],
+  "针对": ["对象", "Target"],
+  "范围": ["范围", "Scope"],
+  "右侧讲解": ["笔记（右侧）", "Notes (right)"],
+  "左侧原文": ["文档（左侧）", "Source (left)"],
+  "本页": ["当前页面", "Current page"],
+  "整份文档": ["整个项目", "Entire project"],
+  "整体要求": ["整体要求", "General instruction"],
+  "例如：这一段我没懂，请补充直观例子。": [
+    "例如：请用一个直观例子解释这段内容。",
+    "For example: explain this passage with a concrete example."
+  ],
+  "颜色和框选用于定位；这里的文字告诉 AI 应该怎样修改。": [
+    "写明希望 AI 解释或修改的内容。",
+    "Describe what you want the AI to explain or change."
+  ],
+  "改进点": ["AI 标注", "AI annotations"],
+  "＋ 新增改进点": ["＋ 添加标注", "+ Add annotation"],
+  "整体风格与内容": ["整体要求", "General instruction"],
+  "待 AI 处理": ["待处理", "Pending"],
+  "AI 已处理": ["已处理", "Resolved"],
+  "已处理": ["已处理", "Resolved"],
+  "已取消": ["已取消", "Dismissed"],
+  "查看 / 修改": ["查看或编辑", "View / edit"],
+  "修改要求": ["编辑要求", "Edit instruction"],
+  "重新启用": ["恢复标注", "Restore annotation"],
+  "请写下给 AI 的要求": ["请填写标注要求", "Enter an annotation instruction."],
+  "改进点已保存": ["标注已保存", "Annotation saved"],
+  "请先导入左侧文档或新建项目": [
+    "请先新建项目或导入文档",
+    "Create a project or import a source document first."
+  ],
+  "点击左侧文档或右侧讲解，选择编辑区域": [
+    "点击文档或笔记区域开始编辑",
+    "Click the source or notes pane to start editing."
+  ],
+  "选择": ["选择", "Select"],
+  "画笔": ["画笔", "Pen"],
+  "直线": ["直线", "Line"],
+  "箭头": ["箭头", "Arrow"],
+  "矩形": ["矩形", "Rectangle"],
+  "椭圆": ["椭圆", "Ellipse"],
+  "文字": ["文字", "Text"],
+  "撤销": ["撤销", "Undo"],
+  "重做": ["重做", "Redo"],
+  "复制": ["复制", "Copy"],
+  "粘贴": ["粘贴", "Paste"],
+  "删除": ["删除", "Delete"],
+  "结束批注": ["完成标注", "Finish annotating"],
+  "细": ["细", "Thin"],
+  "标准": ["标准", "Medium"],
+  "粗": ["粗", "Thick"],
+  "特粗": ["特粗", "Extra thick"],
+  "历史版本": ["版本历史", "Version history"],
+  "恢复所选版本": ["恢复此版本", "Restore version"],
+  "选择一个版本查看内容。": [
+    "选择版本查看内容。",
+    "Select a version to preview."
+  ],
+  "每次保存都会自动保留笔记版本。恢复前会保留当前内容；原始文档和附件不受影响。": [
+    "保存时自动保留笔记版本，恢复前也会备份当前内容。",
+    "Note versions are saved automatically. The current content is backed up before a restore."
+  ],
+  "正在读取历史版本…": ["正在读取版本历史…", "Loading version history…"],
+  "正在解析文档…": ["正在载入文档…", "Loading document…"],
+  "正在通过 Office 转换并分页，请稍候…": [
+    "正在使用 Office 转换文档…",
+    "Converting document with Microsoft Office…"
+  ],
+  "图表渲染超时": ["图表渲染超时", "Diagram rendering timed out."],
+  "图表语法暂时无法解析，请检查 Mermaid 代码。": [
+    "无法解析图表，请检查 Mermaid 语法。",
+    "Unable to render the diagram. Check the Mermaid syntax."
+  ],
+  "查看代码和错误": ["查看代码和错误", "View code and error"],
+  "正在绘制图表…": ["正在渲染图表…", "Rendering diagram…"],
+  "Word 编辑": ["Word 编辑", "Word editing"],
+  "表格、图片、布局等工具由下方 Word 功能区提供": [
+    "使用 Word 工具编辑表格、图片和排版。",
+    "Use Word tools to edit tables, images and layout."
+  ],
+  "保存并返回阅读": ["保存并退出编辑", "Save and finish editing"],
+  "选中文字 → AI 批注": ["为选中文字添加 AI 标注", "Annotate selected text"],
+  "完成": ["完成", "Done"],
+  "知道了": ["关闭", "Close"],
+  "右侧讲解平滑换页": ["笔记切换动画", "Animate page-linked notes"],
+  "左侧翻页时，右侧讲解轻柔淡入。关闭后立即切换。": [
+    "切换文档页面时，笔记使用淡入动画。",
+    "Fade notes in when the active source page changes."
+  ],
+  "编辑时自动展开到整个工作区": [
+    "编辑时展开当前区域",
+    "Expand the active editing pane"
+  ],
+  "语言 / Language": ["语言 / Language", "Language / 语言"],
+  "重启软件后生效": ["重启软件后生效", "Applies after restarting the app"],
+  "请先打开文档": ["请先打开项目或文档", "Open a project or document first."],
+  "项目链接必须使用相对路径": [
+    "项目链接必须使用相对路径",
+    "Project links must use relative paths."
+  ],
+  "项目文件必须放在 src 文件夹中": [
+    "项目文件必须位于 src 文件夹内",
+    "Project files must be inside the src folder."
+  ],
+  "不是有效的页伴项目": ["项目格式无效", "Invalid project format."],
+  "不是有效的pagenote项目": ["项目格式无效", "Invalid project format."],
+  "文档不存在": ["文档不存在", "Document not found."],
+  "文稿内容无效": ["文档内容无效", "Invalid source content."],
+  "剪贴板为空，请先复制内容": ["剪贴板为空", "The clipboard is empty."],
+  "批注内容无效": ["标注内容无效", "Invalid annotation content."],
+  "请输入有效的项目名称": [
+    "请输入有效的项目名称",
+    "Enter a valid project name."
+  ],
+  "当前文档不是项目": [
+    "当前文档未关联项目",
+    "The current document is not part of a project."
+  ],
+  "导入笔记": ["导入笔记", "Import notes"],
+  "导出笔记": ["导出笔记", "Export notes"],
+  "插入附件": ["插入附件", "Insert attachment"],
+  "最近文档": ["最近文档", "Recent documents"],
+  "＋ 打开文档": ["＋ 导入文档", "+ Import document"],
+  "打开课件": ["导入文档", "Import document"],
+  "课件和理解，放在同一页": [
+    "文档与笔记，逐页对应",
+    "Documents and notes, connected by page"
+  ],
+  "左侧阅读原文，右侧记录每页的完整讲解。": [
+    "阅读文档，为每页整理笔记并添加 AI 标注。",
+    "Read documents, take page-linked notes and add AI annotations."
+  ],
+  "也可以把文件拖到这里": [
+    "也可拖入文档文件",
+    "You can also drop a document here."
+  ],
+  "为这一页，留下一份理解": ["为此页添加笔记", "Add notes for this page"],
+  "每一页，都有自己的笔记": ["逐页关联笔记", "Page-linked notes"],
+  "直接输入或粘贴讲解，点击工具栏插入代码、公式和表格。": [
+    "输入或粘贴笔记，也可插入代码块、公式和表格。",
+    "Type or paste notes; insert code blocks, equations or tables."
+  ],
+  "输入 Mermaid 代码": ["输入 Mermaid 代码", "Enter Mermaid code"],
+  "缩小": ["缩小", "Zoom out"],
+  "放大": ["放大", "Zoom in"],
+  "当前页": ["当前页面", "Current page"],
+  "页码": ["页码", "Page"],
+  "缩放": ["缩放", "Zoom"],
+  "pagenote 将源文档与逐页 Markdown 笔记放在同一项目中。": [
+    "pagenote 将源文档与逐页 Markdown 笔记放在同一项目中。",
+    "pagenote keeps source documents and page-linked Markdown notes together in one project."
+  ],
+  "从文件菜单新建或打开项目；导入文档与笔记后，两侧按页面关联。": [
+    "从文件菜单新建或打开项目；导入文档与笔记后，两侧按页面关联。",
+    "Create or open a project from File. Import a source document and notes to link both panes by page."
+  ],
+  "使用选择工具选中文字或区域，再添加 AI 标注；双击编号打开标注画布，右键可删除。": [
+    "使用选择工具选中文字或区域，再添加 AI 标注；双击编号打开标注画布，右键可删除。",
+    "Select text or an area and add an AI annotation. Double-click its number to open the canvas; right-click to delete it."
+  ],
+  "手形工具用于平移页面。画笔支持手写、荧光标记和擦除。": [
+    "手形工具用于平移页面。画笔支持手写、荧光标记和擦除。",
+    "Use Hand to pan a page. Pen supports ink, highlighting and erasing."
+  ],
+  "从编辑菜单选择文档或笔记区域。Word 编辑需要本机 Microsoft Word。": [
+    "从编辑菜单选择文档或笔记区域。Word 编辑需要本机 Microsoft Word。",
+    "Choose a source or notes editing pane from Edit. Word editing requires Microsoft Word installed locally."
+  ],
+  "Ctrl + 鼠标滚轮缩放所在区域。Markdown 支持代码高亮、公式、图片、表格和 Mermaid。": [
+    "Ctrl + 鼠标滚轮缩放所在区域。Markdown 支持代码高亮、公式、图片、表格和 Mermaid。",
+    "Ctrl + mouse wheel zooms the active pane. Markdown supports highlighted code, equations, images, tables and Mermaid."
+  ],
+  "通过 AI 标注菜单复制 MCP 配置，在外部 AI 客户端连接。软件本身不内置 AI 服务或上传项目。": [
+    "通过 AI 标注菜单复制 MCP 配置，在外部 AI 客户端连接。软件本身不内置 AI 服务或上传项目。",
+    "Copy the MCP configuration from AI Annotations and connect an external AI client. pagenote does not include an AI service or upload projects."
+  ],
+  "移动项目时请保留整个文件夹及 src 子目录。新版项目入口为 project.pagenote，旧版 JSON 项目仍可打开。": [
+    "移动项目时请保留整个文件夹及 src 子目录。新版项目入口为 project.pagenote，旧版 JSON 项目仍可打开。",
+    "Move the entire project folder, including src. New projects use project.pagenote; legacy JSON projects remain supported."
+  ],
+  "左侧 Word 编辑或右侧编辑时，默认展开。可拖动分界线拉回双栏，也可点击“返回双栏”。关闭后保持当前双栏宽度。设置会自动保存。": [
+    "编辑时展开当前区域；可拖动分界线或返回双栏。此设置自动保存。",
+    "Expand the active pane while editing. Drag the divider or restore split view to show both panes. This setting is saved automatically."
+  ],
+  "打开文档后，每页都有独立的笔记。": [
+    "每个文档页面都有独立的笔记。",
+    "Each source page has its own notes."
+  ],
+  "在「编辑」中粘贴讲解，在「阅读」中查看公式和排版。": [
+    "通过编辑菜单添加笔记，内容会直接渲染。",
+    "Use Edit to add notes. Formatting renders directly."
+  ],
+  "原文": ["文档", "Source"],
+  "讲解": ["笔记", "Notes"],
+  "选中文字并打 Tag": [
+    "选择文字并添加 AI 标注",
+    "Select text and add an AI annotation"
+  ],
+  "拖动页面": ["平移页面", "Pan the page"],
+  "Mermaid 代码": ["Mermaid 代码", "Mermaid code"],
+  "代码语言": ["代码语言", "Code language"],
+  "输入 Markdown 附件": ["Markdown 附件", "Markdown attachment"],
+  "正在加载文档…": ["正在加载文档…", "Loading document…"],
+  "继续编辑": ["继续编辑", "Keep editing"],
+  "关闭软件": ["关闭软件", "Close application"],
+  "笔记尚未保存成功": ["笔记尚未保存成功", "Notes could not be saved"],
+  "建议继续编辑并重试保存。恢复副本仍会保留。": [
+    "请重试保存。恢复副本仍会保留。",
+    "Please retry saving. Recovery copies will be retained."
+  ],
+  "粘贴这一页的讲解，支持 Markdown 和 LaTeX 公式。": [
+    "粘贴这一页的笔记，支持 Markdown 和 LaTeX。",
+    "Paste page notes. Markdown and LaTeX are supported."
+  ],
+  "输入批注文字": ["输入标注文字", "Enter annotation text"],
+  "不是有效的 pagenote 项目": [
+    "不是有效的 pagenote 项目",
+    "Invalid pagenote project"
+  ],
+  "剪切": ["剪切", "Cut"],
+  "全选": ["全选", "Select all"],
+  "使用系统默认应用编辑源文件": [
+    "使用系统默认应用编辑源文件",
+    "Edit source in the default app"
+  ],
+  "编辑 Markdown 文稿": ["编辑 Markdown 文稿", "Edit Markdown source"],
+  "已在默认应用打开。保存后回到 pagenote 会更新文档。": [
+    "已在默认应用打开。保存后回到 pagenote 会更新文档。",
+    "Opened in the default app. Save and return to pagenote to refresh."
+  ],
+  "文档已更新，页面笔记已保留": [
+    "文档已更新，页面笔记已保留",
+    "Source updated. Page notes preserved."
+  ]
+}

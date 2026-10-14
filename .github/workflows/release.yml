@@ -1,0 +1,36 @@
+name: Release artifacts
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+permissions:
+  contents: read
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run format:check
+      - run: npm audit --omit=dev
+      - run: npm run build
+      - run: npm run test:release
+      - run: npm run test:mcp
+      - run: npm run package:desktop
+      - run: npm run test:release
+        env:
+          DESKTOP_EXE: ${{ github.workspace }}/release/win-unpacked/pagenote.exe
+      - run: node scripts/release-artifacts.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pagenote-windows
+          path: |
+            release/*.exe
+            release/*.zip
+            release/SHA256SUMS.txt
+          if-no-files-found: error

@@ -1,0 +1,135 @@
+{
+  "name": "pagenote",
+  "version": "2.0.0-beta.3",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node server.mjs --dev",
+    "build": "node scripts/create-icon.mjs && node scripts/notices.mjs && vite build && node scripts/build-mcp.mjs",
+    "start": "node server.mjs",
+    "test": "npm run test:release",
+    "desktop": "electron .",
+    "package:desktop": "npm run build && electron-builder --win nsis zip --x64",
+    "test:desktop": "npm run test:release",
+    "test:markdown": "node tests/rich-editor.mjs",
+    "test:mcp": "node tests/mcp.mjs",
+    "package:dir": "npm run build && electron-builder --win dir --x64",
+    "test:release": "node tests/file-ops.mjs && node tests/external-project.mjs && node tests/external-documents.mjs && node tests/migration.mjs && node tests/menus.mjs && node tests/box-tag.mjs && node tests/projects.mjs && node tests/i18n.mjs && node tests/rich-editor.mjs",
+    "format": "prettier --write src desktop mcp scripts server.mjs projects.mjs external-documents.mjs index.html locales tests/*.mjs",
+    "format:check": "prettier --check src desktop mcp scripts server.mjs projects.mjs external-documents.mjs index.html locales",
+    "package:source": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/source-archive.ps1",
+    "test:word": "node tests/default-word.mjs"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "multer": "^2.0.2",
+    "pdfjs-dist": "^6.2.108",
+    "pngjs": "^7.0.0"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.1",
+    "@playwright/test": "^1.56.0",
+    "dompurify": "^3.2.7",
+    "electron": "^44.7.2",
+    "electron-builder": "^26.15.3",
+    "esbuild": "^0.28.2",
+    "highlight.js": "^11.12.0",
+    "katex": "0.18.7",
+    "marked": "^16.3.0",
+    "marked-katex-extension": "^5.1.4",
+    "mermaid": "^12.2.0",
+    "prettier": "3.6.2",
+    "turndown": "^7.2.4",
+    "turndown-plugin-gfm": "^1.0.2",
+    "vite": "^7.1.0",
+    "zod": "^4.6.7"
+  },
+  "description": "Local-first document reading, page-linked Markdown notes and AI annotations",
+  "author": "pagenote contributors",
+  "main": "desktop/main.cjs",
+  "build": {
+    "appId": "io.pagenote.desktop",
+    "productName": "pagenote",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "desktop/**",
+      "server.mjs",
+      "dist/**",
+      "package.json",
+      "node_modules/**",
+      "!node_modules/vite/**",
+      "projects.mjs",
+      "locales/**",
+      "external-documents.mjs"
+    ],
+    "extraResources": [
+      {
+        "from": "desktop/word-host.ps1",
+        "to": "word-host.ps1"
+      },
+      {
+        "from": "convert-office.ps1",
+        "to": "convert-office.ps1"
+      },
+      {
+        "from": "mcp-dist/page-notes-mcp.cjs",
+        "to": "page-notes-mcp.cjs"
+      },
+      {
+        "from": "mcp-dist/node.exe",
+        "to": "mcp-node.exe"
+      },
+      {
+        "from": "mcp-dist/NODE-LICENSE.txt",
+        "to": "NODE-LICENSE.txt"
+      },
+      {
+        "from": "mcp-dist/node-runtime.json",
+        "to": "node-runtime.json"
+      },
+      {
+        "from": "THIRD-PARTY-NOTICES.txt",
+        "to": "THIRD-PARTY-NOTICES.txt"
+      },
+      {
+        "from": "LICENSE",
+        "to": "LICENSE-pagenote.txt"
+      }
+    ],
+    "win": {
+      "target": [
+        "nsis",
+        "zip"
+      ],
+      "icon": "build/icon.ico",
+      "signAndEditExecutable": true,
+      "signExecutable": false
+    },
+    "compression": "normal",
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "pagenote",
+      "artifactName": "pagenote-${version}-windows-x64-setup.exe",
+      "deleteAppDataOnUninstall": false
+    },
+    "artifactName": "pagenote-${version}-windows-${arch}.${ext}",
+    "fileAssociations": [
+      {
+        "ext": "pagenote",
+        "name": "pagenote Project",
+        "description": "pagenote project",
+        "role": "Editor"
+      }
+    ]
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "license": "MIT"
+}

@@ -1,0 +1,6 @@
+*.pdf binary
+*.docx binary
+*.pptx binary
+*.png binary
+*.ico binary
+THIRD-PARTY-NOTICES.txt whitespace=-blank-at-eol,-blank-at-eof

@@ -1,0 +1,529 @@
+const {
+  app,
+  BrowserWindow,
+  Menu,
+  dialog,
+  shell,
+  clipboard,
+} = require('electron');
+const path = require('node:path');
+const fs = require('node:fs/promises');
+const { pathToFileURL } = require('node:url');
+const { randomBytes } = require('node:crypto');
+const { execFileSync } = require('node:child_process');
+let server,
+  win,
+  controller,
+  word,
+  connectionFile,
+  closing = false;
+app.setName('pagenote');
+app.setAppUserModelId('io.pagenote.desktop');
+if (process.env.PAGE_NOTES_USER_DATA)
+  app.setPath('userData', process.env.PAGE_NOTES_USER_DATA);
+if (!app.requestSingleInstanceLock()) {
+  app.quit();
+} else {
+  app.on('second-instance', (_event, argv) => {
+    if (win) {
+      if (win.isMinimized()) win.restore();
+      win.focus();
+      const file = argv.find((value) => /\.pagenote$/i.test(value));
+      if (file)
+        win.webContents
+          .executeJavaScript(
+            'window.pageNotes.ready.then(()=>window.pageNotes.openProject(' +
+              JSON.stringify(file) +
+              '))',
+          )
+          .catch(() => {});
+    }
+  });
+  app
+    .whenReady()
+    .then(async () => {
+      if (!process.env.PAGE_NOTES_USER_DATA) {
+        const legacy = path.join(app.getPath('appData'), '页伴'),
+          target = app.getPath('userData');
+        await require('./migration.cjs').migrateLegacyData(target, legacy);
+      }
+      const data = path.join(app.getPath('userData'), 'documents-data');
+      process.env.PAGE_NOTES_DATA = data;
+      await fs.mkdir(app.getPath('userData'), { recursive: true });
+      const keyFile = path.join(app.getPath('userData'), 'ai-key.txt');
+      let token;
+      try {
+        token = await fs.readFile(keyFile, 'utf8');
+      } catch {
+        token = randomBytes(32).toString('hex');
+        await fs.writeFile(keyFile, token, { mode: 0o600 });
+      }
+      process.env.PAGE_NOTES_AI_TOKEN = token;
+      if (app.isPackaged)
+        process.env.PAGE_NOTES_CONVERTER = path.join(
+          process.resourcesPath,
+          'convert-office.ps1',
+        );
+      if (!app.isPackaged) {
+        try {
+          await fs.access(data);
+        } catch {
+          await fs
+            .cp(path.join(app.getAppPath(), 'data'), data, { recursive: true })
+            .catch(() => {});
+        }
+      }
+      const backend = await import(
+        pathToFileURL(path.join(app.getAppPath(), 'server.mjs')).href
+      );
+      try {
+        server = await backend.startServer(4174);
+      } catch (e) {
+        if (e.code !== 'EADDRINUSE') throw e;
+        server = await backend.startServer(0);
+      }
+      const url = `http://127.0.0.1:${server.address().port}`;
+      const mcpFolder = path.join(app.getPath('userData'), 'mcp');
+      await fs.mkdir(mcpFolder, { recursive: true });
+      const adapter = path.join(mcpFolder, 'page-notes-mcp.cjs');
+      await fs.copyFile(
+        app.isPackaged
+          ? path.join(process.resourcesPath, 'page-notes-mcp.cjs')
+          : path.join(app.getAppPath(), 'mcp-dist', 'page-notes-mcp.cjs'),
+        adapter,
+      );
+      connectionFile = path.join(app.getPath('userData'), 'ai-connection.json');
+      await fs.writeFile(
+        connectionFile,
+        JSON.stringify({ url, token, pid: process.pid }, null, 2),
+        { mode: 0o600 },
+      );
+      let nodeCommand = 'node';
+      try {
+        nodeCommand = execFileSync('where.exe', ['node.exe'], {
+          encoding: 'utf8',
+          windowsHide: true,
+        })
+          .trim()
+          .split(/\r?\n/)[0];
+      } catch {}
+      if (app.isPackaged) {
+        const runtime = JSON.parse(
+          await fs.readFile(
+            path.join(process.resourcesPath, 'node-runtime.json'),
+            'utf8',
+          ),
+        );
+        nodeCommand = path.join(mcpFolder, `node-${runtime.version}.exe`);
+        try {
+          await fs.access(nodeCommand);
+        } catch {
+          await fs.copyFile(
+            path.join(process.resourcesPath, 'mcp-node.exe'),
+            nodeCommand,
+          );
+        }
+        await fs.copyFile(
+          path.join(process.resourcesPath, 'NODE-LICENSE.txt'),
+          path.join(mcpFolder, 'NODE-LICENSE.txt'),
+        );
+      }
+      const mcpConfig = {
+        mcpServers: {
+          page_notes: {
+            command: nodeCommand,
+            args: [adapter, '--connection-file', connectionFile],
+          },
+        },
+      };
+      const configFile = path.join(mcpFolder, 'mcp-config.json');
+      await fs.writeFile(configFile, JSON.stringify(mcpConfig, null, 2));
+      win = new BrowserWindow({
+        title: 'pagenote',
+        width: 1440,
+        height: 960,
+        minWidth: 900,
+        minHeight: 620,
+        backgroundColor: '#f5f8fc',
+        show: false,
+        webPreferences: {
+          contextIsolation: true,
+          nodeIntegration: false,
+          sandbox: true,
+          plugins: true,
+        },
+      });
+      win.webContents.setVisualZoomLevelLimits(1, 1);
+      word = require('./word.cjs').createWordHost({
+        win,
+        data,
+        helper: app.isPackaged
+          ? path.join(process.resourcesPath, 'word-host.ps1')
+          : path.join(app.getAppPath(), 'desktop/word-host.ps1'),
+        converter: app.isPackaged
+          ? path.join(process.resourcesPath, 'convert-office.ps1')
+          : path.join(app.getAppPath(), 'convert-office.ps1'),
+      });
+      backend.setDesktopHandler(async (action, args) => {
+        if (action === 'open-external') {
+          const error = await shell.openPath(args.filePath);
+          if (error) throw Error(error);
+          return { opened: true };
+        }
+        return word.call(action, args);
+      });
+      win.on('focus', () =>
+        win.webContents
+          .executeJavaScript('window.pageNotes?.refreshExternalSource?.()')
+          .catch(() => {}),
+      );
+      controller = await require('./ai.cjs').createAIController({
+        win,
+        url,
+        data,
+        word,
+      });
+      backend.setAIHandler((body) => controller.call(body));
+      win.webContents.setWindowOpenHandler(({ url: target }) => {
+        if (/^https?:|^mailto:/i.test(target)) shell.openExternal(target);
+        return { action: 'deny' };
+      });
+      win.webContents.on('will-navigate', (event, target) => {
+        if (new URL(target).origin !== url) {
+          event.preventDefault();
+          if (/^https?:/i.test(target)) shell.openExternal(target);
+        }
+      });
+      win.on('close', (event) => {
+        if (closing) return;
+        event.preventDefault();
+        win.webContents
+          .executeJavaScript('window.pageNotes.finishEditing()')
+          .then(() => {
+            closing = true;
+            win.close();
+          })
+          .catch(async () => {
+            const result = await dialog.showMessageBox(win, {
+              type: 'warning',
+              buttons: [translate('继续编辑'), translate('关闭软件')],
+              defaultId: 0,
+              cancelId: 0,
+              message: translate('笔记尚未保存成功'),
+              detail: translate('建议继续编辑并重试保存。恢复副本仍会保留。'),
+            });
+            if (result.response === 1) {
+              closing = true;
+              win.close();
+            }
+          });
+      });
+      const catalog = require('../locales/catalog.json');
+      let locale = app.getLocale().startsWith('zh') ? 'zh-CN' : 'en-US';
+      try {
+        const saved = JSON.parse(
+          await fs.readFile(path.join(data, 'preferences.json'), 'utf8'),
+        );
+        if (['zh-CN', 'en-US'].includes(saved.language))
+          locale = saved.language;
+      } catch {}
+      const translate = (label) =>
+        catalog[label]?.[locale === 'en-US' ? 1 : 0] || label;
+      function localize(items) {
+        return items.map((item) => ({
+          ...item,
+          label: item.label ? translate(item.label) : item.label,
+          submenu: item.submenu ? localize(item.submenu) : undefined,
+        }));
+      }
+      function buildMenu() {
+        Menu.setApplicationMenu(
+          Menu.buildFromTemplate(
+            localize([
+              {
+                label: '文件',
+                submenu: [
+                  {
+                    label: '导入左侧',
+                    click: () =>
+                      win.webContents.executeJavaScript(
+                        'document.getElementById("fileInput").click()',
+                      ),
+                  },
+                  {
+                    label: '导入右侧',
+                    click: () =>
+                      win.webContents.executeJavaScript(
+                        'window.pageNotes.menuAction("importRight")',
+                      ),
+                  },
+                  {
+                    label: '新建项目',
+                    accelerator: 'CmdOrCtrl+N',
+                    click: () =>
+                      win.webContents.executeJavaScript(
+                        'window.pageNotes.menuAction("newProject")',
+                      ),
+                  },
+                  {
+                    label: '打开项目',
+                    accelerator: 'CmdOrCtrl+O',
+                    click: async () => {
+                      const chosen = await dialog.showOpenDialog(win, {
+                        title: translate('打开项目'),
+                        properties: ['openFile'],
+                        filters: [
+                          {
+                            name:
+                              locale === 'en-US'
+                                ? 'pagenote Project'
+                                : 'pagenote 项目',
+                            extensions: ['pagenote', 'json'],
+                          },
+                        ],
+                      });
+                      if (!chosen.canceled)
+                        await win.webContents.executeJavaScript(
+                          'window.pageNotes.openProject(' +
+                            JSON.stringify(chosen.filePaths[0]) +
+                            ')',
+                        );
+                    },
+                  },
+                  {
+                    label: '保存',
+                    accelerator: 'CmdOrCtrl+S',
+                    click: () => {
+                      if (word.active) word.call('save', {}).catch(() => {});
+                      else
+                        win.webContents
+                          .executeJavaScript('window.pageNotes.flush()')
+                          .catch(() => {});
+                    },
+                  },
+                  { type: 'separator' },
+                  {
+                    label: '打开数据文件夹',
+                    click: () => shell.openPath(data),
+                  },
+                  { type: 'separator' },
+                  { role: 'quit', label: '退出' },
+                ],
+              },
+              {
+                label: '编辑',
+                submenu: [
+                  {
+                    label: '文件编辑',
+                    click: () =>
+                      win.webContents.executeJavaScript(
+                        'window.pageNotes.menuAction("chooseEditor")',
+                      ),
+                  },
+                ],
+              },
+              {
+                label: '查看',
+                submenu: [
+                  {
+                    label: '适合窗口',
+                    click: () =>
+                      win.webContents.executeJavaScript(
+                        'document.getElementById("fit").click()',
+                      ),
+                  },
+                  {
+                    label: '加宽笔记区域',
+                    click: () =>
+                      win.webContents
+                        .executeJavaScript(
+                          'window.pageNotes.setLayout({noteWidth:1000,padding:28,leftPercent:42})',
+                        )
+                        .catch(() => {}),
+                  },
+                  {
+                    label: '笔记纸张',
+                    submenu: [
+                      {
+                        label: '宽纸张（1000）',
+                        click: () =>
+                          win.webContents
+                            .executeJavaScript(
+                              'window.pageNotes.setLayout({noteWidth:1000})',
+                            )
+                            .catch(() => {}),
+                      },
+                      {
+                        label: '紧凑纸张（760）',
+                        click: () =>
+                          win.webContents
+                            .executeJavaScript(
+                              'window.pageNotes.setLayout({noteWidth:760})',
+                            )
+                            .catch(() => {}),
+                      },
+                      {
+                        label: '铺满右侧',
+                        click: () =>
+                          win.webContents
+                            .executeJavaScript(
+                              'window.pageNotes.setLayout({noteWidth:1400,padding:24})',
+                            )
+                            .catch(() => {}),
+                      },
+                    ],
+                  },
+                  {
+                    label: '重置笔记字号',
+                    click: () =>
+                      win.webContents.executeJavaScript(
+                        'window.pageNotes.resetNoteZoom()',
+                      ),
+                  },
+                  { type: 'separator' },
+                  { role: 'togglefullscreen', label: '全屏' },
+                ],
+              },
+              {
+                label: '修改意见',
+                submenu: [
+                  {
+                    label: '左侧修改意见',
+                    click: () =>
+                      win.webContents.executeJavaScript(
+                        'window.pageNotes.menuAction("reviewLeft")',
+                      ),
+                  },
+                  {
+                    label: '右侧修改意见',
+                    click: () =>
+                      win.webContents.executeJavaScript(
+                        'window.pageNotes.menuAction("reviewRight")',
+                      ),
+                  },
+                  { type: 'separator' },
+                  {
+                    label: '复制 MCP 配置',
+                    click: () =>
+                      clipboard.writeText(JSON.stringify(mcpConfig, null, 2)),
+                  },
+                  {
+                    label: '打开 MCP 配置目录',
+                    click: () => shell.openPath(mcpFolder),
+                  },
+                  {
+                    label: '接口能力',
+                    click: () =>
+                      dialog.showMessageBox(win, {
+                        message: 'pagenote MCP',
+                        detail:
+                          locale === 'en-US'
+                            ? 'Read source documents, notes and layout; edit notes; adjust paper width and styles; import files; capture screenshots and multi-page contact sheets.\n\nCopy the MCP configuration to connect your AI client. The required Node.js runtime is included.'
+                            : '读取原文、笔记和布局；修改单页或批量笔记；调整纸宽、字体和样式；导入文件；获取截图和多页拼图。\n\n从「复制 MCP 配置」取得上层 AI 的连接设置。桌面版已附带 MCP 所需运行时，无需另外安装 Node.js。',
+                      }),
+                  },
+                ],
+              },
+              {
+                label: '设置',
+                submenu: [
+                  {
+                    label: '语言 / Language',
+                    submenu: [
+                      {
+                        label: '简体中文',
+                        type: 'radio',
+                        checked: locale === 'zh-CN',
+                        click: () =>
+                          win.webContents.executeJavaScript(
+                            'window.pageNotes.setLanguage("zh-CN")',
+                          ),
+                      },
+                      {
+                        label: 'English',
+                        type: 'radio',
+                        checked: locale === 'en-US',
+                        click: () =>
+                          win.webContents.executeJavaScript(
+                            'window.pageNotes.setLanguage("en-US")',
+                          ),
+                      },
+                    ],
+                  },
+                  {
+                    label: '设置',
+                    click: () =>
+                      win.webContents.executeJavaScript(
+                        'document.getElementById("settings").showModal()',
+                      ),
+                  },
+                  {
+                    label: '使用说明',
+                    click: () =>
+                      win.webContents.executeJavaScript(
+                        'document.getElementById("help").showModal()',
+                      ),
+                  },
+                ],
+              },
+              {
+                label: '帮助',
+                submenu: [
+                  {
+                    label: '使用说明',
+                    click: () =>
+                      win.webContents.executeJavaScript(
+                        'document.getElementById("help").showModal()',
+                      ),
+                  },
+                  {
+                    label: '关于pagenote',
+                    click: () =>
+                      dialog.showMessageBox(win, {
+                        message: 'pagenote ' + app.getVersion(),
+                        detail:
+                          locale === 'en-US'
+                            ? 'Page-linked Markdown notes and AI annotations\nCtrl + mouse wheel: zoom the pane under the pointer\nDocuments and notes are stored locally.'
+                            : '逐页 Markdown 笔记与 AI 标注\nCtrl + 鼠标滚轮：缩放鼠标所在区域\n文件和笔记保存在本机。',
+                      }),
+                  },
+                ],
+              },
+            ]),
+          ),
+        );
+      }
+      buildMenu();
+      backend.setPreferenceHandler(async (preferences) => {
+        locale = preferences.language;
+        buildMenu();
+      });
+      await win.loadURL(url);
+      win.show();
+      const launchProject = process.argv.find((value) =>
+        /\.pagenote$/i.test(value),
+      );
+      if (launchProject)
+        await win.webContents.executeJavaScript(
+          'window.pageNotes.ready.then(()=>window.pageNotes.openProject(' +
+            JSON.stringify(launchProject) +
+            '))',
+        );
+      win.on('closed', () => {
+        controller?.dispose();
+        server?.close();
+        app.quit();
+      });
+    })
+    .catch((e) => {
+      dialog.showErrorBox('pagenote启动失败', e.stack || e.message);
+      app.quit();
+    });
+  app.on('before-quit', () => {
+    controller?.dispose();
+  });
+  app.on('window-all-closed', () => {
+    server?.close();
+    app.quit();
+  });
+}

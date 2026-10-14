@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>pagenote · 课件与逐页笔记</title>
+  </head>
+  <body>
+    <header class="titlebar">
+      <div class="brand">
+        <span class="logo">P</span><strong>pagenote</strong
+        ><span class="divider">|</span><span id="docName">课件与逐页笔记</span>
+      </div>
+    </header>
+    <section class="command-area" aria-label="功能区">
+      <nav class="tabs">
+        <details class="compact-menu">
+          <summary>文件</summary>
+          <div class="menu-popover">
+            <section
+              class="command-group document-commands"
+              aria-label="文档操作"
+            >
+              <h2>文档</h2>
+              <div class="command-row">
+                <button id="openButton" class="primary">＋ 打开文档</button>
+              </div>
+              <select id="library" aria-label="最近文档">
+                <option value="">最近文档</option>
+              </select>
+            </section>
+            <section class="command-group note-commands" aria-label="笔记编辑">
+              <h2>笔记</h2>
+              <div class="command-row">
+                <button id="attachment" title="插入图片、Markdown 或 PDF 附件">
+                  插入附件
+                </button>
+              </div>
+              <div class="command-row">
+                <button
+                  id="importNote"
+                  title="导入本页 Markdown，或恢复整份 JSON 笔记备份"
+                >
+                  导入笔记</button
+                ><button
+                  id="exportNote"
+                  title="导出整份 JSON 备份及本页 Markdown"
+                >
+                  导出笔记</button
+                ><button
+                  id="historyButton"
+                  title="查看与恢复本页自动保存的历史版本"
+                >
+                  历史版本
+                </button>
+              </div>
+            </section>
+          </div>
+        </details>
+        <button id="aiReviewButton" class="tab">AI 批注</button>
+        <div id="markdownTools" class="editing-tools" hidden>
+          <details class="compact-menu">
+            <summary>编辑</summary>
+            <div class="menu-popover">
+              <button data-md="undo">撤销</button
+              ><button data-md="redo">重做</button>
+              <button data-md="cut">剪切</button
+              ><button data-md="copy">复制</button>
+              <button data-md="selectAll">全选</button>
+            </div>
+          </details>
+          <details class="compact-menu">
+            <summary>段落</summary>
+            <div class="menu-popover">
+              <label
+                >字号
+                <select id="noteFontTool">
+                  <option>12</option>
+                  <option selected>15</option>
+                  <option>18</option>
+                  <option>20</option>
+                  <option>24</option>
+                  <option>28</option>
+                  <option>32</option>
+                </select></label
+              ><select id="headingTool" aria-label="标题格式">
+                <option value="">标题</option>
+                <option value="1">一级标题</option>
+                <option value="2">二级标题</option>
+                <option value="3">三级标题</option></select
+              ><button data-md="bullet" title="无序列表">列表</button
+              ><button data-md="ordered" title="有序列表">编号</button
+              ><button data-md="task" title="任务列表">待办</button
+              ><button data-md="quote" title="引用">引用</button>
+            </div>
+          </details>
+          <details class="compact-menu">
+            <summary>格式</summary>
+            <div class="menu-popover">
+              <button data-md="bold" title="加粗 · Ctrl+B">
+                <strong>B</strong></button
+              ><button data-md="italic" title="斜体 · Ctrl+I"><em>I</em></button
+              ><button data-md="strike" title="删除线"><s>S</s></button
+              ><button data-md="underline" title="下划线"><u>U</u></button>
+            </div>
+          </details>
+          <details class="compact-menu">
+            <summary>插入</summary>
+            <div class="menu-popover">
+              <button data-md="code" title="代码块">代码</button
+              ><button data-md="math" title="独立公式">公式</button
+              ><button data-md="table" title="插入表格">表格</button
+              ><button data-md="link" title="链接 · Ctrl+K">链接</button
+              ><button id="mdImage">图片</button
+              ><button id="mdPaste" title="粘贴并保留 Markdown 格式">
+                格式粘贴
+              </button>
+            </div>
+          </details>
+          <button id="noteReturn" class="return-button">返回双栏</button>
+        </div>
+        <span id="saveStatus">就绪</span
+        ><button id="settingsButton" class="tab">设置</button
+        ><button id="helpButton" class="tab">使用说明</button>
+      </nav>
+      <div class="ribbon">
+        <section class="command-group reading-commands" aria-label="阅读导航">
+          <h2>阅读</h2>
+          <div class="command-row">
+            <span class="control-label">页码</span>
+            <div class="inline page-controls">
+              <button id="prev" title="上一页 · Alt + ←" aria-label="上一页">
+                ‹</button
+              ><input
+                id="pageNumber"
+                type="number"
+                min="1"
+                value="1"
+                aria-label="当前页"
+              /><span id="pageCount">/ —</span
+              ><button id="next" title="下一页 · Alt + →" aria-label="下一页">
+                ›
+              </button>
+            </div>
+          </div>
+          <div class="command-row">
+            <span class="control-label">缩放</span>
+            <div class="inline zoom-controls">
+              <button id="zoomOut" title="缩小" aria-label="缩小">−</button
+              ><span id="zoomLabel">100%</span
+              ><button id="zoomIn" title="放大" aria-label="放大">＋</button>
+            </div>
+            <button id="fit">适合窗口</button>
+          </div>
+        </section>
+      </div>
+
+      <div id="inkTools" class="editing-tools" hidden>
+        <span id="inkSideLabel" class="editing-label">手写批注</span
+        ><button data-ink-tool="select" title="选择、移动和缩放批注">
+          选择</button
+        ><button data-ink-tool="pen" class="selected">画笔</button
+        ><button data-ink-tool="highlight">荧光笔</button
+        ><button data-ink-tool="erase">橡皮擦</button
+        ><button data-ink-tool="line">直线</button
+        ><button data-ink-tool="arrow">箭头</button
+        ><button data-ink-tool="rect">矩形</button
+        ><button data-ink-tool="ellipse">椭圆</button
+        ><button data-ink-tool="text">文字</button
+        ><span class="tool-divider"></span
+        ><input
+          id="inkColor"
+          type="color"
+          value="#dc3545"
+          aria-label="画笔颜色"
+        /><select id="inkWidth" aria-label="笔迹粗细">
+          <option value="1.5">细</option>
+          <option value="3" selected>标准</option>
+          <option value="6">粗</option>
+          <option value="10">特粗</option></select
+        ><button id="inkUndo" title="撤销 · Ctrl+Z">撤销</button
+        ><button id="inkRedo" title="重做 · Ctrl+Y">重做</button
+        ><button id="inkCopy">复制</button><button id="inkPaste">粘贴</button
+        ><button id="inkImage">图片</button><button id="inkDelete">删除</button
+        ><button id="inkDone" class="return-button">结束批注</button
+        ><button id="inkReturn">返回双栏</button>
+      </div>
+      <div id="wordTools" class="editing-tools" hidden>
+        <span class="editing-label">Word 编辑</span
+        ><span>表格、图片、布局等工具由下方 Word 功能区提供</span
+        ><button id="wordSelectionReview">选中文字 → AI 批注</button
+        ><button id="wordDone" class="return-button">保存并返回阅读</button
+        ><button id="wordReturn">返回双栏</button>
+      </div>
+    </section>
+    <main id="workspace">
+      <section class="document-pane">
+        <div class="pane-heading">
+          <span>原始文档</span>
+          <div class="pane-actions">
+            <span id="documentType">连续滚动</span
+            ><button id="documentEditButton" disabled>编辑</button
+            ><button id="documentInkButton">手写批注</button>
+          </div>
+        </div>
+        <div id="documentScroll" tabindex="0" aria-label="文档滚动区域">
+          <div id="welcome">
+            <span class="welcome-icon">▤</span>
+            <h1>课件和理解，放在同一页</h1>
+            <p>左侧阅读原文，右侧记录每页的完整讲解。</p>
+            <button id="welcomeOpen" class="primary">打开课件</button>
+            <p class="formats">PDF · Word · PowerPoint · Markdown</p>
+            <p class="hint">也可以把文件拖到这里</p>
+          </div>
+          <div id="paper" hidden>
+            <canvas id="pdfCanvas"></canvas>
+            <article id="markdownDocument" class="prose" hidden></article>
+          </div>
+          <div id="loading" hidden>正在解析文档…</div>
+        </div>
+        <div class="pane-footer">
+          <span id="pageDescription">每一页，都有自己的笔记</span
+          ><span>Alt + ← / → 翻页</span>
+        </div>
+      </section>
+      <div
+        id="splitter"
+        role="separator"
+        aria-label="调整两侧宽度"
+        tabindex="0"
+      ></div>
+      <section class="note-pane">
+        <div class="pane-heading">
+          <span id="noteTitle">本页笔记</span>
+          <div class="pane-actions">
+            <span class="pane-caption">逐页对应</span
+            ><button id="noteEditButton">编辑</button
+            ><button id="noteInkButton">手写批注</button>
+          </div>
+        </div>
+        <div id="noteScroll">
+          <div id="noteBody" class="mode-read">
+            <textarea
+              id="editor"
+              spellcheck="false"
+              aria-label="本页 Markdown 笔记"
+              placeholder="粘贴这一页的讲解，支持 Markdown 和 LaTeX 公式。"
+              disabled
+            ></textarea>
+            <article id="preview" class="prose" tabindex="0">
+              <div class="note-empty">
+                <h2>为这一页，留下一份理解</h2>
+                <p>
+                  打开文档后，每页都有独立的笔记。<br />在「编辑」中粘贴讲解，在「阅读」中查看公式和排版。
+                </p>
+              </div>
+            </article>
+          </div>
+        </div>
+        <div class="pane-footer">
+          <span id="wordCount">0 字</span
+          ><span>Markdown · LaTeX · Mermaid</span>
+        </div>
+      </section>
+    </main>
+    <input
+      id="fileInput"
+      type="file"
+      accept=".pdf,.doc,.docx,.ppt,.pptx,.md,.markdown"
+      hidden
+    /><input
+      id="inkImageInput"
+      type="file"
+      accept="image/png,image/jpeg,image/webp,image/gif"
+      hidden
+    /><input id="attachmentInput" type="file" hidden /><input
+      id="noteInput"
+      type="file"
+      accept=".md,.markdown,.txt,.json"
+      hidden
+    />
+    <div id="toast" role="status" hidden></div>
+    <dialog id="help">
+      <h2>pagenote</h2>
+      <p>pagenote 将源文档与逐页 Markdown 笔记放在同一项目中。</p>
+      <p>从文件菜单新建或打开项目；导入文档与笔记后，两侧按页面关联。</p>
+      <p>
+        使用选择工具选中文字或区域，再添加 AI
+        标注；双击编号打开标注画布，右键可删除。
+      </p>
+      <p>手形工具用于平移页面。画笔支持手写、荧光标记和擦除。</p>
+      <p>从编辑菜单选择文档或笔记区域。Word 编辑需要本机 Microsoft Word。</p>
+      <p>
+        Ctrl + 鼠标滚轮缩放所在区域。Markdown 支持代码高亮、公式、图片、表格和
+        Mermaid。
+      </p>
+      <p>
+        通过 AI 标注菜单复制 MCP 配置，在外部 AI 客户端连接。软件本身不内置 AI
+        服务或上传项目。
+      </p>
+      <p>
+        移动项目时请保留整个文件夹及 src 子目录。新版项目入口为
+        project.pagenote，旧版 JSON 项目仍可打开。
+      </p>
+      <button id="closeHelp">知道了</button>
+    </dialog>
+    <dialog id="settings">
+      <h2>设置</h2>
+      <label class="setting-toggle"
+        >语言 / Language
+        <select id="languageSetting">
+          <option value="zh-CN">简体中文</option>
+          <option value="en-US">English</option>
+        </select></label
+      ><label class="setting-toggle"
+        ><input id="noteAnimationSetting" type="checkbox" checked />
+        右侧讲解平滑换页</label
+      >
+      <p>左侧翻页时，右侧讲解轻柔淡入。关闭后立即切换。</p>
+      <label class="setting-toggle"
+        ><input id="expandEditorSetting" type="checkbox" checked />
+        编辑时自动展开到整个工作区</label
+      >
+      <p>
+        左侧 Word
+        编辑或右侧编辑时，默认展开。可拖动分界线拉回双栏，也可点击“返回双栏”。关闭后保持当前双栏宽度。设置会自动保存。
+      </p>
+      <button id="closeSettings" class="primary">完成</button>
+    </dialog>
+    <dialog id="historyDialog">
+      <div class="history-heading">
+        <div>
+          <h2>历史版本</h2>
+          <p id="historyContext"></p>
+        </div>
+        <button id="closeHistory" aria-label="关闭历史版本">✕</button>
+      </div>
+      <p class="history-explanation">
+        每次保存都会自动保留笔记版本。恢复前会保留当前内容；原始文档和附件不受影响。
+      </p>
+      <div class="history-layout">
+        <select id="historyList" size="8" aria-label="本页历史版本"></select>
+        <article id="historyPreview" class="prose">
+          <p>选择一个版本查看内容。</p>
+        </article>
+      </div>
+      <div class="history-actions">
+        <span id="historyStatus" role="status"></span
+        ><button id="restoreHistory" class="primary" disabled>
+          恢复所选版本
+        </button>
+      </div>
+    </dialog>
+    <dialog id="inkTextDialog">
+      <h2>插入文字批注</h2>
+      <textarea
+        id="inkTextInput"
+        rows="4"
+        placeholder="输入批注文字"
+        aria-label="批注文字"
+      ></textarea>
+      <div class="history-actions">
+        <button id="inkTextCancel">取消</button
+        ><button id="inkTextApply" class="primary">插入</button>
+      </div>
+    </dialog>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

@@ -1,0 +1,10 @@
+node_modules
+dist
+release
+tmp
+output
+mcp-dist
+tests/*-data*
+tests/menus-*
+tests/project-*
+tests/box-tag-*
