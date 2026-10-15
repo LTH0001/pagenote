@@ -3,6 +3,7 @@ import markedKatex from 'marked-katex-extension';
 import katex from 'katex';
 import DOMPurify from 'dompurify';
 import { codeLanguage, highlightCode } from './code-highlight';
+import { normalizeMath } from './math-input';
 import 'highlight.js/styles/github.css';
 
 const md = new Marked(
@@ -30,21 +31,6 @@ function getMermaid() {
       return mermaid;
     });
   return mermaidPromise;
-}
-function normalizeMath(text) {
-  return text
-    .split(/(```[\s\S]*?```|~~~[\s\S]*?~~~|`[^`\n]*`)/g)
-    .map((part, i) =>
-      i % 2
-        ? part
-        : part
-            .replace(
-              /\\\[([\s\S]*?)\\\]/g,
-              (_, x) => '\n\n$$\n' + x + '\n$$\n\n',
-            )
-            .replace(/\\\(([\s\S]*?)\\\)/g, (_, x) => '$' + x + '$'),
-    )
-    .join('');
 }
 function diagramError(block, source, error) {
   block.replaceChildren();

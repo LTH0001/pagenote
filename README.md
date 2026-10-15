@@ -30,6 +30,8 @@ AI 浪潮扑面而来，用 AI 辅助学习早已是寻常选择。大家常常�
 
 代码高亮在本机完成，不需要联网下载语法。显示异常时，可参考 [代码渲染说明](docs/CODE-RENDERING.md) 提供版本和最小示例，便于排查。
 
+公式若显示成一串反斜杠源码，可能是复制后的转义格式没有被识别。开发版已补充这类兼容处理，具体范围见 [公式渲染说明](docs/FORMULA-RENDERING.md)。
+
 ![Markdown 中的公式、Python 代码高亮和 Mermaid 流程图](docs/images/markdown-rendering.png)
 
 ### 需要修改时，再展开编辑

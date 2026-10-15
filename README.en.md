@@ -30,6 +30,8 @@ Notes support LaTeX, syntax-highlighted code, Mermaid diagrams, tables and paste
 
 Code highlighting runs locally, without downloading grammars. If rendering fails, include the app version, a minimal code block and a screenshot in your report; see the [rendering notes](docs/CODE-RENDERING.md).
 
+If formulas appear as backslash commands, copied TeX delimiters may be double-escaped. The development build now handles these forms; see the [formula compatibility notes](docs/FORMULA-RENDERING.md).
+
 ![Rendered formulas, Python highlighting and a Mermaid flowchart](docs/images/markdown-rendering.png)
 
 ### Expand the editor when needed
