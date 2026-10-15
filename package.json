@@ -1,6 +1,6 @@
 {
   "name": "pagenote",
-  "version": "2.0.0-beta.4",
+  "version": "2.0.0-beta.5",
   "private": true,
   "type": "module",
   "scripts": {
@@ -14,7 +14,7 @@
     "test:markdown": "node tests/rich-editor.mjs",
     "test:mcp": "node tests/mcp.mjs",
     "package:dir": "npm run build && electron-builder --win dir --x64 --publish never",
-    "test:release": "node tests/file-ops.mjs && node tests/external-project.mjs && node tests/external-documents.mjs && node tests/migration.mjs && node tests/menus.mjs && node tests/box-tag.mjs && node tests/projects.mjs && node tests/i18n.mjs && node tests/rich-editor.mjs",
+    "test:release": "node tests/project-launch.mjs && node tests/project-open.mjs && node tests/file-ops.mjs && node tests/external-project.mjs && node tests/external-documents.mjs && node tests/migration.mjs && node tests/menus.mjs && node tests/box-tag.mjs && node tests/projects.mjs && node tests/i18n.mjs && node tests/rich-editor.mjs",
     "format": "prettier --write src desktop mcp scripts server.mjs projects.mjs external-documents.mjs index.html locales tests/*.mjs",
     "format:check": "prettier --check src desktop mcp scripts server.mjs projects.mjs external-documents.mjs index.html locales",
     "package:source": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/source-archive.ps1",
@@ -67,6 +67,16 @@
       "projects.mjs",
       "locales/**",
       "external-documents.mjs"
+    ],
+    "extraFiles": [
+      {
+        "from": "scripts/register-project-files.cmd",
+        "to": "register-project-files.cmd"
+      },
+      {
+        "from": "scripts/register-project-files.ps1",
+        "to": "register-project-files.ps1"
+      }
     ],
     "extraResources": [
       {

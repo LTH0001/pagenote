@@ -11,6 +11,10 @@ const fs = require('node:fs/promises');
 const { pathToFileURL } = require('node:url');
 const { randomBytes } = require('node:crypto');
 const { execFileSync } = require('node:child_process');
+const {
+  projectArgument,
+  createProjectLauncher,
+} = require('./project-launch.cjs');
 let server,
   win,
   controller,
@@ -21,22 +25,29 @@ app.setName('pagenote');
 app.setAppUserModelId('io.pagenote.desktop');
 if (process.env.PAGE_NOTES_USER_DATA)
   app.setPath('userData', process.env.PAGE_NOTES_USER_DATA);
+const projectLauncher = createProjectLauncher({
+  open: (file) =>
+    win.webContents.executeJavaScript(
+      'window.pageNotes.ready.then(()=>window.pageNotes.openProject(' +
+        JSON.stringify(file) +
+        '))',
+    ),
+  onError: (error, file) =>
+    dialog.showErrorBox(
+      'pagenote · Open project / 打开项目失败',
+      file + '\n\n' + (error.message || String(error)),
+    ),
+});
+projectLauncher.enqueue(projectArgument(process.argv));
 if (!app.requestSingleInstanceLock()) {
   app.quit();
 } else {
-  app.on('second-instance', (_event, argv) => {
+  app.on('second-instance', (_event, argv, workingDirectory) => {
+    projectLauncher.enqueue(projectArgument(argv, workingDirectory));
     if (win) {
       if (win.isMinimized()) win.restore();
+      win.show();
       win.focus();
-      const file = argv.find((value) => /\.pagenote$/i.test(value));
-      if (file)
-        win.webContents
-          .executeJavaScript(
-            'window.pageNotes.ready.then(()=>window.pageNotes.openProject(' +
-              JSON.stringify(file) +
-              '))',
-          )
-          .catch(() => {});
     }
   });
   app
@@ -500,15 +511,7 @@ if (!app.requestSingleInstanceLock()) {
       });
       await win.loadURL(url);
       win.show();
-      const launchProject = process.argv.find((value) =>
-        /\.pagenote$/i.test(value),
-      );
-      if (launchProject)
-        await win.webContents.executeJavaScript(
-          'window.pageNotes.ready.then(()=>window.pageNotes.openProject(' +
-            JSON.stringify(launchProject) +
-            '))',
-        );
+      await projectLauncher.ready();
       win.on('closed', () => {
         controller?.dispose();
         server?.close();

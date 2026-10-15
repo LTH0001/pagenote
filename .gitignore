@@ -17,6 +17,7 @@ tests/*-data*/
 tests/*data-*/
 tests/menus-*/
 tests/project-*/
+tests/launch-*/
 tests/box-tag-*/
 tests/ai-workspace-*/
 tests/*.png

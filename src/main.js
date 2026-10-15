@@ -600,7 +600,16 @@ async function goTo(next, smooth = false) {
   }
   paintVisible();
 }
+let documentOpening = 0;
 async function openDocument(meta, fromWord = false) {
+  documentOpening++;
+  try {
+    return await performOpenDocument(meta, fromWord);
+  } finally {
+    documentOpening--;
+  }
+}
+async function performOpenDocument(meta, fromWord = false) {
   if (wordBusy && !fromWord) await waitWordIdle();
   if (wordActive) await endWord();
   await flush();
@@ -1930,14 +1939,19 @@ navigationDescription.hidden = true;
 document.querySelector('.titlebar').hidden = true;
 
 window.pageNotes.openProject = async (filePath) => {
-  await window.pageNotes.finishEditing();
-  const meta = await request('/api/projects/open', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ filePath }),
-  });
-  await refreshLibrary();
-  await openDocument(meta);
+  documentOpening++;
+  try {
+    await window.pageNotes.finishEditing();
+    const meta = await request('/api/projects/open', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ filePath }),
+    });
+    await refreshLibrary();
+    await openDocument(meta);
+  } finally {
+    documentOpening--;
+  }
 };
 
 window.pageNotes.setLanguage = setLanguage;
@@ -1962,6 +1976,7 @@ let externalRefreshBusy = false;
 window.pageNotes.refreshExternalSource = async () => {
   if (
     !doc ||
+    documentOpening ||
     externalRefreshBusy ||
     mode === 'edit' ||
     documentMarkdownEditing ||
@@ -1976,7 +1991,7 @@ window.pageNotes.refreshExternalSource = async () => {
       result = await request('/api/documents/' + id + '/refresh-external', {
         method: 'POST',
       });
-    if (result.changed && doc?.id === id) {
+    if (result.changed && doc?.id === id && !documentOpening) {
       await openDocument(result.document, true);
       toast(t('文档已更新，页面笔记已保留'));
     }
