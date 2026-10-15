@@ -37,6 +37,14 @@
   "重置笔记字号": ["重置笔记缩放", "Reset notes zoom"],
   "全屏": ["全屏", "Full screen"],
   "复制 MCP 配置": ["复制 MCP 配置", "Copy MCP configuration"],
+  "复制逐页精讲提示词": [
+    "复制逐页精讲提示词",
+    "Copy page-by-page teaching prompt"
+  ],
+  "打开内置学习技能目录": [
+    "打开内置学习技能目录",
+    "Open built-in learning skill folder"
+  ],
   "打开 MCP 配置目录": ["打开 MCP 配置目录", "Open MCP configuration folder"],
   "接口能力": ["AI 接口说明", "AI integration"],
   "使用说明": ["使用说明", "User guide"],

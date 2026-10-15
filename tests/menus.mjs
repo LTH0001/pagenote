@@ -35,6 +35,23 @@ try {
   assert.ok(
     menus.find((m) => m.label === 'AI 标注').children.includes('文档标注画布'),
   );
+  const copiedSkill = await app.evaluate(async ({ Menu, clipboard }) => {
+    const menu = Menu.getApplicationMenu().items.find(
+      (item) => item.label === 'AI 标注',
+    );
+    menu.submenu.items
+      .find((item) => item.label === '复制逐页精讲提示词')
+      .click();
+    const deadline = Date.now() + 5000;
+    while (
+      !(await clipboard.readText()).includes('name: pagenote-page-tutor') &&
+      Date.now() < deadline
+    )
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    return clipboard.readText();
+  });
+  assert.ok(copiedSkill.includes('name: pagenote-page-tutor'));
+  assert.ok(copiedSkill.includes('不用“为什么”'));
   assert.ok(await w.locator('.titlebar').isHidden());
   assert.ok(await w.locator('#saveStatus').isHidden());
   assert.ok(await w.locator('#helpButton').isHidden());

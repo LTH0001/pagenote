@@ -59,6 +59,7 @@
     },
     "files": [
       "desktop/**",
+      "skills/**",
       "server.mjs",
       "dist/**",
       "package.json",

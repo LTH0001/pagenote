@@ -96,6 +96,22 @@ if (!app.requestSingleInstanceLock()) {
       const url = `http://127.0.0.1:${server.address().port}`;
       const mcpFolder = path.join(app.getPath('userData'), 'mcp');
       await fs.mkdir(mcpFolder, { recursive: true });
+      const tutorFolder = path.join(
+        app.getPath('userData'),
+        'skills',
+        'pagenote-page-tutor',
+      );
+      await fs.mkdir(tutorFolder, { recursive: true });
+      const tutorSkillFile = path.join(tutorFolder, 'SKILL.md');
+      await fs.copyFile(
+        path.join(
+          app.getAppPath(),
+          'skills',
+          'pagenote-page-tutor',
+          'SKILL.md',
+        ),
+        tutorSkillFile,
+      );
       const adapter = path.join(mcpFolder, 'page-notes-mcp.cjs');
       await fs.copyFile(
         app.isPackaged
@@ -413,6 +429,17 @@ if (!app.requestSingleInstanceLock()) {
                       ),
                   },
                   { type: 'separator' },
+                  {
+                    label: '复制逐页精讲提示词',
+                    click: async () =>
+                      clipboard.writeText(
+                        await fs.readFile(tutorSkillFile, 'utf8'),
+                      ),
+                  },
+                  {
+                    label: '打开内置学习技能目录',
+                    click: () => shell.openPath(tutorFolder),
+                  },
                   {
                     label: '复制 MCP 配置',
                     click: () =>
