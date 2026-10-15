@@ -8,19 +8,45 @@ pagenote puts a document on the left and notes for the current page on the right
 
 ## Where pagenote started
 
-With the current wave of AI, using it to study has become commonplace. I often ask it to explain slides and papers, hoping to understand the parts I find difficult.
+As AI becomes part of everyday life, using it to study is a familiar choice. We give it slides and papers, hoping it will build on what we already know and guide us, step by step, toward an understanding of difficult material.
 
-But I still spend time switching between two windows. The source is in one, the explanation in another, and I lose track of which passage belongs to which page. Sometimes AI changes the order, making the lesson harder to follow.
+Yet this way of learning has practical shortcomings. The source and explanation sit in separate windows, and switching between them makes it easy to lose our place. AI sometimes rearranges the material, disrupting the order of the lesson. Asking it to explain an entire document at once can run into context and output limits, producing a summary that skips derivations, unfamiliar notation and examples. We may feel we have understood it, only to struggle when solving a problem or putting it into practice.
 
-Asking for everything at once often produces a summary. Context and answer-length limits leave out derivations, notation and examples. I can finish reading and still struggle to use what I have read.
+These frustrations led to Pagenote. The idea is to keep each source page beside its explanation and give it the attention of a separate request: start from familiar knowledge, fill in the intermediate steps and continue from the preceding page. When something is unclear, select a passage or a figure and leave a request for another example or a different explanation. Notes can be revised as we learn, without repeatedly copying text and explaining the background. Illustrations, runnable code, mathematical notation and flowcharts give AI more ways to make abstract ideas understandable. That was the original purpose of Pagenote.
 
-I wanted a tool that keeps each page beside its explanation. Each page should receive the attention of a separate request, starting from familiar ideas, working through the steps and connecting to the previous page.
+## Features in pictures
 
-When something is unclear, I want to select a passage or box a figure and leave a note: “Try another example here.” AI can revise that part without making me copy the text and explain the context again.
+These are real screenshots of the current development build, using original demonstration content. The interface shown is in Chinese.
 
-I also want to use AI beyond text: an illustration for an abstract idea, runnable code for an algorithm, formulas for a derivation and a flowchart for a process. That is what led me to build pagenote.
+### Read the source beside its explanation
 
-The app currently provides two-pane reading, page-linked notes and AI annotations, with an MCP interface for reading and editing content. It does not bundle a model. Detailed explanations and image generation require an AI client with the relevant capabilities.
+The left pane shows the document; the right holds Markdown notes for the active page. Notes follow page changes, and each pane scrolls independently. Read PDF and Markdown directly; Word and PowerPoint conversion uses locally installed Microsoft Office.
+
+![Source document and notes for the current page](docs/images/paired-reading.png)
+
+### Formulas, code and diagrams
+
+Notes support LaTeX, syntax-highlighted code, Mermaid diagrams, tables and pasted images. Keep derivations and verification code on the same page, with the results rendered for reading.
+
+![Rendered formulas, Python highlighting and a Mermaid flowchart](docs/images/markdown-rendering.png)
+
+### Expand the editor when needed
+
+Choose the notes pane from the editing menu to expand it and reveal its tools. Edit rendered content directly, with code highlighting updating as you type. Source edits for Word, PDF and PowerPoint open in the system default app; save and return to refresh the preview.
+
+![Expanded note editor with its contextual tools](docs/images/note-editing.png)
+
+### Leave feedback where it belongs
+
+Select text or an area and add an AI annotation, such as “Add an example here” or “Explain this in words before introducing the formula.” A movable panel opens in the same pane.
+
+![Writing a revision request beside selected text](docs/images/ai-annotation.png)
+
+Annotations collect in a workbench for the corresponding pane. You can also record requests about the whole document. Double-click a marker to open its workbench, or right-click to delete it. A connected AI client can read the requests through MCP and revise the notes.
+
+![AI annotation workbench with a local revision request](docs/images/ai-workbench.png)
+
+Pagenote currently supports two-pane reading, page-linked notes and AI annotations. Its MCP interface lets AI read and edit page content. The app does not include a model; detailed page-by-page explanations and image generation require an AI client with the relevant capabilities.
 
 **Current public version: 2.0.0-beta.4.** It is still a beta. Try it with something you are actually learning, and let me know where it gets in your way.
 
@@ -37,18 +63,13 @@ Alternatively, extract the complete Windows ZIP distribution and run `pagenote.e
 
 Releases should include `SHA256SUMS.txt` and pass security review. The current local build has no publisher signature. If security software blocks it, stop and report the detection; **do not disable protection or add an exclusion**.
 
-## Features
+## Other controls
 
-- Read PDFs and Markdown; convert Word/PowerPoint documents through locally installed Microsoft Office.
-- Source editing opens Word/PDF/PPT in your system default app. Save and return to pagenote to refresh the preview; PDF editing depends on that app.
-- Notes follow the active source page as page boundaries cross the viewport midpoint.
-- Rendered Markdown editing with live syntax highlighting, LaTeX, pasted images, tables and Mermaid.
-- **Select** text or an area and add an **AI annotation**. **Hand** pans the page. **Pen** provides ink, highlighting and erasing.
-- Double-click an annotation number to open its canvas; right-click to delete. Canvases stay hidden until opened from **AI Annotations**.
-- Use **Edit → Choose editing pane**, then click the source or notes pane.
+- **Hand** pans the page. **Pen** provides ink, highlighting and erasing.
 - Ctrl + mouse wheel zooms the current pane. Notes zoom changes the displayed font size.
+- Notes follow the active source page as page boundaries cross the viewport midpoint. Page-transition animation can be disabled in settings.
 - Automatic note history and restore. Projects, ink and annotations stay on the local machine.
-- MCP integration for reading documents, editing notes, adjusting layout, screenshots and contact sheets. No AI model or AI subscription is bundled. Configure a compatible external client; data shared with it is governed by that client's privacy policy.
+- Data shared with an external AI client is governed by that client's privacy policy.
 
 ## Portable projects
 
