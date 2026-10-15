@@ -19,12 +19,16 @@
     "format:check": "prettier --check src desktop mcp scripts server.mjs projects.mjs external-documents.mjs index.html locales",
     "package:source": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/source-archive.ps1",
     "test:word": "node tests/default-word.mjs",
+    "test:prepared": "node tests/prepared.mjs",
+    "pretest:prepared": "node scripts/ensure-electron.mjs",
     "pretest:release": "node scripts/ensure-electron.mjs",
     "pretest:mcp": "node scripts/ensure-electron.mjs",
     "pretest:word": "node scripts/ensure-electron.mjs",
     "pretest:markdown": "node scripts/ensure-electron.mjs"
   },
   "dependencies": {
+    "sharp": "0.35.5",
+    "@gutenye/ocr-node": "1.4.9",
     "express": "^5.1.0",
     "multer": "^2.0.2",
     "pdfjs-dist": "^6.2.108",
@@ -48,6 +52,11 @@
     "vite": "^7.1.0",
     "zod": "^4.6.7"
   },
+  "overrides": {
+    "@gutenye/ocr-node": {
+      "sharp": "$sharp"
+    }
+  },
   "description": "Local-first document reading, page-linked Markdown notes and AI annotations",
   "author": "pagenote contributors",
   "main": "desktop/main.cjs",
@@ -65,6 +74,9 @@
       "package.json",
       "node_modules/**",
       "!node_modules/vite/**",
+      "!node_modules/onnxruntime-node/bin/napi-v6/darwin/**",
+      "!node_modules/onnxruntime-node/bin/napi-v6/linux/**",
+      "!node_modules/onnxruntime-node/bin/napi-v6/win32/arm64/**",
       "projects.mjs",
       "locales/**",
       "external-documents.mjs"
@@ -111,6 +123,14 @@
       {
         "from": "LICENSE",
         "to": "LICENSE-pagenote.txt"
+      },
+      {
+        "from": "build/licenses/PaddleOCR-LICENSE.txt",
+        "to": "LICENSE-PaddleOCR.txt"
+      },
+      {
+        "from": "build/licenses/Guten-OCR-LICENSE.txt",
+        "to": "LICENSE-Guten-OCR.txt"
       }
     ],
     "win": {
@@ -123,6 +143,12 @@
       "signExecutable": false
     },
     "compression": "normal",
+    "asarUnpack": [
+      "node_modules/@gutenye/ocr-models/**",
+      "node_modules/onnxruntime-node/**",
+      "node_modules/sharp/**",
+      "node_modules/@img/**"
+    ],
     "nsis": {
       "oneClick": false,
       "perMachine": false,

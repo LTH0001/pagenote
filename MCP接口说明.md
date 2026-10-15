@@ -17,6 +17,7 @@
 | `page_notes_list_documents` | 获取文档列表和 documentId |
 | `page_notes_get_state` | 默认只获取当前文档、页码和模式；`detail=full` 获取完整状态 |
 | `page_notes_read_pages` | 默认读取当前页原文，支持笔记、版本元数据、局部段落与缓存 |
+| `page_notes_prepare_page` | 本地 OCR、页面与区域图片、Markdown 表格/Mermaid 预处理与缓存 |
 | `page_notes_read_handoff` / `page_notes_write_handoff` | 读取或保存单页知识交接，检测原文和笔记变化 |
 | `page_notes_navigate` | 在用户窗口打开文档并跳页 |
 | `page_notes_write_notes` | 替换单页或批量笔记 |
@@ -32,6 +33,8 @@
 资源 `page-notes://state` 也可以读取当前状态。
 
 ## 按需读取与知识交接
+
+需要本地 OCR 或图表准备时，调用 `page_notes_prepare_page`，随后按需取文字、文字块、Markdown 表格或图像。详见 [本地页面准备](docs/LOCAL-PREPARATION.md)。源文件与视觉材料保留，识别结果有置信度和警告，不宣称无损转换。
 
 开发版默认精简返回内容。旧调用需要完整状态时指定 `detail=full`；需要原文与笔记一起返回时指定 `include=both`。工具名称保留，默认返回范围有所调整；公开 beta.4 尚不含这些新参数。
 

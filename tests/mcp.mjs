@@ -47,7 +47,7 @@ try {
   assert.ok(client.getInstructions().includes('先识别用户当前任务'));
   assert.ok(client.getInstructions().includes('其他任务按用户要求执行'));
   const tools = await client.listTools();
-  assert.equal(tools.tools.length, 19);
+  assert.equal(tools.tools.length, 20);
   const resources = await client.listResources();
   assert.ok(
     resources.resources.some((r) => r.uri === 'page-notes://skills/page-tutor'),
@@ -589,7 +589,7 @@ try {
     JSON.stringify(
       {
         ok: true,
-        tools: 19,
+        tools: 20,
         checks: [
           'stdio MCP handshake',
           'tool discovery',
@@ -615,7 +615,7 @@ try {
     ),
   );
   console.log(
-    'PASS MCP: 19 tools; selective reads/cache; persistent handoffs; compact state; silent writes; hidden screenshots and collage; restart with live MCP client.',
+    'PASS MCP: 20 tools; selective reads/cache; persistent handoffs; compact state; silent writes; hidden screenshots and collage; restart with live MCP client.',
   );
 } finally {
   await client?.close();

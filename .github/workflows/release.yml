@@ -27,8 +27,12 @@ jobs:
       - run: npm run build
       - run: npm run test:release
       - run: npm run test:mcp
+      - run: npm run test:prepared
       - run: npm run package:desktop
       - run: npm run test:release
+        env:
+          DESKTOP_EXE: ${{ github.workspace }}/release/win-unpacked/pagenote.exe
+      - run: npm run test:prepared
         env:
           DESKTOP_EXE: ${{ github.workspace }}/release/win-unpacked/pagenote.exe
       - run: node scripts/release-artifacts.mjs

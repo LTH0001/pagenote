@@ -195,6 +195,31 @@ tool(
   'navigate',
 );
 tool(
+  'page_notes_prepare_page',
+  '本地准备一页供AI读取：PDF文字层、必要时中文/英文OCR、坐标与置信度、完整页面PNG；Markdown表格和Mermaid转成结构/图像。结果缓存到项目src/prepared。默认只返回摘要；output=text/blocks/tables/image按需读取，长文字用start续读。ocr=always可补识别图片内文字，region按页面1000×1000裁剪。OCR与图表解释不保证无损，始终保留原文/原图并检查警告；不自动恢复PDF表格/公式/图表数据。不会切换用户页面。',
+  {
+    documentId,
+    page: page.optional(),
+    ocr: z.enum(['auto', 'always', 'never']).default('auto'),
+    output: z
+      .enum(['summary', 'text', 'blocks', 'tables', 'image'])
+      .default('summary'),
+    region: z
+      .object({
+        x: z.number().min(0).max(1000),
+        y: z.number().min(0).max(1000),
+        width: z.number().positive().max(1000),
+        height: z.number().positive().max(1000),
+      })
+      .optional(),
+    start: z.number().int().min(0).optional(),
+    maxChars: z.number().int().min(1).max(20000).optional(),
+    imageIndex: z.number().int().min(0).max(100).optional(),
+    refresh: z.boolean().optional(),
+  },
+  'prepare_page',
+);
+tool(
   'page_notes_write_notes',
   '替换单页或批量笔记；可用 expectedRevision 检测冲突。逐页保存后静默刷新，不切换用户当前页面。生成讲解时完成一页即调用本工具保存一页，不等整份文档完成；检查用后台截图，不调用 navigate。修改前自动保存旧笔记到历史目录。',
   {

@@ -11,6 +11,7 @@ The existing `page_notes_*` tool names and `page-notes://state` resource remain 
 | `page_notes_list_documents` | List document IDs |
 | `page_notes_get_state` | Compact document/page/mode by default; `detail=full` includes content and geometry |
 | `page_notes_read_pages` | Source by default; selective notes, metadata, ranges and revision caching |
+| `page_notes_prepare_page` | Local OCR, positioned text, page/region images and native Markdown table/Mermaid assets |
 | `page_notes_read_handoff` / `page_notes_write_handoff` | Persistent page handoffs with staleness checks |
 | `page_notes_navigate` | Navigate the visible workspace |
 | `page_notes_write_notes` | Replace one or multiple page notes |
@@ -28,9 +29,11 @@ Screenshots return PNG image content suitable for multimodal models. Screenshot 
 
 ## Page-by-page teaching
 
-The development build exposes the bundled `SKILL.md` at `page-notes://skills/page-tutor` and as the MCP prompt `pagenote-page-tutor`. Optional string arguments are `learner` (background), `pages` (page range) and `goal`. Clients without prompt support can read the resource, or paste the skill from **AI Annotations → Copy page-by-page teaching prompt**. There are now 19 tools, including two handoff tools. The skill does not initiate model calls.
+The development build exposes the bundled `SKILL.md` at `page-notes://skills/page-tutor` and as the MCP prompt `pagenote-page-tutor`. Optional string arguments are `learner` (background), `pages` (page range) and `goal`. Clients without prompt support can read the resource, or paste the skill from **AI Annotations → Copy page-by-page teaching prompt**. There are now 20 tools, including page preparation and two handoff tools. The skill does not initiate model calls.
 
 ## Token-efficient reads
+
+Use `page_notes_prepare_page` for offline OCR and reusable text, coordinates, images and native Markdown table/Mermaid assets. Models ship locally; sources and visuals are preserved with confidence and warnings. See [local preparation](LOCAL-PREPARATION.md). This does not guarantee lossless semantic extraction.
 
 Omit `pages` to read the active page (page 1 for an explicitly selected inactive document). `include` accepts `source` (default), `note`, `both` or `metadata` (note revision/length only). Source has `sourceRevision`; notes have `revision` and `noteLength`. `noteRange: {start: 120, maxChars: 800}` returns only that UTF-16 slice with its actual `range`, while revision always refers to the complete note. Cache content by document ID, page and kind, then pass `knownRevisions: {"6": {source: "hash", note: "hash"}}`; matching content is omitted and marked `sourceUnchanged` / `noteUnchanged`.
 

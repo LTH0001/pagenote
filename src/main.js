@@ -10,6 +10,7 @@ import { setupMarkdownTools, htmlToMarkdown } from './editing.js';
 import { createReviews } from './reviews.js';
 import { createAITools } from './ai-tools.js';
 import { createRichEditor } from './rich-editor.js';
+import { preparePageData } from './page-data.js';
 
 pdfjs.GlobalWorkerOptions.workerSrc = worker;
 const $ = (id) => document.getElementById(id);
@@ -1677,6 +1678,15 @@ window.pageNotes = {
     mode,
     wordEditing: wordActive,
   }),
+  preparePageData: async (p) => {
+    if (!Number.isInteger(p) || p < 1 || p > total) throw Error('页码超出范围');
+    return preparePageData({
+      pdf,
+      pdfjs,
+      markdown: mdPages[p - 1] || '',
+      page: p,
+    });
+  },
   getState: async () => ({
     document: doc,
     page,

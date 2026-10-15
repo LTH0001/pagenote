@@ -3,6 +3,8 @@ import path from 'node:path';
 const seen = new Set(),
   notices = [],
   bundled = [
+    '@gutenye/ocr-node',
+    'sharp',
     'express',
     'multer',
     'pngjs',
@@ -52,6 +54,14 @@ async function visit(name, parent = '.') {
     await visit(dependency, directory);
 }
 for (const name of bundled) await visit(name);
+notices.push(
+  'Guten OCR source license\n' +
+    (await fs.readFile('build/licenses/Guten-OCR-LICENSE.txt', 'utf8')),
+);
+notices.push(
+  'PaddleOCR PP-OCRv4 models and dictionary\nBundled via @gutenye/ocr-models 1.4.2. Model weights/dictionary originate from PaddlePaddle/PaddleOCR and retain their Apache-2.0 license, separate from Guten OCR MIT source.\nhttps://github.com/PaddlePaddle/PaddleOCR\n' +
+    (await fs.readFile('build/licenses/PaddleOCR-LICENSE.txt', 'utf8')),
+);
 await fs.writeFile(
   'THIRD-PARTY-NOTICES.txt',
   'pagenote third-party notices\nGenerated package inventory; review additional font, binary and asset notices before distribution.\n\n' +

@@ -125,6 +125,28 @@ exports.createAIController = async function ({ win, url, data, word }) {
     return window;
   }
   const sourceRevision = (text) => revision(readerSource.hash + '\n' + text);
+  const preparePage = require('./prepared.cjs').createPagePreparer({
+    data,
+    describe: async (id, page) => {
+      const window = await readWindow(id);
+      const [source] = await invoke(window, 'readPages', [page], 'source');
+      const meta = JSON.parse(
+        await fs.readFile(
+          path.join(data, 'documents', id, 'meta.json'),
+          'utf8',
+        ),
+      );
+      return {
+        sourceRevision: sourceRevision(source.sourceText),
+        projectRoot: meta.projectRoot,
+      };
+    },
+    snapshot: async (id, page) => {
+      const window = await readWindow(id);
+      const source = await invoke(window, 'preparePageData', page);
+      return { ...source, sourceRevision: sourceRevision(source.nativeText) };
+    },
+  });
   async function writeNotes(id, updates) {
     await invoke(win, 'lockEditing');
     try {
@@ -315,6 +337,13 @@ exports.createAIController = async function ({ win, url, data, word }) {
       return meta;
     }
     const id = await activeId(args.documentId);
+    if (action === 'prepare_page') {
+      await invoke(win, 'flush');
+      const state = await invoke(win, 'getSummary');
+      const targetPage =
+        args.page ?? (state.document?.id === id ? state.page : 1);
+      return preparePage(id, targetPage, args);
+    }
     if (action === 'read_ai_reviews')
       return {
         documentId: id,
