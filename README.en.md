@@ -6,7 +6,7 @@ English · [简体中文](README.md)
 
 pagenote started as a small tool I wanted for my own learning. The source material goes on the left, and an explanation of that page goes on the right, so I can read them together.
 
-## Why I am making it
+## Where pagenote started
 
 Asking AI to explain a paper or a slide deck is ordinary now. Actually learning from that explanation still involves a surprising amount of friction.
 
