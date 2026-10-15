@@ -341,5 +341,20 @@
   "文档已更新，页面笔记已保留": [
     "文档已更新，页面笔记已保留",
     "Source updated. Page notes preserved."
+  ],
+  "提示词模块": ["提示词模块", "Prompt module"],
+  "学习讲解": ["学习讲解", "Learning guidance"],
+  "逐页精讲": ["逐页精讲", "Page-by-page teaching"],
+  "输出格式": ["输出格式", "Output format"],
+  "学习背景": ["学习背景", "Learner context"],
+  "已保存，AI 下次读取模块时生效": [
+    "已保存，AI 下次读取模块时生效",
+    "Saved. Applies the next time AI reads this module."
+  ],
+  "AI Tag 修改": ["AI Tag 修改", "AI Tag edits"],
+  "提示词内容": ["提示词内容", "Prompt content"],
+  "系统提示词保存后重新连接客户端；模块修改在 AI 下次读取时生效。仅保存当前选中的模块。": [
+    "系统提示词保存后重新连接客户端；模块修改在 AI 下次读取时生效。仅保存当前选中的模块。",
+    "Reconnect after changing the system prompt. Module changes apply on the next AI read. Save affects only the selected module."
   ]
 }

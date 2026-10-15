@@ -38,7 +38,7 @@ const markdown =
   issueFormula +
   '$$继续解释。\n\n$$\n' +
   issueFormula +
-  '\n$$';
+  '\n$$\n\n紧邻段落\n$$\n\\theta=1\n$$\n继续正文。';
 const app = await electron.launch({
   executablePath:
     process.env.DESKTOP_EXE ||
@@ -82,8 +82,8 @@ try {
   const check = async () => {
     await w.evaluate(() => document.fonts.ready);
     assert.equal(await w.locator('#preview .katex-error').count(), 0);
-    assert.equal(await w.locator('#preview .katex').count(), 14);
-    assert.equal(await w.locator('#preview .katex-display').count(), 10);
+    assert.equal(await w.locator('#preview .katex').count(), 15);
+    assert.equal(await w.locator('#preview .katex-display').count(), 11);
     assert.equal(await w.locator('#preview .katex .mtable').count(), 2);
     assert.ok(
       (await w.locator('#preview pre code').textContent()).includes('not math'),

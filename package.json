@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "node server.mjs --dev",
-    "build": "node scripts/create-icon.mjs && node scripts/notices.mjs && vite build && node scripts/build-mcp.mjs",
+    "build": "node scripts/export-prompts.mjs && node scripts/create-icon.mjs && node scripts/notices.mjs && vite build && node scripts/build-mcp.mjs",
     "start": "node server.mjs",
     "test": "npm run test:release",
     "desktop": "electron .",

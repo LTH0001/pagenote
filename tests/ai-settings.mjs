@@ -51,7 +51,61 @@ try {
   const skill = await client.readResource({
     uri: 'page-notes://skills/page-tutor',
   });
-  assert.ok(skill.contents[0].text.includes('人文材料'));
+  assert.ok(skill.contents[0].text.includes('不等待上一页讲解完成'));
+  const indexBefore = JSON.parse(
+    (await client.readResource({ uri: 'page-notes://prompts/index' }))
+      .contents[0].text,
+  );
+  assert.equal(indexBefore.modules.length, 5);
+  assert.ok(indexBefore.routes.some((r) => r.modules.includes('tag-edit')));
+  await w.locator('#aiPromptModule').selectOption('page-tutor');
+  await w.waitForFunction(() =>
+    document.querySelector('#aiSystemPrompt').value.includes('floor('),
+  );
+  const moduleDefault = await w.locator('#aiSystemPrompt').inputValue();
+  const moduleCustom = moduleDefault + '\n本机测试偏好：先给直觉。';
+  await w.locator('#aiSystemPrompt').fill(moduleCustom);
+  await w.locator('#aiSettingsSave').click();
+  await w.waitForFunction(() =>
+    document.querySelector('#aiSettingsStatus').textContent.includes('已保存'),
+  );
+  const indexAfter = JSON.parse(
+    (await client.readResource({ uri: 'page-notes://prompts/index' }))
+      .contents[0].text,
+  );
+  assert.notEqual(indexAfter.revision, indexBefore.revision);
+  const loaded = JSON.parse(
+    (
+      await client.callTool({
+        name: 'page_notes_read_prompt',
+        arguments: { id: 'page-tutor' },
+      })
+    ).content[0].text,
+  );
+  assert.equal(
+    loaded.text,
+    moduleCustom,
+    'live MCP sees customized module without reconnect',
+  );
+  const cached = JSON.parse(
+    (
+      await client.callTool({
+        name: 'page_notes_read_prompt',
+        arguments: { id: 'page-tutor', knownRevision: loaded.revision },
+      })
+    ).content[0].text,
+  );
+  assert.equal(cached.unchanged, true);
+  assert.ok(!('text' in cached));
+  assert.ok(!('defaultText' in cached));
+  await w.locator('#aiPromptReset').click();
+  assert.equal(await w.locator('#aiSystemPrompt').inputValue(), moduleDefault);
+  await w.locator('#aiPromptModule').selectOption('system');
+  await w.waitForFunction(
+    () =>
+      document.querySelector('#aiSystemPrompt').value ===
+      '先遵守本次任务范围。用简洁中文解释；遇到论文先区分结论与证据。',
+  );
   await client.close();
   client = null;
   await w.locator('#aiPromptReset').click();

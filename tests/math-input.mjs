@@ -46,6 +46,17 @@ for (const fence of ['```', '````', '~~~']) {
 }
 assert.equal(normalizeMath('`$$a\nb$$`'), '`$$a\nb$$`');
 assert.equal(
+  normalizeMath('正文\n$$\n\\theta=1\n$$\n后文'),
+  '正文\n\n$$\n\\theta=1\n$$\n\n后文',
+);
+assert.equal(
+  normalizeMath('正文\r\n$$\r\n\\theta=1\r\n$$\r\n后文').replaceAll(
+    '\r\n',
+    '\n',
+  ),
+  '正文\n\n$$\n\\theta=1\n$$\n\n后文',
+);
+assert.equal(
   normalizeMath(String.raw`\$\$ a` + '\nb' + String.raw`\$\$`),
   String.raw`\$\$ a` + '\nb' + String.raw`\$\$`,
 );

@@ -110,6 +110,113 @@ function scheduleDiagrams(target) {
 export function renderDiagrams(target) {
   scheduleDiagrams(target);
 }
+export async function validateNote(markdown) {
+  const normalizedMarkdown = normalizeMath(String(markdown));
+  const errors = [],
+    warnings = [],
+    tokens = md.lexer(normalizedMarkdown),
+    images = [],
+    diagrams = [],
+    mathCode = [];
+  let fence = null;
+  for (const line of normalizedMarkdown.split(/\r?\n/)) {
+    const m = line.match(/^ {0,3}(`{3,}|~{3,})/);
+    if (!fence && m) fence = m[1];
+    else if (
+      fence &&
+      m &&
+      m[1][0] === fence[0] &&
+      m[1].length >= fence.length &&
+      /^ {0,3}(?:`+|~+)\s*$/.test(line)
+    )
+      fence = null;
+  }
+  if (fence) errors.push('代码围栏未闭合');
+  md.walkTokens(tokens, (t) => {
+    if (t.type === 'blockKatex' || t.type === 'inlineKatex') {
+      try {
+        katex.renderToString(t.text, {
+          throwOnError: true,
+          displayMode: !!t.displayMode,
+        });
+      } catch (e) {
+        errors.push('公式: ' + e.message);
+      }
+    }
+    if (t.type === 'image') images.push(t.href);
+    if (t.type === 'code' && t.lang?.trim() === 'mermaid')
+      diagrams.push(t.text);
+    if (t.type === 'code' && ['math', 'latex', 'tex'].includes(t.lang?.trim()))
+      mathCode.push(t.text);
+  });
+  const target = document.createElement('div');
+  target.innerHTML = DOMPurify.sanitize(
+    md.parse(normalizedMarkdown).replace(/<img\b[^>]*>/gi, ''),
+    { ADD_TAGS: ['annotation'] },
+  );
+  target
+    .querySelectorAll('.katex-error')
+    .forEach((e) => errors.push(e.getAttribute('title') || '公式解析失败'));
+  for (const text of mathCode) {
+    try {
+      katex.renderToString(text, { throwOnError: true });
+    } catch (e) {
+      errors.push('公式: ' + e.message);
+    }
+  }
+  const prose = target.cloneNode(true);
+  prose.querySelectorAll('.katex,pre,code').forEach((e) => e.remove());
+  if (
+    /\$\$|\\(?:frac|theta|sigma|mu|nabla|begin|sum|partial)\b/.test(
+      prose.textContent,
+    )
+  )
+    errors.push('正文仍含未渲染的公式分隔符或LaTeX命令');
+  if (diagrams.length) {
+    const engine = await getMermaid();
+    for (const source of diagrams) {
+      try {
+        await engine.parse(source);
+      } catch (e) {
+        errors.push('Mermaid: ' + String(e.message || e).slice(0, 600));
+      }
+    }
+  }
+  for (const href of images) {
+    if (!/^\/attachments\/[a-f0-9-]+\.(png|jpe?g|webp|gif|svg)$/i.test(href)) {
+      warnings.push('未自动验证非本地图片: ' + href.slice(0, 150));
+      continue;
+    }
+    try {
+      const response = await fetch(href);
+      if (!response.ok) throw Error('附件不存在');
+      const blob = await response.blob();
+      const u = URL.createObjectURL(blob);
+      try {
+        const img = new Image();
+        img.src = u;
+        await img.decode();
+      } finally {
+        URL.revokeObjectURL(u);
+      }
+    } catch (e) {
+      errors.push('图片不可加载: ' + href);
+    }
+  }
+  return {
+    valid: errors.length === 0,
+    normalizedMarkdown,
+    errors,
+    warnings,
+    counts: {
+      formulas: target.querySelectorAll('.katex').length + mathCode.length,
+      diagrams: diagrams.length,
+      images: images.length,
+    },
+    scope:
+      'syntax-and-local-assets; not semantic correctness or cross-device guarantee',
+  };
+}
 export function renderMarkdown(text, target, depth = 0) {
   target.innerHTML = DOMPurify.sanitize(md.parse(normalizeMath(text)), {
     ADD_TAGS: ['annotation'],

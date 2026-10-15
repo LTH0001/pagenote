@@ -5,6 +5,7 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { z } from 'zod';
 import packageInfo from '../package.json' with { type: 'json' };
 import aiSettingsStore from '../desktop/ai-settings.cjs';
+import promptStoreModule from '../desktop/prompts.cjs';
 
 const i = process.argv.indexOf('--connection-file');
 const connectionFile =
@@ -28,7 +29,7 @@ const server = new McpServer(
           'ai-settings.json',
         ),
       ).systemPrompt +
-      '\n仅当用户请求逐页精讲时，读取资源 page-notes://skills/page-tutor，或调用提示模板 pagenote-page-tutor。其他任务按用户要求执行，不套用精讲流程。For page-by-page teaching tasks, load the built-in skill resource or prompt; otherwise follow the requested task.',
+      '\n先读取 page-notes://prompts/index，按模块用途与revision选择性读取；其他任务按用户要求执行。',
   },
 );
 const documentId = z
@@ -349,16 +350,47 @@ server.registerResource(
     };
   },
 );
-const readTutorSkill = () =>
-  fs.readFile(
-    path.join(
-      path.dirname(connectionFile),
-      'skills',
-      'pagenote-page-tutor',
-      'SKILL.md',
-    ),
-    'utf8',
-  );
+const promptStore = promptStoreModule.createPromptStore(
+  path.join(path.dirname(connectionFile), 'skills'),
+  path.join(path.dirname(connectionFile), 'documents-data'),
+);
+const readTutorSkill = () => promptStore.read('page-tutor').text;
+server.registerResource(
+  'prompt-index',
+  'page-notes://prompts/index',
+  { title: '提示词索引 / Prompt index', mimeType: 'application/json' },
+  async (uri) => ({
+    contents: [
+      {
+        uri: uri.href,
+        mimeType: 'application/json',
+        text: JSON.stringify(promptStore.index()),
+      },
+    ],
+  }),
+);
+server.registerTool(
+  'page_notes_read_prompt',
+  {
+    description:
+      '按索引模块id读取当前提示词；knownRevision相同时省略正文。每次读取检查磁盘更新，无需重新连接。',
+    inputSchema: {
+      id: z.enum(['learning', 'page-tutor', 'output', 'learner', 'tag-edit']),
+      knownRevision: z.string().max(64).optional(),
+    },
+  },
+  async ({ id, knownRevision }) => {
+    const { defaultText, ...value } = promptStore.read(id, knownRevision);
+    return { content: [{ type: 'text', text: JSON.stringify(value) }] };
+  },
+);
+tool(
+  'page_notes_validate_note',
+  '提交前本地预检Markdown公式、Mermaid、代码围栏和附件，不保存、不导航；返回规范化正文和错误。',
+  { markdown: z.string().max(200000) },
+  'validate_note',
+  true,
+);
 server.registerResource(
   'page-tutor-skill',
   'page-notes://skills/page-tutor',

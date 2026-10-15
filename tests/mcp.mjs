@@ -47,7 +47,7 @@ try {
   assert.ok(client.getInstructions().includes('先识别用户当前任务'));
   assert.ok(client.getInstructions().includes('其他任务按用户要求执行'));
   const tools = await client.listTools();
-  assert.equal(tools.tools.length, 20);
+  assert.equal(tools.tools.length, 22);
   const resources = await client.listResources();
   assert.ok(
     resources.resources.some((r) => r.uri === 'page-notes://skills/page-tutor'),
@@ -77,6 +77,41 @@ try {
     prompt.messages[0].content.text.includes('大三，学过一点计算机网络'),
   );
   assert.ok(prompt.messages[0].content.text.includes('6-7'));
+  const valid = json(
+    await client.callTool({
+      name: 'page_notes_validate_note',
+      arguments: {
+        markdown:
+          '解释\n$$\n\\mu=1\n$$\n后文\n\n```mermaid\nflowchart LR\n A["样本"] --> B["估计"]\n```',
+      },
+    }),
+  );
+  assert.equal(valid.valid, true, JSON.stringify(valid.errors));
+  assert.equal(valid.counts.formulas, 1);
+  assert.equal(valid.counts.diagrams, 1);
+  assert.ok(valid.normalizedMarkdown.includes('解释\n\n$$'));
+  for (const markdown of [
+    '```python\nprint(1)',
+    '$$\n\\notARealCommand{1}\n$$',
+    '```mermaid\nflowchart LR\n A -->[\n```',
+    '![missing](/attachments/00000000-0000-0000-0000-000000000000.png)',
+  ]) {
+    const invalid = json(
+      await client.callTool({
+        name: 'page_notes_validate_note',
+        arguments: { markdown },
+      }),
+    );
+    assert.equal(invalid.valid, false, markdown);
+    assert.ok(invalid.errors.length);
+  }
+  const emptyState = json(
+    await client.callTool({ name: 'page_notes_get_state', arguments: {} }),
+  );
+  assert.ok(
+    !emptyState.document,
+    'preflight does not create or activate a document',
+  );
   const imported = json(
     await client.callTool({
       name: 'page_notes_import_document',
@@ -615,7 +650,7 @@ try {
     ),
   );
   console.log(
-    'PASS MCP: 20 tools; selective reads/cache; persistent handoffs; compact state; silent writes; hidden screenshots and collage; restart with live MCP client.',
+    'PASS MCP: 22 tools; selective reads/cache; persistent handoffs; compact state; silent writes; hidden screenshots and collage; restart with live MCP client.',
   );
 } finally {
   await client?.close();

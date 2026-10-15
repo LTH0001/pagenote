@@ -315,6 +315,11 @@ exports.createAIController = async function ({ win, url, data, word }) {
   async function perform({ action, args = {} }) {
     await win.webContents.executeJavaScript('window.pageNotes.ready');
     if (action === 'list_documents') return api('/api/documents');
+    if (action === 'validate_note') {
+      if (typeof args.markdown !== 'string' || args.markdown.length > 200000)
+        throw Error('Invalid Markdown or more than 200000 characters');
+      return invoke(await readyInspector(), 'validateNote', args.markdown);
+    }
     if (action === 'get_state') {
       await invoke(win, 'flush');
       if (args.detail === 'compact') return invoke(win, 'getSummary');

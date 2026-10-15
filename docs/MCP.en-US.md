@@ -29,7 +29,7 @@ Screenshots return PNG image content suitable for multimodal models. Screenshot 
 
 ## Page-by-page teaching
 
-The development build exposes the bundled `SKILL.md` at `page-notes://skills/page-tutor` and as the MCP prompt `pagenote-page-tutor`. Optional string arguments are `learner` (background), `pages` (page range) and `goal`. Clients without prompt support can read the resource, or paste the skill from **AI Annotations → Copy page-by-page teaching prompt**. There are now 20 tools, including page preparation and two handoff tools. The skill does not initiate model calls.
+The development build exposes the bundled `SKILL.md` at `page-notes://skills/page-tutor` and as the MCP prompt `pagenote-page-tutor`. Optional string arguments are `learner` (background), `pages` (page range) and `goal`. Clients without prompt support can read the resource, or paste the skill from **AI Annotations → Copy page-by-page teaching prompt**. There are now 22 tools, including page preparation and two handoff tools. The skill does not initiate model calls.
 
 ## Token-efficient reads
 
@@ -52,3 +52,11 @@ MCP cannot start model generations or manage a client's context window. If the c
 The local API listens on loopback. The MCP bridge checks a per-user token. This interface does not expose arbitrary JavaScript or shell-command execution, but grants the document-reading and editing capabilities listed by the tools. Data sent onward by your AI client follows that client's policies.
 
 [中文 MCP 文档](../MCP接口说明.md)
+
+## Prompt routing and preflight
+
+Start with `page-notes://prompts/index`, a small task map and module revision list. Initial teaching uses learning/page-tutor/output; AI Tag edits use tag-edit/output, with learning only when reteaching. Read a module with `page_notes_read_prompt({id, knownRevision?})`. Matching revisions omit text; omit knownRevision if its body is no longer in context. The index and modules are read live, so module overrides from AI settings apply without reconnecting. The system prompt still requires reconnection.
+
+Page requests use current, previous and next **source** pages. They do not wait for previous generated notes or mandatory handoffs. Recommend `max(1, floor(total pages / 10))` workers, capped by remaining work, client/service limits and resources. Handoffs remain optional for cross-session continuity.
+
+Before saving generated Markdown, call `page_notes_validate_note({markdown})`. It returns `valid`, `normalizedMarkdown`, errors, warnings and counts without saving or navigating. It detects malformed math, unclosed fences, invalid Mermaid and broken local image attachments. External image URLs are not fetched and are reported as unverified warnings. Use revision-protected writes after preflight. This checks syntax and assets, not semantic correctness or universal device compatibility.

@@ -1,5 +1,6 @@
 import fileOps from './desktop/file-ops.cjs';
 import aiSettingsStore from './desktop/ai-settings.cjs';
+import promptStoreModule from './desktop/prompts.cjs';
 const { moveFile, copyFileSafe } = fileOps;
 import { registerExternalDocuments } from './external-documents.mjs';
 import { createProjectStore } from './projects.mjs';
@@ -28,6 +29,31 @@ app.use((req, res, next) => {
 });
 app.use(express.json({ limit: '30mb' }));
 const aiSettingsFile = path.join(data, 'ai-settings.json');
+const prompts = promptStoreModule.createPromptStore(
+  path.join(root, 'skills'),
+  data,
+);
+app.get('/api/ai-prompts', (req, res, next) => {
+  try {
+    res.json(prompts.index());
+  } catch (e) {
+    next(e);
+  }
+});
+app.get('/api/ai-prompts/:id', (req, res, next) => {
+  try {
+    res.json(prompts.read(req.params.id));
+  } catch (e) {
+    next(e);
+  }
+});
+app.put('/api/ai-prompts/:id', async (req, res, next) => {
+  try {
+    res.json(await prompts.save(req.params.id, req.body?.text));
+  } catch (e) {
+    next(e);
+  }
+});
 app.get('/api/ai-settings', (req, res, next) => {
   try {
     res.json(aiSettingsStore.readAISettings(aiSettingsFile));

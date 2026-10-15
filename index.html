@@ -330,10 +330,19 @@
     </dialog>
     <dialog id="aiSettings">
       <h2>AI 设置</h2>
-      <label for="aiSystemPrompt">默认系统提示词</label>
+      <label for="aiPromptModule">提示词模块</label>
+      <select id="aiPromptModule">
+        <option value="system">默认系统提示词</option>
+        <option value="learning">学习讲解</option>
+        <option value="page-tutor">逐页精讲</option>
+        <option value="output">输出格式</option>
+        <option value="tag-edit">AI Tag 修改</option>
+        <option value="learner">学习背景</option>
+      </select>
+      <label for="aiSystemPrompt">提示词内容</label>
       <p>
-        作为 MCP 默认指令提供给 AI
-        客户端。保存后重新连接客户端生效；实际系统提示层由客户端决定。
+        系统提示词保存后重新连接客户端；模块修改在 AI
+        下次读取时生效。仅保存当前选中的模块。
       </p>
       <textarea
         id="aiSystemPrompt"

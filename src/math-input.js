@@ -12,20 +12,19 @@ function proseMath(text) {
   text = text.replace(
     /(?<![\\$])\$\$(?!\$)([\s\S]*?)(?<!\\)\$\$(?!\$)/g,
     (match, body, offset, source) => {
-      if (!body.includes('\n') || (/^\s*\n/.test(body) && /\n\s*$/.test(body)))
-        return match;
+      if (!body.includes('\n')) return match;
       const before = source.slice(0, offset),
         after = source.slice(offset + match.length);
       const prefix =
-        !before || before.endsWith('\n\n')
+        !before || /(?:\r?\n){2}$/.test(before)
           ? ''
           : before.endsWith('\n')
             ? '\n'
             : '\n\n';
       const suffix =
-        !after || after.startsWith('\n\n')
+        !after || /^(?:\r?\n){2}/.test(after)
           ? ''
-          : after.startsWith('\n')
+          : /^\r?\n/.test(after)
             ? '\n'
             : '\n\n';
       return prefix + '$$\n' + body.trim() + '\n$$' + suffix;

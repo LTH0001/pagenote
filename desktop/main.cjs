@@ -12,6 +12,7 @@ const { pathToFileURL } = require('node:url');
 const { randomBytes } = require('node:crypto');
 const { execFileSync } = require('node:child_process');
 const aiSettingsStore = require('./ai-settings.cjs');
+const promptStoreModule = require('./prompts.cjs');
 const {
   projectArgument,
   createProjectLauncher,
@@ -113,6 +114,19 @@ if (!app.requestSingleInstanceLock()) {
         ),
         tutorSkillFile,
       );
+      // Copy explicit files: recursive fs.cp is not supported reliably inside ASAR.
+      for (const item of promptStoreModule.modules) {
+        const folder = path.join(
+          app.getPath('userData'),
+          'skills',
+          item.folder,
+        );
+        await fs.mkdir(folder, { recursive: true });
+        await fs.copyFile(
+          path.join(app.getAppPath(), 'skills', item.folder, 'SKILL.md'),
+          path.join(folder, 'SKILL.md'),
+        );
+      }
       const adapter = path.join(mcpFolder, 'page-notes-mcp.cjs');
       await fs.copyFile(
         app.isPackaged
@@ -439,12 +453,28 @@ if (!app.requestSingleInstanceLock()) {
                             path.join(data, 'ai-settings.json'),
                           ).systemPrompt +
                           '\n\n' +
-                          (await fs.readFile(tutorSkillFile, 'utf8')),
+                          JSON.stringify(
+                            promptStoreModule
+                              .createPromptStore(
+                                path.join(app.getPath('userData'), 'skills'),
+                                data,
+                              )
+                              .index(),
+                            null,
+                            2,
+                          ) +
+                          '\n\n' +
+                          promptStoreModule
+                            .createPromptStore(
+                              path.join(app.getPath('userData'), 'skills'),
+                              data,
+                            )
+                            .read('page-tutor').text,
                       ),
                   },
                   {
                     label: '打开内置学习技能目录',
-                    click: () => shell.openPath(tutorFolder),
+                    click: () => shell.openPath(path.dirname(tutorFolder)),
                   },
                   {
                     label: '复制 MCP 配置',

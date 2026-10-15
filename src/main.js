@@ -4,7 +4,7 @@ import './desktop.css';
 import 'katex/dist/katex.min.css';
 import * as pdfjs from 'pdfjs-dist';
 import worker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
-import { renderMarkdown } from './markdown.js';
+import { renderMarkdown, validateNote } from './markdown.js';
 import { createAnnotations } from './annotations.js';
 import { setupMarkdownTools, htmlToMarkdown } from './editing.js';
 import { createReviews } from './reviews.js';
@@ -1126,8 +1126,32 @@ $('closeHelp').onclick = () => $('help').close();
 $('settingsButton').onclick = () => $('settings').showModal();
 $('closeSettings').onclick = () => $('settings').close();
 let defaultAIPrompt = '';
+let promptDrafts = {},
+  selectedPrompt = 'system';
+async function loadPromptModule(id) {
+  selectedPrompt = id;
+  if (!promptDrafts[id]) {
+    const value = await request('/api/ai-prompts/' + id);
+    promptDrafts[id] = { text: value.text, defaultText: value.defaultText };
+  }
+  defaultAIPrompt = promptDrafts[id].defaultText;
+  $('aiSystemPrompt').value = promptDrafts[id].text;
+  $('aiSettingsStatus').textContent = '';
+}
+$('aiPromptModule').onchange = safely(async () => {
+  promptDrafts[selectedPrompt].text = $('aiSystemPrompt').value;
+  await loadPromptModule($('aiPromptModule').value);
+});
 async function openAISettings() {
   const settings = await request('/api/ai-settings');
+  promptDrafts = {
+    system: {
+      text: settings.systemPrompt,
+      defaultText: settings.defaultSystemPrompt,
+    },
+  };
+  selectedPrompt = 'system';
+  $('aiPromptModule').value = 'system';
   defaultAIPrompt = settings.defaultSystemPrompt;
   $('aiSystemPrompt').value = settings.systemPrompt;
   $('aiSettingsStatus').textContent = '';
@@ -1143,12 +1167,26 @@ $('aiPromptReset').onclick = () => {
 $('aiSettingsSave').onclick = async () => {
   $('aiSettingsSave').disabled = true;
   try {
-    await request('/api/ai-settings', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ systemPrompt: $('aiSystemPrompt').value }),
-    });
-    $('aiSettingsStatus').textContent = t('已保存，请重新连接 AI 客户端');
+    await request(
+      selectedPrompt === 'system'
+        ? '/api/ai-settings'
+        : '/api/ai-prompts/' + selectedPrompt,
+      {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(
+          selectedPrompt === 'system'
+            ? { systemPrompt: $('aiSystemPrompt').value }
+            : { text: $('aiSystemPrompt').value },
+        ),
+      },
+    );
+    promptDrafts[selectedPrompt].text = $('aiSystemPrompt').value;
+    $('aiSettingsStatus').textContent = t(
+      selectedPrompt === 'system'
+        ? '已保存，请重新连接 AI 客户端'
+        : '已保存，AI 下次读取模块时生效',
+    );
   } catch (error) {
     $('aiSettingsStatus').textContent = error.message;
   } finally {
@@ -1616,6 +1654,7 @@ function geometry(selector) {
   };
 }
 window.pageNotes = {
+  validateNote,
   openAISettings,
   finishEditing: async () => {
     const hadWord = wordActive;
