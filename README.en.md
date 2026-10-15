@@ -4,36 +4,23 @@
 
 English · [简体中文](README.md)
 
-pagenote started as a small tool I wanted for my own learning. The source material goes on the left, and an explanation of that page goes on the right, so I can read them together.
+pagenote puts a document on the left and notes for the current page on the right.
 
 ## Where pagenote started
 
-Asking AI to explain a paper or a slide deck is ordinary now. Actually learning from that explanation still involves a surprising amount of friction.
+With the current wave of AI, using it to study has become commonplace. I often ask it to explain slides and papers, hoping to understand the parts I find difficult.
 
-I keep ending up with two windows: the document in one, a long AI conversation in the other. I scroll back to check a formula, lose my place in the explanation, and sometimes have to work out which page the answer refers to. AI may also rearrange the material to suit its answer, which makes following the original lesson harder.
+But I still spend time switching between two windows. The source is in one, the explanation in another, and I lose track of which passage belongs to which page. Sometimes AI changes the order, making the lesson harder to follow.
 
-Asking for the whole document at once does not always help. Context limits, answer length and the way the task is framed can turn a detailed lesson into a chapter summary. The main points are there, but the small steps that make them understandable are missing.
+Asking for everything at once often produces a summary. Context and answer-length limits leave out derivations, notation and examples. I can finish reading and still struggle to use what I have read.
 
-What I want is for each page to get proper attention—as if I had asked about that page on its own. Start with what I already know, explain the next step carefully, then carry that understanding into the following page.
+I wanted a tool that keeps each page beside its explanation. Each page should receive the attention of a separate request, starting from familiar ideas, working through the steps and connecting to the previous page.
 
-Revision matters too. Sometimes there are too many formulas, an example does not click, or a paragraph moves too quickly. I want to select the passage or draw a box around a figure, write “I did not understand this; try another example,” and let AI see exactly what needs work.
+When something is unclear, I want to select a passage or box a figure and leave a note: “Try another example here.” AI can revise that part without making me copy the text and explain the context again.
 
-**pagenote brings that process into one workspace: read beside the source, learn page by page, leave feedback where it belongs, and keep improving the notes.**
+I also want to use AI beyond text: an illustration for an abstract idea, runnable code for an algorithm, formulas for a derivation and a flowchart for a process. That is what led me to build pagenote.
 
-## The learning experience I want
-
-An explanation should not have to be a wall of text. Use an illustration when it helps, runnable code when something can be tested, formulas for a derivation, and a flowchart for a process. The point is to make the idea clearer, rather than fill the page with every available format.
-
-The intended workflow is simple:
-
-1. Open the material on the left and work through it page by page.
-2. Ask AI for a careful explanation of the current page, with examples and a connection to the surrounding pages.
-3. Select text or an area and leave an AI annotation wherever something needs another pass.
-4. Let AI read that feedback and revise the relevant explanation. Keep the result as a local learning project.
-
-That is why the app uses two panes and page-linked notes. I want the learner to set the pace, with AI helping make each step understandable.
-
-pagenote currently provides the workspace and an MCP interface. **It does not bundle an AI model or automatically generate a complete lesson on import.** A connected AI client handles the page-by-page work, context planning and any image generation. The app keeps the source, explanations and feedback together so that work can continue.
+The app currently provides two-pane reading, page-linked notes and AI annotations, with an MCP interface for reading and editing content. It does not bundle a model. Detailed explanations and image generation require an AI client with the relevant capabilities.
 
 **Current public version: 2.0.0-beta.4.** It is still a beta. Try it with something you are actually learning, and let me know where it gets in your way.
 
