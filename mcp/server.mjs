@@ -55,13 +55,13 @@ async function call(action, args) {
       const { imageBase64, ...meta } = result;
       return {
         content: [
-          { type: 'text', text: JSON.stringify(meta, null, 2) },
+          { type: 'text', text: JSON.stringify(meta) },
           { type: 'image', data: imageBase64, mimeType: 'image/png' },
         ],
       };
     }
     return {
-      content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+      content: [{ type: 'text', text: JSON.stringify(result) }],
     };
   } catch (error) {
     return {
@@ -102,8 +102,8 @@ tool(
 );
 tool(
   'page_notes_get_state',
-  '读取当前文档、页码、原文文字、Markdown、渲染文字、布局设置和元素尺寸。',
-  {},
+  '默认只返回当前文档、页码和模式；需要正文、笔记和界面尺寸时显式选 detail=full。',
+  { detail: z.enum(['compact', 'full']).default('compact') },
   'get_state',
   true,
 );
@@ -145,10 +145,48 @@ tool(
 );
 tool(
   'page_notes_read_pages',
-  '读取指定页面的原文和笔记，每页返回 revision。扫描件请另外调用截图。',
-  { documentId, pages },
+  '按需读取页面，省略 pages 时读取当前页。默认 include=source 只取原文；note 只取笔记，both 同时读取，metadata 只取笔记 revision/长度。knownRevisions 命中时省略未变化正文。noteRange 可只取笔记局部；扫描或复杂图表再用截图。',
+  {
+    documentId,
+    pages: pages.optional(),
+    include: z.enum(['source', 'note', 'both', 'metadata']).default('source'),
+    knownRevisions: z
+      .record(
+        z.string(),
+        z.object({
+          source: z.string().optional(),
+          note: z.string().optional(),
+        }),
+      )
+      .optional(),
+    noteRange: z
+      .object({
+        start: z.number().int().min(0),
+        maxChars: z.number().int().min(1).max(100000),
+      })
+      .optional(),
+  },
   'read_pages',
   true,
+);
+tool(
+  'page_notes_read_handoff',
+  '读取指定页保存的简短知识交接及是否过期，供下一页承接。过期时按需重读相关内容，不直接沿用。',
+  { documentId, page },
+  'read_handoff',
+  true,
+);
+tool(
+  'page_notes_write_handoff',
+  '保存本页知识交接：概念、符号、例子、结论和未解依赖，建议约1000字以内。须提供最新笔记 expectedRevision；可附 sourceRevision 跟踪原文变化。仅返回保存状态。',
+  {
+    documentId,
+    page,
+    summary: z.string().min(1).max(4000),
+    expectedRevision: z.string(),
+    sourceRevision: z.string().optional(),
+  },
+  'write_handoff',
 );
 tool(
   'page_notes_navigate',
@@ -274,7 +312,7 @@ server.registerResource(
   'page-notes://state',
   {},
   async (uri) => {
-    const result = await call('get_state', {});
+    const result = await call('get_state', { detail: 'compact' });
     return {
       contents: [
         {

@@ -120,6 +120,7 @@ export function createProjectStore({ app, data, convertOffice }) {
           'notes.json',
           'annotations.json',
           'ai-reviews.json',
+          'ai-handoffs.json',
         ]) {
           try {
             await atomic(
@@ -190,7 +191,11 @@ export function createProjectStore({ app, data, convertOffice }) {
         .map((text, i) => [i + 1, text]),
     );
     await atomic(path.join(dir, 'notes.json'), JSON.stringify(notes));
-    for (const name of ['annotations.json', 'ai-reviews.json']) {
+    for (const name of [
+      'annotations.json',
+      'ai-reviews.json',
+      'ai-handoffs.json',
+    ]) {
       try {
         await atomic(
           path.join(dir, name),
@@ -201,6 +206,8 @@ export function createProjectStore({ app, data, convertOffice }) {
         );
       } catch (e) {
         if (e.code !== 'ENOENT') throw e;
+        if (name === 'ai-handoffs.json')
+          await atomic(path.join(dir, name), '{}');
       }
     }
     const meta = {

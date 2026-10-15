@@ -390,6 +390,74 @@ app.get('/api/documents/:id/notes', async (req, res, next) => {
   }
 });
 let writeQueue = Promise.resolve();
+async function readHandoffs(id) {
+  const file = path.join(path.dirname(metaFile(id)), 'ai-handoffs.json');
+  try {
+    return JSON.parse(await fs.readFile(file, 'utf8'));
+  } catch (e) {
+    if (e.code !== 'ENOENT') throw e;
+    return {};
+  }
+}
+app.get('/api/documents/:id/handoffs/:page', async (req, res, next) => {
+  try {
+    const { id, page } = req.params;
+    if (!validId(id) || !/^[1-9]\d{0,3}$|^10000$/.test(page))
+      return res.sendStatus(400);
+    await fs.access(metaFile(id));
+    const handoff = (await readHandoffs(id))[page] || null;
+    const current = noteRevision((await readNotes(id))[page] || '');
+    res.json({
+      documentId: id,
+      page: Number(page),
+      handoff,
+      stale: handoff ? handoff.noteRevision !== current : false,
+    });
+  } catch (e) {
+    next(e);
+  }
+});
+app.put('/api/documents/:id/handoffs/:page', async (req, res, next) => {
+  try {
+    const { id, page } = req.params;
+    const { summary, expectedRevision, sourceRevision } = req.body || {};
+    if (
+      !validId(id) ||
+      !/^[1-9]\d{0,3}$|^10000$/.test(page) ||
+      typeof summary !== 'string' ||
+      !summary.trim() ||
+      summary.length > 4000 ||
+      typeof expectedRevision !== 'string' ||
+      !/^[a-f0-9]{64}$/.test(expectedRevision) ||
+      typeof sourceRevision !== 'string' ||
+      !/^[a-f0-9]{64}$/.test(sourceRevision)
+    )
+      return res.status(400).json({ error: '交接内容、页码或版本无效' });
+    await fs.access(metaFile(id));
+    const job = writeQueue.then(async () => {
+      const current = noteRevision((await readNotes(id))[page] || '');
+      if (current !== expectedRevision)
+        throw Error('笔记已变化，请重新读取后保存交接');
+      const records = await readHandoffs(id);
+      records[page] = {
+        summary,
+        noteRevision: current,
+        sourceRevision,
+        updated: new Date().toISOString(),
+      };
+      const file = path.join(path.dirname(metaFile(id)), 'ai-handoffs.json');
+      const temp = file + '.' + randomUUID() + '.tmp';
+      await fs.writeFile(temp, JSON.stringify(records));
+      await moveFile(temp, file);
+      await projects.persist(id);
+    });
+    writeQueue = job.catch(() => {});
+    await job;
+    res.json({ documentId: id, page: Number(page), saved: true });
+  } catch (e) {
+    next(e);
+  }
+});
 async function readReviews(id) {
   if (!validId(id)) throw Error('文档 ID 无效');
   await fs.access(metaFile(id));

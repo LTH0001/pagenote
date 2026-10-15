@@ -2,6 +2,7 @@ import { _electron as electron } from '@playwright/test';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 const root = path.resolve(import.meta.dirname, '..'),
   profile = path.join(root, 'tests', 'project-' + Date.now()),
   projectParent = path.join(profile, 'portable-projects');
@@ -46,11 +47,48 @@ try {
       '右侧保存',
     ),
   );
+  const handoffSummary = '本页已说明样本均值，后页沿用这一概念。';
+  const handoffSaved = await w.evaluate(
+    async ({ id, revision, summary }) => {
+      const response = await fetch('/api/documents/' + id + '/handoffs/1', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          summary,
+          expectedRevision: revision,
+          sourceRevision: 'a'.repeat(64),
+        }),
+      });
+      return response.json();
+    },
+    {
+      id,
+      revision: createHash('sha256').update('右侧保存的解释。').digest('hex'),
+      summary: handoffSummary,
+    },
+  );
+  assert.equal(handoffSaved.saved, true);
+  assert.equal(
+    JSON.parse(
+      await fs.readFile(path.join(folder, 'src/ai-handoffs.json'), 'utf8'),
+    )['1'].summary,
+    handoffSummary,
+  );
   await fs.writeFile(
     path.join(folder, 'src/right.md'),
     '右侧保存的解释。（按链接重新读取）',
   );
   await w.evaluate((file) => window.pageNotes.openProject(file), manifestFile);
+  const portableHandoff = await w.evaluate(
+    async (id) => (await fetch('/api/documents/' + id + '/handoffs/1')).json(),
+    id,
+  );
+  assert.equal(portableHandoff.handoff.summary, handoffSummary);
+  assert.equal(
+    portableHandoff.stale,
+    true,
+    'external note changes make portable handoffs stale',
+  );
   assert.ok(
     (await w.evaluate(() => window.pageNotes.getState())).markdown.includes(
       '按链接重新读取',

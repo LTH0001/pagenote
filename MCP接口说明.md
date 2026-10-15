@@ -15,8 +15,9 @@
 | MCP 工具 | 用途 |
 | --- | --- |
 | `page_notes_list_documents` | 获取文档列表和 documentId |
-| `page_notes_get_state` | 获取当前文档、页码、原文、Markdown、渲染文字、布局和元素几何尺寸 |
-| `page_notes_read_pages` | 读取指定页原文和笔记，返回每页 revision |
+| `page_notes_get_state` | 默认只获取当前文档、页码和模式；`detail=full` 获取完整状态 |
+| `page_notes_read_pages` | 默认读取当前页原文，支持笔记、版本元数据、局部段落与缓存 |
+| `page_notes_read_handoff` / `page_notes_write_handoff` | 读取或保存单页知识交接，检测原文和笔记变化 |
 | `page_notes_navigate` | 在用户窗口打开文档并跳页 |
 | `page_notes_write_notes` | 替换单页或批量笔记 |
 | `page_notes_patch_note` | 追加笔记或精确替换某段文字 |
@@ -29,6 +30,36 @@
 | `page_notes_contact_sheet` | 把最多 12 页截图拼成带页码的网格图片 |
 
 资源 `page-notes://state` 也可以读取当前状态。
+
+## 按需读取与知识交接
+
+开发版默认精简返回内容。旧调用需要完整状态时指定 `detail=full`；需要原文与笔记一起返回时指定 `include=both`。工具名称保留，默认返回范围有所调整；公开 beta.4 尚不含这些新参数。
+
+`page_notes_read_pages` 不传 `pages` 时读取当前文档的当前页；显式指定另一份文档时从第1页读取。`include` 为 `source`（默认，仅原文）、`note`（仅笔记）、`both` 或 `metadata`（仅笔记版本与长度）。原文返回 `sourceRevision`，笔记返回完整笔记的 `revision` 与 `noteLength`。
+
+```json
+{"pages":[6],"include":"source"}
+```
+
+修改局部段落时只读取所需范围，`noteRange` 使用 JavaScript 字符串偏移（UTF-16），`range` 返回实际区间与全文长度。截取不改变 `revision` 的含义，它始终针对完整笔记。
+
+```json
+{"pages":[6],"include":"note","noteRange":{"start":120,"maxChars":800}}
+```
+
+已有内容可按文档ID、页码和内容种类缓存，再传 `knownRevisions`。版本一致时省略相应正文，返回 `sourceUnchanged` / `noteUnchanged`；缓存缺失时不要只保存版本号。
+
+```json
+{"pages":[6],"include":"both","knownRevisions":{"6":{"source":"原文版本","note":"笔记版本"}}}
+```
+
+每页讲解保存后，用 `page_notes_write_handoff` 保存概念、符号、例子、结论和未解依赖，建议约1000字以内，最多4000个UTF-16字符。传入最新笔记 `expectedRevision`，可附当前 `sourceRevision`。下一页用 `page_notes_read_handoff` 读取前页交接；`stale=true` 表示原文或笔记有变化，应复核更新。新项目无交接时返回 `handoff=null`。交接单独保存在项目的 `src/ai-handoffs.json`，随项目迁移，不混入笔记正文。
+
+```json
+{"page":6,"summary":"已确定分布族，下一页介绍从样本构造估计量。","expectedRevision":"保存笔记后返回的版本","sourceRevision":"读取原文返回的版本"}
+```
+
+工具结果使用紧凑 JSON。笔记写入返回页码、版本和历史目录，交接写入只返回保存状态，不回传刚写入的长文。精简工具输入不能替代客户端管理聊天历史；仍应按页发起请求，避免反复带上全部旧讲解。
 
 ## 文字与布局修改
 

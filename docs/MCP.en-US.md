@@ -4,13 +4,14 @@ Start pagenote, then choose **AI Annotations → Copy MCP configuration**. Add t
 
 **AI Annotations → Open MCP configuration folder** opens the local configuration directory. Connection credentials remain on the machine. Do not upload `ai-connection.json`, `ai-key.txt`, or your user-data folder to GitHub.
 
-The existing `page_notes_*` tool names and `page-notes://state` resource remain compatible with older clients. The MCP server identifies itself as **pagenote** with the application version.
+The existing `page_notes_*` tool names and `page-notes://state` resource remain available. The development build changes default response scope: request `detail=full` for the previous full state and `include=both` for source plus notes. Public beta.4 does not yet include these options. The MCP server identifies itself as **pagenote** with the application version.
 
 | Tool | Purpose |
 | --- | --- |
 | `page_notes_list_documents` | List document IDs |
-| `page_notes_get_state` | Inspect the active document, notes, layout and geometry |
-| `page_notes_read_pages` | Read page source/notes and revisions |
+| `page_notes_get_state` | Compact document/page/mode by default; `detail=full` includes content and geometry |
+| `page_notes_read_pages` | Source by default; selective notes, metadata, ranges and revision caching |
+| `page_notes_read_handoff` / `page_notes_write_handoff` | Persistent page handoffs with staleness checks |
 | `page_notes_navigate` | Navigate the visible workspace |
 | `page_notes_write_notes` | Replace one or multiple page notes |
 | `page_notes_patch_note` | Append or replace exact note text |
@@ -27,7 +28,13 @@ Screenshots return PNG image content suitable for multimodal models. Screenshot 
 
 ## Page-by-page teaching
 
-The development build exposes the bundled `SKILL.md` at `page-notes://skills/page-tutor` and as the MCP prompt `pagenote-page-tutor`. Optional string arguments are `learner` (background), `pages` (page range) and `goal`. Clients without prompt support can read the resource, or paste the skill from **AI Annotations → Copy page-by-page teaching prompt**. The original 17 document tools remain unchanged. The skill does not initiate model calls.
+The development build exposes the bundled `SKILL.md` at `page-notes://skills/page-tutor` and as the MCP prompt `pagenote-page-tutor`. Optional string arguments are `learner` (background), `pages` (page range) and `goal`. Clients without prompt support can read the resource, or paste the skill from **AI Annotations → Copy page-by-page teaching prompt**. There are now 19 tools, including two handoff tools. The skill does not initiate model calls.
+
+## Token-efficient reads
+
+Omit `pages` to read the active page (page 1 for an explicitly selected inactive document). `include` accepts `source` (default), `note`, `both` or `metadata` (note revision/length only). Source has `sourceRevision`; notes have `revision` and `noteLength`. `noteRange: {start: 120, maxChars: 800}` returns only that UTF-16 slice with its actual `range`, while revision always refers to the complete note. Cache content by document ID, page and kind, then pass `knownRevisions: {"6": {source: "hash", note: "hash"}}`; matching content is omitted and marked `sourceUnchanged` / `noteUnchanged`.
+
+After saving each note, call `page_notes_write_handoff` with `page`, `summary`, the latest note `expectedRevision` and optionally `sourceRevision`. Keep handoffs concise (usually under about 1,000 characters, maximum 4,000 UTF-16 units). `page_notes_read_handoff` returns the saved summary and `stale` if source or notes changed; a missing handoff is `null`. Handoffs persist in `src/ai-handoffs.json` inside portable projects and survive restarts. Recheck stale handoffs before using them. Write results omit the submitted content; all tool JSON is compact. Clients must still manage their own chat history and model-request boundaries.
 
 Use a separate model generation request for each source page. Complete, verify, save and inspect that page before requesting the next one. Do not generate the entire chapter in one answer and split it afterward. Batch MCP reads or writes do not count as separate model requests.
 

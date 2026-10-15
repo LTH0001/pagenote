@@ -6,7 +6,7 @@ import path from 'node:path';
 import fs from 'node:fs/promises';
 import assert from 'node:assert/strict';
 const root = path.resolve(import.meta.dirname, '..');
-const userData = path.join(root, 'tests', 'mcp-data');
+const userData = path.join(root, 'tests', 'mcp-data-' + Date.now());
 await fs.mkdir(userData, { recursive: true });
 const executable =
   process.env.DESKTOP_EXE ||
@@ -47,7 +47,7 @@ try {
   assert.ok(client.getInstructions().includes('先识别用户当前任务'));
   assert.ok(client.getInstructions().includes('其他任务按用户要求执行'));
   const tools = await client.listTools();
-  assert.equal(tools.tools.length, 17);
+  assert.equal(tools.tools.length, 19);
   const resources = await client.listResources();
   assert.ok(
     resources.resources.some((r) => r.uri === 'page-notes://skills/page-tutor'),
@@ -86,7 +86,10 @@ try {
     }),
   );
   const state = json(
-    await client.callTool({ name: 'page_notes_get_state', arguments: {} }),
+    await client.callTool({
+      name: 'page_notes_get_state',
+      arguments: { detail: 'full' },
+    }),
   );
   assert.equal(state.document.id, imported.id);
   assert.equal(state.total, 3);
@@ -94,7 +97,7 @@ try {
   const first = json(
     await client.callTool({
       name: 'page_notes_read_pages',
-      arguments: { documentId: imported.id, pages: [1, 2] },
+      arguments: { documentId: imported.id, pages: [1, 2], include: 'both' },
     }),
   );
   console.log('PASS MCP reading source pages');
@@ -167,13 +170,131 @@ try {
   const updated = json(
     await client.callTool({
       name: 'page_notes_read_pages',
-      arguments: { documentId: imported.id, pages: [1] },
+      arguments: { documentId: imported.id, pages: [1], include: 'both' },
     }),
   );
   assert.equal(
     updated.pages[0].markdown,
     text,
     'AI reader refreshes after mutation',
+  );
+  const compact = json(
+    await client.callTool({ name: 'page_notes_get_state', arguments: {} }),
+  );
+  assert.ok(
+    JSON.stringify(compact).length * 5 < JSON.stringify(state).length,
+    'compact state avoids repeating long content',
+  );
+  assert.equal(compact.document.id, imported.id);
+  assert.ok(
+    !('markdown' in compact) &&
+      !('sourceText' in compact) &&
+      !('geometry' in compact),
+  );
+  const sourceOnly = json(
+    await client.callTool({ name: 'page_notes_read_pages', arguments: {} }),
+  );
+  assert.equal(sourceOnly.pages[0].page, 1);
+  assert.ok(sourceOnly.pages[0].sourceText.includes('Pattern Recognition'));
+  assert.ok(!('markdown' in sourceOnly.pages[0]));
+  const noteOnly = json(
+    await client.callTool({
+      name: 'page_notes_read_pages',
+      arguments: { include: 'note' },
+    }),
+  );
+  assert.equal(noteOnly.pages[0].markdown, text);
+  assert.ok(!('sourceText' in noteOnly.pages[0]));
+  const metadata = json(
+    await client.callTool({
+      name: 'page_notes_read_pages',
+      arguments: { include: 'metadata' },
+    }),
+  );
+  assert.equal(metadata.pages[0].noteLength, text.length);
+  assert.equal(metadata.pages[0].revision, updated.pages[0].revision);
+  assert.ok(
+    !('markdown' in metadata.pages[0]) && !('sourceText' in metadata.pages[0]),
+  );
+  const cached = json(
+    await client.callTool({
+      name: 'page_notes_read_pages',
+      arguments: {
+        include: 'both',
+        knownRevisions: {
+          1: {
+            source: sourceOnly.pages[0].sourceRevision,
+            note: updated.pages[0].revision,
+          },
+        },
+      },
+    }),
+  );
+  assert.ok(cached.pages[0].sourceUnchanged && cached.pages[0].noteUnchanged);
+  assert.ok(
+    !('markdown' in cached.pages[0]) && !('sourceText' in cached.pages[0]),
+  );
+  const partial = json(
+    await client.callTool({
+      name: 'page_notes_read_pages',
+      arguments: {
+        include: 'note',
+        noteRange: { start: 10, maxChars: 35 },
+      },
+    }),
+  );
+  assert.equal(partial.pages[0].markdown, text.slice(10, 45));
+  assert.equal(partial.pages[0].revision, updated.pages[0].revision);
+  assert.deepEqual(partial.pages[0].range, {
+    start: 10,
+    end: 45,
+    totalChars: text.length,
+  });
+  const savedHandoff = json(
+    await client.callTool({
+      name: 'page_notes_write_handoff',
+      arguments: {
+        documentId: imported.id,
+        page: 1,
+        summary: '已建立样本、均值与密度的联系；下一页沿用样本记号。',
+        expectedRevision: updated.pages[0].revision,
+        sourceRevision: sourceOnly.pages[0].sourceRevision,
+      },
+    }),
+  );
+  assert.equal(savedHandoff.saved, true);
+  assert.ok(!('summary' in savedHandoff));
+  const handoff = json(
+    await client.callTool({
+      name: 'page_notes_read_handoff',
+      arguments: { documentId: imported.id, page: 1 },
+    }),
+  );
+  assert.equal(handoff.stale, false);
+  assert.ok(handoff.handoff.summary.includes('样本'));
+  const badHandoff = await client.callTool({
+    name: 'page_notes_write_handoff',
+    arguments: {
+      documentId: imported.id,
+      page: 1,
+      summary: '旧版本交接不能覆盖',
+      expectedRevision: '0'.repeat(64),
+    },
+  });
+  assert.ok(badHandoff.isError);
+  const wrongSource = await client.callTool({
+    name: 'page_notes_write_handoff',
+    arguments: {
+      documentId: imported.id,
+      page: 1,
+      summary: '原文冲突',
+      expectedRevision: updated.pages[0].revision,
+      sourceRevision: '0'.repeat(64),
+    },
+  });
+  assert.ok(wrongSource.isError);
+  console.log(
+    'PASS MCP compact state, selective reads, cache, ranges and handoffs',
   );
   const readingPosition = await window.evaluate(() => {
     const scroll = document.querySelector('#noteScroll');
@@ -220,6 +341,17 @@ try {
   );
   assert.ok(
     (await window.locator('#preview').innerText()).includes('本页实时补充'),
+  );
+  const staleHandoff = json(
+    await client.callTool({
+      name: 'page_notes_read_handoff',
+      arguments: { documentId: imported.id, page: 1 },
+    }),
+  );
+  assert.equal(
+    staleHandoff.stale,
+    true,
+    'edited notes invalidate the saved handoff',
   );
   assert.equal(await window.locator('#pageNumber').inputValue(), '1');
   assert.ok(
@@ -328,8 +460,69 @@ try {
     }),
   );
   assert.equal(created.kind, 'markdown');
+  const createdPage = json(
+    await client.callTool({
+      name: 'page_notes_read_pages',
+      arguments: {
+        documentId: created.id,
+        pages: [1],
+        include: 'both',
+      },
+    }),
+  ).pages[0];
+  json(
+    await client.callTool({
+      name: 'page_notes_write_handoff',
+      arguments: {
+        documentId: created.id,
+        page: 1,
+        summary: '原文第一版的知识交接。',
+        expectedRevision: createdPage.revision,
+        sourceRevision: createdPage.sourceRevision,
+      },
+    }),
+  );
+  const sourceChanged = await window.evaluate(async (id) => {
+    const response = await fetch('/api/documents/' + id + '/markdown', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        markdown: '# 第一页（修订）\n\n新说明\n\n---\n\n# 第二页',
+      }),
+    });
+    return response.ok;
+  }, created.id);
+  assert.equal(sourceChanged, true);
+  const changedPage = json(
+    await client.callTool({
+      name: 'page_notes_read_pages',
+      arguments: {
+        documentId: created.id,
+        pages: [1],
+        knownRevisions: { 1: { source: createdPage.sourceRevision } },
+      },
+    }),
+  ).pages[0];
+  assert.ok(changedPage.sourceText.includes('修订'));
+  assert.notEqual(changedPage.sourceRevision, createdPage.sourceRevision);
+  const changedHandoff = json(
+    await client.callTool({
+      name: 'page_notes_read_handoff',
+      arguments: { documentId: created.id, page: 1 },
+    }),
+  );
+  assert.equal(
+    changedHandoff.stale,
+    true,
+    'source changes invalidate handoffs even with unchanged notes',
+  );
+  console.log('PASS MCP source changes invalidate cached content and handoffs');
   const resource = await client.readResource({ uri: 'page-notes://state' });
   assert.equal(JSON.parse(resource.contents[0].text).page, 2);
+  assert.ok(
+    !('markdown' in JSON.parse(resource.contents[0].text)),
+    'state resource is compact too',
+  );
   json(
     await client.callTool({
       name: 'page_notes_set_layout',
@@ -357,8 +550,8 @@ try {
     Math.abs(wide.width - Math.min(1000, wide.available)) <= 3,
     'configured paper fills available writing space while staying bounded',
   );
-  const screenshotMain = await app.evaluate(async ({ BrowserWindow }) => {
-    const main = BrowserWindow.getAllWindows().find((w) => w.isVisible());
+  const mainWindow = await app.browserWindow(window);
+  const screenshotMain = await mainWindow.evaluate(async (main) => {
     return (await main.webContents.capturePage(undefined, { stayAwake: true }))
       .toPNG()
       .toString('base64');
@@ -376,25 +569,36 @@ try {
   const afterRestart = json(
     await client.callTool({
       name: 'page_notes_read_pages',
-      arguments: { documentId: imported.id, pages: [2] },
+      arguments: { documentId: imported.id, pages: [2], include: 'note' },
     }),
   );
   assert.ok(
     afterRestart.pages[0].markdown.includes('追加解释'),
     'same MCP client reconnects after desktop restart',
   );
+  const restartedHandoff = json(
+    await client.callTool({
+      name: 'page_notes_read_handoff',
+      arguments: { documentId: imported.id, page: 1 },
+    }),
+  );
+  assert.equal(restartedHandoff.handoff.summary, handoff.handoff.summary);
+  assert.equal(restartedHandoff.stale, true);
   await fs.writeFile(
     path.join(root, 'tests', 'mcp-results.json'),
     JSON.stringify(
       {
         ok: true,
-        tools: 17,
+        tools: 19,
         checks: [
           'stdio MCP handshake',
           'tool discovery',
           'authenticated desktop bridge',
           'source and layout inspection',
           'batch writes',
+          'compact state and selective source/note/metadata reads',
+          'revision cache and partial note reads',
+          'persistent handoffs with revision conflicts and staleness',
           'revision conflicts',
           'append',
           'layout persistence and custom CSS',
@@ -411,7 +615,7 @@ try {
     ),
   );
   console.log(
-    'PASS MCP: 17 tools; read/write/layout/import; bounded paper; revisions; hidden screenshots and collage; PNG image content; restart with live MCP client.',
+    'PASS MCP: 19 tools; selective reads/cache; persistent handoffs; compact state; silent writes; hidden screenshots and collage; restart with live MCP client.',
   );
 } finally {
   await client?.close();

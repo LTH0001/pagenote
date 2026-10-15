@@ -52,6 +52,7 @@ function pageLabel(png, x, y, page) {
 
 exports.createAIController = async function ({ win, url, data, word }) {
   let inspector,
+    readerSource,
     queue = Promise.resolve();
   const invoke = (window, method, ...args) =>
     window.webContents.executeJavaScript(
@@ -104,11 +105,31 @@ exports.createAIController = async function ({ win, url, data, word }) {
   async function getNotes(id) {
     return api(`/api/documents/${id}/notes`);
   }
+  async function readWindow(id) {
+    const window = await readyInspector();
+    const dir = path.join(data, 'documents', id);
+    const meta = JSON.parse(
+      await fs.readFile(path.join(dir, 'meta.json'), 'utf8'),
+    );
+    const file = path.join(
+      dir,
+      meta.kind === 'pdf' ? 'view.pdf' : 'original' + meta.ext,
+    );
+    const stat = await fs.stat(file);
+    const signature = `${id}:${stat.size}:${stat.mtimeMs}:${stat.ctimeMs}`;
+    const changed = readerSource?.signature !== signature;
+    if (changed || (await invoke(window, 'getSummary')).document?.id !== id)
+      await invoke(window, 'open', id, 1, changed);
+    if (changed)
+      readerSource = { signature, hash: revision(await fs.readFile(file)) };
+    return window;
+  }
+  const sourceRevision = (text) => revision(readerSource.hash + '\n' + text);
   async function writeNotes(id, updates) {
     await invoke(win, 'lockEditing');
     try {
       const all = await getNotes(id);
-      const window = await inspect(id, updates[0].page);
+      const window = await readWindow(id);
       const { total } = await invoke(window, 'getState');
       const seen = new Set();
       for (const update of updates) {
@@ -266,6 +287,7 @@ exports.createAIController = async function ({ win, url, data, word }) {
     if (action === 'list_documents') return api('/api/documents');
     if (action === 'get_state') {
       await invoke(win, 'flush');
+      if (args.detail === 'compact') return invoke(win, 'getSummary');
       const state = await invoke(win, 'getState');
       return { ...state, revision: revision(state.markdown) };
     }
@@ -337,17 +359,79 @@ exports.createAIController = async function ({ win, url, data, word }) {
     }
     if (action === 'navigate') {
       await invoke(win, 'open', id, args.page);
-      return invoke(win, 'getState');
+      return invoke(win, 'getSummary');
     }
     if (action === 'read_pages') {
       await invoke(win, 'flush');
-      const window = await inspect(id, args.pages?.[0] || 1);
-      const result = await invoke(window, 'readPages', args.pages || [1]);
+      const active = await invoke(win, 'getSummary');
+      const requested = args.pages || [
+        active.document?.id === id ? active.page : 1,
+      ];
+      const window = await readWindow(id);
+      const include = args.include || 'both';
+      const result = await invoke(
+        window,
+        'readPages',
+        requested,
+        ['source', 'both'].includes(include) ? 'source' : 'metadata',
+      );
+      const all = include !== 'source' ? await getNotes(id) : null;
       return {
         documentId: id,
-        pages: result.map((p) => ({ ...p, revision: revision(p.markdown) })),
-        note: '扫描 PDF 的原文文字可能为空，可使用截图工具查看。',
+        pages: result.map((p) => {
+          const known = args.knownRevisions?.[p.page] || {};
+          if ('sourceText' in p) {
+            p.sourceRevision = sourceRevision(p.sourceText);
+            if (known.source === p.sourceRevision) {
+              delete p.sourceText;
+              p.sourceUnchanged = true;
+            }
+          }
+          if (all) {
+            const markdown = all[p.page] || '';
+            if (include !== 'metadata') p.markdown = markdown;
+            p.revision = revision(markdown);
+            p.noteLength = markdown.length;
+            if (known.note === p.revision) {
+              delete p.markdown;
+              p.noteUnchanged = true;
+            } else if ('markdown' in p && args.noteRange) {
+              const start = Math.min(args.noteRange.start, markdown.length);
+              const end = Math.min(
+                start + args.noteRange.maxChars,
+                markdown.length,
+              );
+              p.markdown = markdown.slice(start, end);
+              p.range = { start, end, totalChars: markdown.length };
+            }
+          }
+          return p;
+        }),
       };
+    }
+    if (action === 'read_handoff' || action === 'write_handoff') {
+      await invoke(win, 'flush');
+      const window = await readWindow(id);
+      const [source] = await invoke(window, 'readPages', [args.page], 'source');
+      const currentSource = sourceRevision(source.sourceText);
+      if (action === 'write_handoff') {
+        if (args.sourceRevision && args.sourceRevision !== currentSource)
+          throw Error('原文已变化，请重新读取后保存交接');
+        return api(`/api/documents/${id}/handoffs/${args.page}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            summary: args.summary,
+            expectedRevision: args.expectedRevision,
+            sourceRevision: currentSource,
+          }),
+        });
+      }
+      const result = await api(`/api/documents/${id}/handoffs/${args.page}`);
+      if (result.handoff)
+        result.stale =
+          result.stale || result.handoff.sourceRevision !== currentSource;
+      return result;
     }
     if (action === 'write_notes') return writeNotes(id, args.updates);
     if (action === 'patch_note') {

@@ -1670,6 +1670,13 @@ window.pageNotes = {
     applyNoteZoom();
     updatePreview();
   },
+  getSummary: () => ({
+    document: doc ? { id: doc.id, name: doc.name, kind: doc.kind } : null,
+    page,
+    total,
+    mode,
+    wordEditing: wordActive,
+  }),
   getState: async () => ({
     document: doc,
     page,
@@ -1710,23 +1717,27 @@ window.pageNotes = {
     },
   }),
   refreshLibrary,
-  open: async (id, p = 1) => {
+  open: async (id, p = 1, forceReload = false) => {
     if (wordBusy || wordActive) await window.pageNotes.finishEditing();
     const list = await refreshLibrary();
     const meta = list.find((d) => d.id === id);
     if (!meta) throw Error('文档不存在');
-    if (doc?.id !== id) await openDocument(meta);
+    if (doc?.id !== id || forceReload) await openDocument(meta);
     await goTo(p);
     await waitVisuals();
   },
-  readPages: async (pages) => {
+  readPages: async (pages, include = 'both') => {
     const results = [];
     for (const p of pages) {
       if (p < 1 || p > total) throw Error('页码超出范围');
       results.push({
         page: p,
-        sourceText: await sourceText(p),
-        markdown: notes[p] || '',
+        ...(['source', 'both'].includes(include)
+          ? { sourceText: await sourceText(p) }
+          : {}),
+        ...(['note', 'both'].includes(include)
+          ? { markdown: notes[p] || '' }
+          : {}),
       });
     }
     return results;
