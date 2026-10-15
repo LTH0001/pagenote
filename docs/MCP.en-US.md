@@ -25,6 +25,16 @@ Discover the complete current tool list through MCP; additional tools cover AI a
 
 Screenshots return PNG image content suitable for multimodal models. Screenshot rendering uses a hidden workspace and should preserve the user's visible reading position. No model, subscription, cloud account or automatic AI service is included.
 
+## Page-by-page teaching
+
+Use a separate model generation request for each source page. Complete, verify, save and inspect that page before requesting the next one. Do not generate the entire chapter in one answer and split it afterward. Batch MCP reads or writes do not count as separate model requests.
+
+Each request needs the complete current page, relevant screenshots, the learner's background, a short chapter map and a concise handoff from the previous page. Preserve notation, examples and dependencies in the handoff, leaving enough context for detailed explanations of the current page. Begin from prior knowledge and end with a brief transition to the next page. Use formulas, runnable code, Mermaid or illustrations where they help.
+
+Read revisions before writing and use expectedRevision. Check the saved page with a screenshot before continuing. Report actual completed pages and validations, without claiming tests or independent requests that were not performed.
+
+The MCP initialization instructions include this policy; reconnect the client to receive updates. MCP cannot start model generations or manage a client's context window. If the client cannot issue independent requests, state that limitation and handle one page per user turn. See the [detailed Chinese workflow and request template](AI-TEACHING.zh-CN.md).
+
 The local API listens on loopback. The MCP bridge checks a per-user token. This interface does not expose arbitrary JavaScript or shell-command execution, but grants the document-reading and editing capabilities listed by the tools. Data sent onward by your AI client follows that client's policies.
 
 [中文 MCP 文档](../MCP接口说明.md)

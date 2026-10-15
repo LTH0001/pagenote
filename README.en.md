@@ -28,6 +28,8 @@ The left pane shows the document; the right holds Markdown notes for the active 
 
 Notes support LaTeX, syntax-highlighted code, Mermaid diagrams, tables and pasted images. Keep derivations and verification code on the same page, with the results rendered for reading.
 
+Code highlighting runs locally, without downloading grammars. If rendering fails, include the app version, a minimal code block and a screenshot in your report; see the [rendering notes](docs/CODE-RENDERING.md).
+
 ![Rendered formulas, Python highlighting and a Mermaid flowchart](docs/images/markdown-rendering.png)
 
 ### Expand the editor when needed
@@ -47,6 +49,8 @@ Annotations collect in a workbench for the corresponding pane. You can also reco
 ![AI annotation workbench with a local revision request](docs/images/ai-workbench.png)
 
 Pagenote currently supports two-pane reading, page-linked notes and AI annotations. Its MCP interface lets AI read and edit page content. The app does not include a model; detailed page-by-page explanations and image generation require an AI client with the relevant capabilities.
+
+Follow the [page-by-page teaching workflow](docs/MCP.en-US.md#page-by-page-teaching): make a separate generation request for each page, give it sufficient current-page context and carry a concise knowledge handoff into the next request. Do not generate a whole chapter and split it into pages afterward.
 
 **Current public version: 2.0.0-beta.4.** It is still a beta. Try it with something you are actually learning, and let me know where it gets in your way.
 

@@ -4,6 +4,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
 import packageInfo from '../package.json' with { type: 'json' };
+import { teachingPolicy } from './teaching-policy.mjs';
 
 const i = process.argv.indexOf('--connection-file');
 const connectionFile =
@@ -19,7 +20,8 @@ const server = new McpServer(
   { name: 'pagenote', version: packageInfo.version },
   {
     instructions:
-      '控制本机pagenote桌面软件。先读取状态或文档列表；修改前读取页面并保留 revision，用 expectedRevision 避免覆盖用户的新修改。截图和拼图返回 image/png 图片内容，多模态模型可直接查看。操作只影响软件的文档、笔记和布局。截图在隐藏窗口生成，不切换用户的阅读页。',
+      '控制本机pagenote桌面软件。先读取状态或文档列表；修改前读取页面并保留 revision，用 expectedRevision 避免覆盖用户的新修改。截图和拼图返回 image/png 图片内容，多模态模型可直接查看。操作只影响软件的文档、笔记和布局。截图在隐藏窗口生成，不切换用户的阅读页。\n\n' +
+      teachingPolicy,
   },
 );
 const documentId = z

@@ -43,6 +43,12 @@ try {
     await fs.readFile(path.join(userData, 'mcp', 'mcp-config.json'), 'utf8'),
   ).mcpServers.page_notes;
   await client.connect(new StdioClientTransport({ ...config, stderr: 'pipe' }));
+  assert.ok(
+    client
+      .getInstructions()
+      .includes('每一页必须作为一次独立的模型讲解请求处理'),
+  );
+  assert.ok(client.getInstructions().includes('上一页知识交接'));
   const tools = await client.listTools();
   assert.equal(tools.tools.length, 17);
   const imported = json(

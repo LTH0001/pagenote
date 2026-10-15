@@ -1,5 +1,5 @@
 import DOMPurify from 'dompurify';
-import hljs from 'highlight.js/lib/core';
+import { highlightCode } from './code-highlight';
 import { renderMarkdown, renderDiagrams } from './markdown.js';
 import { htmlToMarkdown, codeText } from './editing.js';
 
@@ -189,12 +189,7 @@ export function createRichEditor({ root, changed, canEdit, toast }) {
       language = [...code.classList]
         .find((c) => c.startsWith('language-'))
         ?.slice(9);
-    if (language && hljs.getLanguage(language))
-      code.innerHTML = hljs.highlight(text, {
-        language,
-        ignoreIllegals: true,
-      }).value;
-    else code.textContent = text;
+    highlightCode(code, text, language);
     if (inside) {
       const position = (offset) => {
         const walker = document.createTreeWalker(code, NodeFilter.SHOW_TEXT);

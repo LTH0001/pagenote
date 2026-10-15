@@ -2,30 +2,9 @@ import { Marked } from 'marked';
 import markedKatex from 'marked-katex-extension';
 import katex from 'katex';
 import DOMPurify from 'dompurify';
-import hljs from 'highlight.js/lib/core';
-import javascript from 'highlight.js/lib/languages/javascript';
-import typescript from 'highlight.js/lib/languages/typescript';
-import python from 'highlight.js/lib/languages/python';
-import cpp from 'highlight.js/lib/languages/cpp';
-import json from 'highlight.js/lib/languages/json';
-import bash from 'highlight.js/lib/languages/bash';
-import css from 'highlight.js/lib/languages/css';
-import xml from 'highlight.js/lib/languages/xml';
-import sql from 'highlight.js/lib/languages/sql';
+import { codeLanguage, highlightCode } from './code-highlight';
 import 'highlight.js/styles/github.css';
 
-for (const [name, language] of Object.entries({
-  javascript,
-  typescript,
-  python,
-  cpp,
-  json,
-  bash,
-  css,
-  xml,
-  sql,
-}))
-  hljs.registerLanguage(name, language);
 const md = new Marked(
   { gfm: true },
   markedKatex({ throwOnError: false, nonStandard: true }),
@@ -155,9 +134,14 @@ export function renderMarkdown(text, target, depth = 0) {
     a.rel = 'noopener noreferrer';
   });
   target.querySelectorAll('pre > code').forEach((code) => {
-    const language = [...code.classList]
-      .find((c) => c.startsWith('language-'))
-      ?.slice(9);
+    const language = codeLanguage(
+      [...code.classList].find((c) => c.startsWith('language-'))?.slice(9),
+    );
+    if (language) {
+      for (const name of [...code.classList])
+        if (name.startsWith('language-')) code.classList.remove(name);
+      code.classList.add('language-' + language);
+    }
     if (language === 'mermaid') return;
     if (['math', 'latex', 'tex'].includes(language)) {
       const block = document.createElement('div');
@@ -170,13 +154,7 @@ export function renderMarkdown(text, target, depth = 0) {
         { ADD_TAGS: ['annotation'], ADD_ATTR: ['encoding'] },
       );
       code.parentElement.replaceWith(block);
-    } else if (language && hljs.getLanguage(language)) {
-      code.innerHTML = hljs.highlight(code.textContent, {
-        language,
-        ignoreIllegals: true,
-      }).value;
-      code.classList.add('hljs');
-    }
+    } else highlightCode(code, code.textContent, language);
   });
   scheduleDiagrams(target);
   target.querySelectorAll('a,img').forEach((node) => {
