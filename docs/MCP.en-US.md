@@ -35,7 +35,9 @@ Each request needs the complete current page, relevant screenshots, the learner'
 
 Read revisions before writing and use expectedRevision. Check the saved page with a screenshot before continuing. Report actual completed pages and validations, without claiming tests or independent requests that were not performed.
 
-The MCP initialization instructions include this policy; reconnect the client to receive updates. MCP cannot start model generations or manage a client's context window. If the client cannot issue independent requests, state that limitation and handle one page per user turn. See the [detailed Chinese workflow and request template](AI-TEACHING.zh-CN.md).
+Default instructions route relevant learning tasks to the skill without forcing summaries or translations into a teaching workflow. **Settings → AI settings** lets users edit, save or restore the default system prompt; reconnect the client to apply it. The setting stays in the local document-data directory as `ai-settings.json`, outside portable projects. MCP initialization supplies these instructions, while the client controls their instruction level. Tool permissions remain unchanged.
+
+MCP cannot start model generations or manage a client's context window. If the client cannot issue independent requests, state that limitation and handle one page per user turn. See the [detailed Chinese workflow and request template](AI-TEACHING.zh-CN.md).
 
 The local API listens on loopback. The MCP bridge checks a per-user token. This interface does not expose arbitrary JavaScript or shell-command execution, but grants the document-reading and editing capabilities listed by the tools. Data sent onward by your AI client follows that client's policies.
 

@@ -43,12 +43,8 @@ try {
     await fs.readFile(path.join(userData, 'mcp', 'mcp-config.json'), 'utf8'),
   ).mcpServers.page_notes;
   await client.connect(new StdioClientTransport({ ...config, stderr: 'pipe' }));
-  assert.ok(
-    client
-      .getInstructions()
-      .includes('每一页必须作为一次独立的模型讲解请求处理'),
-  );
-  assert.ok(client.getInstructions().includes('上一页知识交接'));
+  assert.ok(client.getInstructions().includes('先识别用户当前任务'));
+  assert.ok(client.getInstructions().includes('其他任务按用户要求执行'));
   const tools = await client.listTools();
   assert.equal(tools.tools.length, 17);
   const resources = await client.listResources();
@@ -63,6 +59,8 @@ try {
     'utf8',
   );
   assert.equal(skill.contents[0].text, canonicalSkill);
+  assert.ok(canonicalSkill.includes('上一页交接'));
+  assert.ok(canonicalSkill.includes('每页作为独立的模型讲解请求'));
   const prompts = await client.listPrompts();
   assert.ok(prompts.prompts.some((p) => p.name === 'pagenote-page-tutor'));
   const prompt = await client.getPrompt({

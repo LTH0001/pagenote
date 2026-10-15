@@ -37,6 +37,25 @@
   "重置笔记字号": ["重置笔记缩放", "Reset notes zoom"],
   "全屏": ["全屏", "Full screen"],
   "复制 MCP 配置": ["复制 MCP 配置", "Copy MCP configuration"],
+  "AI 设置": ["AI 设置", "AI settings"],
+  "默认系统提示词": ["默认系统提示词", "Default system prompt"],
+  "恢复默认": ["恢复默认", "Restore defaults"],
+  "作为 MCP 默认指令提供给 AI 客户端。保存后重新连接客户端生效；实际系统提示层由客户端决定。": [
+    "作为 MCP 默认指令提供给 AI 客户端。保存后重新连接客户端生效；实际系统提示层由客户端决定。",
+    "Provided as default MCP instructions. Reconnect your AI client after saving; the client controls its actual system-prompt layer."
+  ],
+  "逐页精讲技能按任务启用，不会把摘要、翻译或简答强制变成讲课。此设置不改变工具权限。": [
+    "逐页精讲技能按任务启用，不会把摘要、翻译或简答强制变成讲课。此设置不改变工具权限。",
+    "The page tutor applies to relevant tasks; summaries, translation and short answers keep their scope. This setting does not change tool permissions."
+  ],
+  "已恢复默认内容，保存后生效": [
+    "已恢复默认内容，保存后生效",
+    "Defaults restored in the editor; save to apply."
+  ],
+  "已保存，请重新连接 AI 客户端": [
+    "已保存，请重新连接 AI 客户端",
+    "Saved. Reconnect your AI client to apply."
+  ],
   "复制逐页精讲提示词": [
     "复制逐页精讲提示词",
     "Copy page-by-page teaching prompt"

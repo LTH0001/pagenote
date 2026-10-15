@@ -325,7 +325,31 @@
         左侧 Word
         编辑或右侧编辑时，默认展开。可拖动分界线拉回双栏，也可点击“返回双栏”。关闭后保持当前双栏宽度。设置会自动保存。
       </p>
+      <button id="aiSettingsButton">AI 设置</button>
       <button id="closeSettings" class="primary">完成</button>
+    </dialog>
+    <dialog id="aiSettings">
+      <h2>AI 设置</h2>
+      <label for="aiSystemPrompt">默认系统提示词</label>
+      <p>
+        作为 MCP 默认指令提供给 AI
+        客户端。保存后重新连接客户端生效；实际系统提示层由客户端决定。
+      </p>
+      <textarea
+        id="aiSystemPrompt"
+        rows="12"
+        maxlength="32768"
+        spellcheck="false"
+      ></textarea>
+      <p>
+        逐页精讲技能按任务启用，不会把摘要、翻译或简答强制变成讲课。此设置不改变工具权限。
+      </p>
+      <p id="aiSettingsStatus" role="status"></p>
+      <div class="history-actions">
+        <button id="aiPromptReset">恢复默认</button>
+        <button id="aiSettingsCancel">取消</button>
+        <button id="aiSettingsSave" class="primary">保存</button>
+      </div>
     </dialog>
     <dialog id="historyDialog">
       <div class="history-heading">

@@ -1,4 +1,5 @@
 import fileOps from './desktop/file-ops.cjs';
+import aiSettingsStore from './desktop/ai-settings.cjs';
 const { moveFile, copyFileSafe } = fileOps;
 import { registerExternalDocuments } from './external-documents.mjs';
 import { createProjectStore } from './projects.mjs';
@@ -26,6 +27,26 @@ app.use((req, res, next) => {
   next();
 });
 app.use(express.json({ limit: '30mb' }));
+const aiSettingsFile = path.join(data, 'ai-settings.json');
+app.get('/api/ai-settings', (req, res, next) => {
+  try {
+    res.json(aiSettingsStore.readAISettings(aiSettingsFile));
+  } catch (error) {
+    next(error);
+  }
+});
+app.put('/api/ai-settings', async (req, res, next) => {
+  try {
+    res.json(
+      await aiSettingsStore.saveAISettings(
+        aiSettingsFile,
+        req.body?.systemPrompt,
+      ),
+    );
+  } catch (error) {
+    next(error);
+  }
+});
 const projects = createProjectStore({
   app,
   data,

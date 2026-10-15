@@ -1124,6 +1124,36 @@ $('helpButton').onclick = () => $('help').showModal();
 $('closeHelp').onclick = () => $('help').close();
 $('settingsButton').onclick = () => $('settings').showModal();
 $('closeSettings').onclick = () => $('settings').close();
+let defaultAIPrompt = '';
+async function openAISettings() {
+  const settings = await request('/api/ai-settings');
+  defaultAIPrompt = settings.defaultSystemPrompt;
+  $('aiSystemPrompt').value = settings.systemPrompt;
+  $('aiSettingsStatus').textContent = '';
+  if ($('settings').open) $('settings').close();
+  $('aiSettings').showModal();
+}
+$('aiSettingsButton').onclick = safely(openAISettings);
+$('aiSettingsCancel').onclick = () => $('aiSettings').close();
+$('aiPromptReset').onclick = () => {
+  $('aiSystemPrompt').value = defaultAIPrompt;
+  $('aiSettingsStatus').textContent = t('已恢复默认内容，保存后生效');
+};
+$('aiSettingsSave').onclick = async () => {
+  $('aiSettingsSave').disabled = true;
+  try {
+    await request('/api/ai-settings', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ systemPrompt: $('aiSystemPrompt').value }),
+    });
+    $('aiSettingsStatus').textContent = t('已保存，请重新连接 AI 客户端');
+  } catch (error) {
+    $('aiSettingsStatus').textContent = error.message;
+  } finally {
+    $('aiSettingsSave').disabled = false;
+  }
+};
 $('expandEditorSetting').onchange = safely(async () => {
   const next = $('expandEditorSetting').checked;
   $('expandEditorSetting').disabled = true;
@@ -1585,6 +1615,7 @@ function geometry(selector) {
   };
 }
 window.pageNotes = {
+  openAISettings,
   finishEditing: async () => {
     const hadWord = wordActive;
     await endMarkdownDocument();

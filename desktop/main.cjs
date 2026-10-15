@@ -11,6 +11,7 @@ const fs = require('node:fs/promises');
 const { pathToFileURL } = require('node:url');
 const { randomBytes } = require('node:crypto');
 const { execFileSync } = require('node:child_process');
+const aiSettingsStore = require('./ai-settings.cjs');
 const {
   projectArgument,
   createProjectLauncher,
@@ -433,7 +434,12 @@ if (!app.requestSingleInstanceLock()) {
                     label: '复制逐页精讲提示词',
                     click: async () =>
                       clipboard.writeText(
-                        await fs.readFile(tutorSkillFile, 'utf8'),
+                        '# 默认系统提示词 / Default AI instructions\n\n' +
+                          aiSettingsStore.readAISettings(
+                            path.join(data, 'ai-settings.json'),
+                          ).systemPrompt +
+                          '\n\n' +
+                          (await fs.readFile(tutorSkillFile, 'utf8')),
                       ),
                   },
                   {
@@ -465,6 +471,13 @@ if (!app.requestSingleInstanceLock()) {
               {
                 label: '设置',
                 submenu: [
+                  {
+                    label: 'AI 设置',
+                    click: () =>
+                      win.webContents.executeJavaScript(
+                        'window.pageNotes.openAISettings()',
+                      ),
+                  },
                   {
                     label: '语言 / Language',
                     submenu: [

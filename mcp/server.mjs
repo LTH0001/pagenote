@@ -4,7 +4,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
 import packageInfo from '../package.json' with { type: 'json' };
-import { teachingPolicy } from './teaching-policy.mjs';
+import aiSettingsStore from '../desktop/ai-settings.cjs';
 
 const i = process.argv.indexOf('--connection-file');
 const connectionFile =
@@ -21,8 +21,14 @@ const server = new McpServer(
   {
     instructions:
       '控制本机pagenote桌面软件。先读取状态或文档列表；修改前读取页面并保留 revision，用 expectedRevision 避免覆盖用户的新修改。截图和拼图返回 image/png 图片内容，多模态模型可直接查看。操作只影响软件的文档、笔记和布局。截图在隐藏窗口生成，不切换用户的阅读页。\n\n' +
-      teachingPolicy +
-      '\n逐页精讲任务开始前，读取资源 page-notes://skills/page-tutor，或调用提示模板 pagenote-page-tutor，按内置 SKILL.md 执行。For page-by-page teaching, load the built-in skill resource or prompt first.',
+      aiSettingsStore.readAISettings(
+        path.join(
+          path.dirname(connectionFile),
+          'documents-data',
+          'ai-settings.json',
+        ),
+      ).systemPrompt +
+      '\n仅当用户请求逐页精讲时，读取资源 page-notes://skills/page-tutor，或调用提示模板 pagenote-page-tutor。其他任务按用户要求执行，不套用精讲流程。For page-by-page teaching tasks, load the built-in skill resource or prompt; otherwise follow the requested task.',
   },
 );
 const documentId = z
