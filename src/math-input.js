@@ -9,6 +9,28 @@ function mathBody(body, doubled) {
   return copied ? body.replace(/\\\\/g, '\\') : body;
 }
 function proseMath(text) {
+  text = text.replace(
+    /(?<![\\$])\$\$(?!\$)([\s\S]*?)(?<!\\)\$\$(?!\$)/g,
+    (match, body, offset, source) => {
+      if (!body.includes('\n') || (/^\s*\n/.test(body) && /\n\s*$/.test(body)))
+        return match;
+      const before = source.slice(0, offset),
+        after = source.slice(offset + match.length);
+      const prefix =
+        !before || before.endsWith('\n\n')
+          ? ''
+          : before.endsWith('\n')
+            ? '\n'
+            : '\n\n';
+      const suffix =
+        !after || after.startsWith('\n\n')
+          ? ''
+          : after.startsWith('\n')
+            ? '\n'
+            : '\n\n';
+      return prefix + '$$\n' + body.trim() + '\n$$' + suffix;
+    },
+  );
   // Match doubled delimiters first, so their extra slash cannot escape Markdown.
   return text.replace(
     /(\\{1,2})(\[|\()([\s\S]*?)\1(\]|\))/g,
@@ -26,10 +48,12 @@ export function normalizeMath(text) {
     prose = '',
     output = '';
   const flush = () => {
-    output += prose
-      .split(/(`+[^`\n]*`+)/g)
-      .map((s, i) => (i % 2 ? s : proseMath(s)))
-      .join('');
+    let offset = 0;
+    for (const match of prose.matchAll(/(?<!`)(`+)(?!`)([\s\S]*?)\1(?!`)/g)) {
+      output += proseMath(prose.slice(offset, match.index)) + match[0];
+      offset = match.index + match[0].length;
+    }
+    output += proseMath(prose.slice(offset));
     prose = '';
   };
   for (const line of lines) {

@@ -2,7 +2,7 @@ import { _electron as electron } from '@playwright/test';
 import assert from 'node:assert/strict';
 import path from 'node:path';
 const root = path.resolve(import.meta.dirname, '..');
-const markdown =
+const markdownBase =
   String.raw`# Formula compatibility
 
 Inline $\mu$, normal \(\sigma^2\), copied \\(\\theta\\), mixed \\(\alpha\\).
@@ -26,6 +26,19 @@ $$\frac{1}{N}\sum_{i=1}^N x_i$$
   '```python\n' +
   String.raw`text = "\\[not math\\]"` +
   '\n```\n\nEnd of page.';
+const issueFormula =
+  String.raw`\frac{(\mathbf w^{\mathsf T}\boldsymbol\delta)^2}{\mathbf w^{\mathsf T}S_w\mathbf w}` +
+  '\n' +
+  String.raw`\le\boldsymbol\delta^{\mathsf T}S_w^{-1}\boldsymbol\delta.`;
+const markdown =
+  markdownBase +
+  '\n\n$$' +
+  issueFormula +
+  '$$\n\n紧邻正文$$' +
+  issueFormula +
+  '$$继续解释。\n\n$$\n' +
+  issueFormula +
+  '\n$$';
 const app = await electron.launch({
   executablePath:
     process.env.DESKTOP_EXE ||
@@ -69,8 +82,8 @@ try {
   const check = async () => {
     await w.evaluate(() => document.fonts.ready);
     assert.equal(await w.locator('#preview .katex-error').count(), 0);
-    assert.equal(await w.locator('#preview .katex').count(), 11);
-    assert.equal(await w.locator('#preview .katex-display').count(), 7);
+    assert.equal(await w.locator('#preview .katex').count(), 14);
+    assert.equal(await w.locator('#preview .katex-display').count(), 10);
     assert.equal(await w.locator('#preview .katex .mtable').count(), 2);
     assert.ok(
       (await w.locator('#preview pre code').textContent()).includes('not math'),

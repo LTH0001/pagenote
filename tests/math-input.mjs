@@ -24,3 +24,31 @@ assert.equal(
 console.log(
   'PASS normal/doubled math delimiters, copied TeX commands, matrix row separators and protected code',
 );
+const inequality =
+  String.raw`\frac{(\mathbf w^{\mathsf T}\boldsymbol\delta)^2}{\mathbf w^{\mathsf T}S_w\mathbf w}` +
+  '\n' +
+  String.raw`\le\boldsymbol\delta^{\mathsf T}S_w^{-1}\boldsymbol\delta.`;
+assert.equal(
+  normalizeMath('$$' + inequality + '$$'),
+  '$$\n' + inequality + '\n$$',
+);
+assert.equal(
+  normalizeMath('正文$$' + inequality + '$$后文'),
+  '正文\n\n$$\n' + inequality + '\n$$\n\n后文',
+);
+assert.equal(
+  normalizeMath(normalizeMath('$$' + inequality + '$$')),
+  normalizeMath('$$' + inequality + '$$'),
+);
+for (const fence of ['```', '````', '~~~']) {
+  const sample = fence + 'text\n$$' + inequality + '$$\n' + fence;
+  assert.equal(normalizeMath(sample), sample);
+}
+assert.equal(normalizeMath('`$$a\nb$$`'), '`$$a\nb$$`');
+assert.equal(
+  normalizeMath(String.raw`\$\$ a` + '\nb' + String.raw`\$\$`),
+  String.raw`\$\$ a` + '\nb' + String.raw`\$\$`,
+);
+console.log(
+  'PASS issue #1 adjacent multiline dollar delimiters, paragraph separation, idempotence and code preservation',
+);
