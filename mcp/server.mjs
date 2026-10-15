@@ -158,7 +158,7 @@ tool(
 );
 tool(
   'page_notes_write_notes',
-  '替换单页或批量笔记；可用 expectedRevision 检测冲突。修改前自动保存旧笔记到历史目录。',
+  '替换单页或批量笔记；可用 expectedRevision 检测冲突。逐页保存后静默刷新，不切换用户当前页面。生成讲解时完成一页即调用本工具保存一页，不等整份文档完成；检查用后台截图，不调用 navigate。修改前自动保存旧笔记到历史目录。',
   {
     documentId,
     updates: z

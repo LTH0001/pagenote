@@ -142,8 +142,9 @@ exports.createAIController = async function ({ win, url, data, word }) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ markdown: update.markdown }),
         });
+        // Publish each completed page without navigating the visible window.
+        await invoke(win, 'syncNotes', id);
       }
-      await invoke(win, 'syncNotes', id);
       return {
         documentId: id,
         updated: updates.map((u) => ({

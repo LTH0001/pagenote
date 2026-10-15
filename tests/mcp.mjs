@@ -26,6 +26,7 @@ function json(result) {
 }
 try {
   const window = await app.firstWindow();
+  window.setDefaultTimeout(30000);
   await window.waitForSelector('#noteScroll');
   await window.waitForFunction(() => !!window.pageNotes);
   await window.evaluate(() => window.pageNotes.ready);
@@ -96,12 +97,21 @@ try {
       arguments: { documentId: imported.id, pages: [1, 2] },
     }),
   );
+  console.log('PASS MCP reading source pages');
   const text =
     '# 无限长笔记纸张\n\n' +
     '这是一段较长的解释，纸张宽度固定，正文自动换行。\n\n'.repeat(90) +
     '\n```python\n' +
     'long_word_'.repeat(150) +
     '\n```\n\n```mermaid\nflowchart LR\n A[原文] --> B[理解] --> C[笔记]\n```';
+  await window.evaluate(() => {
+    window.notePublication = [];
+    const sync = window.pageNotes.syncNotes;
+    window.pageNotes.syncNotes = async (id) => {
+      await sync(id);
+      window.notePublication.push(await window.pageNotes.readPages([1, 2]));
+    };
+  });
   json(
     await client.callTool({
       name: 'page_notes_write_notes',
@@ -118,6 +128,11 @@ try {
       },
     }),
   );
+  const published = await window.evaluate(() => window.notePublication);
+  console.log('PASS MCP per-page publication');
+  assert.equal(published.length, 2, 'batch writes publish each completed page');
+  assert.equal(published[0][0].markdown, text);
+  assert.equal(published[1][1].markdown, '# 第二页\n\n$$\\mu=18$$');
 
   const layout = json(
     await client.callTool({
@@ -160,6 +175,71 @@ try {
     text,
     'AI reader refreshes after mutation',
   );
+  const readingPosition = await window.evaluate(() => {
+    const scroll = document.querySelector('#noteScroll');
+    scroll.scrollTop = 500;
+    window.readingHeading = document.querySelector('#preview h1');
+    const selection = getSelection();
+    selection.selectAllChildren(window.readingHeading);
+    return { top: scroll.scrollTop, selected: selection.toString() };
+  });
+  console.log('Testing silent background updates');
+  json(
+    await client.callTool({
+      name: 'page_notes_write_notes',
+      arguments: {
+        documentId: imported.id,
+        updates: [{ page: 3, markdown: '# 第三页已生成\n\n后台逐页讲解。' }],
+      },
+    }),
+  );
+  assert.deepEqual(
+    await window.evaluate(() => ({
+      page: document.querySelector('#pageNumber').value,
+      top: document.querySelector('#noteScroll').scrollTop,
+      selected: getSelection().toString(),
+      sameHeading:
+        window.readingHeading === document.querySelector('#preview h1'),
+    })),
+    {
+      page: '1',
+      top: readingPosition.top,
+      selected: readingPosition.selected,
+      sameHeading: true,
+    },
+    'background pages preserve reading position, selection and DOM',
+  );
+  json(
+    await client.callTool({
+      name: 'page_notes_write_notes',
+      arguments: {
+        documentId: imported.id,
+        updates: [{ page: 1, markdown: text + '\n\n本页实时补充。' }],
+      },
+    }),
+  );
+  assert.ok(
+    (await window.locator('#preview').innerText()).includes('本页实时补充'),
+  );
+  assert.equal(await window.locator('#pageNumber').inputValue(), '1');
+  assert.ok(
+    Math.abs(
+      (await window.locator('#noteScroll').evaluate((e) => e.scrollTop)) -
+        readingPosition.top,
+    ) < 2,
+    'updating the viewed page preserves scroll',
+  );
+  await window.locator('#pageNumber').fill('3');
+  await window.locator('#pageNumber').dispatchEvent('change');
+  await window.waitForFunction(() =>
+    document.querySelector('#preview').textContent.includes('第三页已生成'),
+  );
+  await window.locator('#pageNumber').fill('1');
+  await window.locator('#pageNumber').dispatchEvent('change');
+  await window.waitForFunction(() =>
+    document.querySelector('#preview').textContent.includes('本页实时补充'),
+  );
+  console.log('PASS MCP silent updates and preserved reading position');
   await window.evaluate(() => window.pageNotes.lockEditing());
   await window.locator('#next').click();
   await window.waitForFunction(

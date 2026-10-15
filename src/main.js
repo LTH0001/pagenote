@@ -1743,8 +1743,24 @@ window.pageNotes = {
   },
   syncNotes: async (id) => {
     if (doc?.id === id) {
-      notes = await request(`/api/documents/${id}/notes`);
-      loadNote();
+      const incoming = await request(`/api/documents/${id}/notes`);
+      if (doc?.id !== id) return;
+      const previous = notes[page] || '';
+      notes = incoming;
+      // Background writes to other pages must not rebuild the reader's DOM,
+      // clear their selection or move either pane.
+      if ((notes[page] || '') !== previous) {
+        const scroll = $('noteScroll');
+        const { scrollTop, scrollLeft } = scroll;
+        const editorTop = $('editor').scrollTop;
+        $('editor').value = notes[page] || '';
+        updatePreview();
+        annotations.mountNote($('noteBody'), page);
+        reviews?.refresh();
+        scroll.scrollTop = scrollTop;
+        scroll.scrollLeft = scrollLeft;
+        $('editor').scrollTop = editorTop;
+      }
     }
   },
   lockEditing: async () => {
