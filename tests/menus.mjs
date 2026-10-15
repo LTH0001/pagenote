@@ -69,6 +69,40 @@ try {
   await w.evaluate(() => window.pageNotes.menuAction('reviewLeft'));
   assert.ok(await w.locator('.ai-workbench[data-side=document]').isVisible());
   assert.ok(await w.locator('.ai-workbench[data-side=note]').isHidden());
+  for (const factor of [0.8, 1, 1.25]) {
+    await app.evaluate(
+      ({ BrowserWindow }, zoom) =>
+        BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(zoom),
+      factor,
+    );
+    const alignment = await w.evaluate(() => {
+      const rail = document
+        .querySelector('#aiSharedTools')
+        .getBoundingClientRect();
+      const workspace = document
+        .querySelector('#workspace')
+        .getBoundingClientRect();
+      const first = document
+        .querySelector('#aiSharedTools > button')
+        .getBoundingClientRect();
+      return {
+        railTop: rail.top,
+        workspaceTop: workspace.top,
+        buttonGap: first.top - rail.top,
+      };
+    });
+    assert.ok(
+      Math.abs(alignment.railTop - alignment.workspaceTop) <= 1,
+      'tool rail aligns with workspace at scale ' + factor,
+    );
+    assert.ok(
+      alignment.buttonGap <= 7,
+      'no doubled top spacer at scale ' + factor,
+    );
+  }
+  await app.evaluate(({ BrowserWindow }) =>
+    BrowserWindow.getAllWindows()[0].webContents.setZoomFactor(1),
+  );
   await w.locator('.ai-workbench[data-side=document] .board-close').click();
   await w.locator('#aiSharedTools [data-ai-pointer=mouse]').click();
   assert.ok(await w.locator('.mouse-options').isVisible());

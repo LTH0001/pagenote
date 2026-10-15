@@ -1701,7 +1701,7 @@ body {
 #aiSharedTools {
   position: fixed;
   left: 0;
-  top: 12px;
+  top: 0;
   bottom: 0;
   width: 72px;
   flex-direction: column;
@@ -1710,7 +1710,7 @@ body {
   border: 0;
   border-right: 1px solid #e0e0e0;
   margin: 0;
-  padding: 12px 6px;
+  padding: 6px;
   z-index: 20;
 }
 #aiSharedTools > button,
