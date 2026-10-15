@@ -9,16 +9,26 @@ function mathBody(body, doubled) {
   return copied ? body.replace(/\\\\/g, '\\') : body;
 }
 function proseMath(text) {
-  // Match doubled delimiters first, so their extra slash cannot escape Markdown.
-  return text.replace(
-    /(\\{1,2})(\[|\()([\s\S]*?)\1(\]|\))/g,
-    (match, slash, open, body, close) => {
-      if ((open === '[' && close !== ']') || (open === '(' && close !== ')'))
-        return match;
-      const value = mathBody(body, slash.length === 2);
-      return open === '[' ? '\n\n$$\n' + value + '\n$$\n\n' : '$' + value + '$';
-    },
-  );
+  return text
+    .replace(
+      // The KaTeX extension accepts multiline display bodies only when the
+      // delimiters occupy their own lines. Preserve TeX, including matrix rows.
+      /^ {0,3}\$\$(?!\$)([\s\S]*?)\$\$[\t ]*(?=\r?$)/gm,
+      (match, body) =>
+        body.includes('\n') ? '$$\n' + body.trim() + '\n$$' : match,
+    )
+    .replace(
+      // Match doubled TeX delimiters first so Markdown cannot escape them.
+      /(\\{1,2})(\[|\()([\s\S]*?)\1(\]|\))/g,
+      (match, slash, open, body, close) => {
+        if ((open === '[' && close !== ']') || (open === '(' && close !== ')'))
+          return match;
+        const value = mathBody(body, slash.length === 2);
+        return open === '['
+          ? '\n\n$$\n' + value + '\n$$\n\n'
+          : '$' + value + '$';
+      },
+    );
 }
 export function normalizeMath(text) {
   const lines = String(text).split(/(?<=\n)/);

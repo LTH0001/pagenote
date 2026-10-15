@@ -2,6 +2,8 @@
 
 ## 2.0.0-beta.5 — Unreleased / 尚未发布
 
+- Render multiline dollar display formulas whose delimiters touch the first and last lines of TeX. / 修复跨行块公式在 `$$` 紧邻公式内容时显示为源码的问题。
+
 - Recognize copied double-escaped TeX delimiters and consistently escaped commands without changing code blocks or normal matrix row breaks. / 兼容复制后的双重转义公式，保留代码块和正常矩阵换行；修复公式显示反斜杠源码的问题。
 
 - Bundle common code-language grammars, normalize aliases/case and preserve plain code when highlighting fails. / 本地打包常用代码语言，统一大小写和别名，高亮失败时保留原文。

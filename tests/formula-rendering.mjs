@@ -9,6 +9,9 @@ Inline $\mu$, normal \(\sigma^2\), copied \\(\\theta\\), mixed \\(\alpha\\).
 
 $$\frac{1}{N}\sum_{i=1}^N x_i$$
 
+$$\frac{(\mathbf w^{\mathsf T}\boldsymbol\delta)^2}{\mathbf w^{\mathsf T}S_w\mathbf w}
+\le\boldsymbol\delta^{\mathsf T}S_w^{-1}\boldsymbol\delta.$$
+
 \[p(x)=\frac{1}{\sqrt{2\pi}}\exp(-x^2/2)\]
 
 \\[x\sim\mathcal N(\mu,\sigma^2)\\]
@@ -69,8 +72,8 @@ try {
   const check = async () => {
     await w.evaluate(() => document.fonts.ready);
     assert.equal(await w.locator('#preview .katex-error').count(), 0);
-    assert.equal(await w.locator('#preview .katex').count(), 11);
-    assert.equal(await w.locator('#preview .katex-display').count(), 7);
+    assert.equal(await w.locator('#preview .katex').count(), 12);
+    assert.equal(await w.locator('#preview .katex-display').count(), 8);
     assert.equal(await w.locator('#preview .katex .mtable').count(), 2);
     assert.ok(
       (await w.locator('#preview pre code').textContent()).includes('not math'),
