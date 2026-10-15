@@ -118,10 +118,18 @@ exports.createAIController = async function ({ win, url, data, word }) {
     const stat = await fs.stat(file);
     const signature = `${id}:${stat.size}:${stat.mtimeMs}:${stat.ctimeMs}`;
     const changed = readerSource?.signature !== signature;
-    if (changed || (await invoke(window, 'getSummary')).document?.id !== id)
-      await invoke(window, 'open', id, 1, changed);
-    if (changed)
-      readerSource = { signature, hash: revision(await fs.readFile(file)) };
+    const needsOpen =
+      changed || (await invoke(window, 'getSummary')).document?.id !== id;
+    if (needsOpen) await invoke(window, 'open', id, 1, changed);
+    if (needsOpen) {
+      // Opening a portable project refreshes its cached source copy. Cache the
+      // resulting fingerprint so later reads do not repeatedly reopen it.
+      const current = await fs.stat(file);
+      readerSource = {
+        signature: `${id}:${current.size}:${current.mtimeMs}:${current.ctimeMs}`,
+        hash: revision(await fs.readFile(file)),
+      };
+    }
     return window;
   }
   const sourceRevision = (text) => revision(readerSource.hash + '\n' + text);

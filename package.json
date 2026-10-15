@@ -20,6 +20,7 @@
     "package:source": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/source-archive.ps1",
     "test:word": "node tests/default-word.mjs",
     "test:prepared": "node tests/prepared.mjs",
+    "test:page-breaks": "node tests/page-breaks.mjs",
     "pretest:prepared": "node scripts/ensure-electron.mjs",
     "pretest:release": "node scripts/ensure-electron.mjs",
     "pretest:mcp": "node scripts/ensure-electron.mjs",

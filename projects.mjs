@@ -3,6 +3,11 @@ const { moveFile, copyFileSafe } = fileOps;
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { createHash, randomUUID } from 'node:crypto';
+export function splitPageNotes(text) {
+  return text.split(
+    /(?:\r?\n){2}<!--[ \t]*pagebreak[ \t]*-->(?:\r?\n){2}|^[ \t]*<!--[ \t]*pagebreak[ \t]*-->[ \t]*\r?$/gm,
+  );
+}
 export function createProjectStore({ app, data, convertOffice }) {
   const metaPath = (id) => path.join(data, 'documents', id, 'meta.json'),
     valid = (id) => /^[a-f0-9]{64}$/.test(id);
@@ -186,9 +191,9 @@ export function createProjectStore({ app, data, convertOffice }) {
       }
     }
     const notes = Object.fromEntries(
-      (await importAssets(await fs.readFile(right, 'utf8'), root))
-        .split(/\n\s*<!--\s*pagebreak\s*-->\s*\r?\n/g)
-        .map((text, i) => [i + 1, text]),
+      splitPageNotes(
+        await importAssets(await fs.readFile(right, 'utf8'), root),
+      ).map((text, i) => [i + 1, text]),
     );
     await atomic(path.join(dir, 'notes.json'), JSON.stringify(notes));
     for (const name of [

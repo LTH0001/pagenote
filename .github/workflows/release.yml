@@ -26,6 +26,7 @@ jobs:
       - run: npm audit --omit=dev
       - run: npm run build
       - run: npm run test:release
+      - run: npm run test:page-breaks
       - run: npm run test:mcp
       - run: npm run test:prepared
       - run: npm run package:desktop
