@@ -27,6 +27,8 @@ Screenshots return PNG image content suitable for multimodal models. Screenshot 
 
 ## Page-by-page teaching
 
+The development build exposes the bundled `SKILL.md` at `page-notes://skills/page-tutor` and as the MCP prompt `pagenote-page-tutor`. Optional string arguments are `learner` (background), `pages` (page range) and `goal`. Clients without prompt support can read the resource, or paste the skill from **AI Annotations → Copy page-by-page teaching prompt**. The original 17 document tools remain unchanged. The skill does not initiate model calls.
+
 Use a separate model generation request for each source page. Complete, verify, save and inspect that page before requesting the next one. Do not generate the entire chapter in one answer and split it afterward. Batch MCP reads or writes do not count as separate model requests.
 
 Each request needs the complete current page, relevant screenshots, the learner's background, a short chapter map and a concise handoff from the previous page. Preserve notation, examples and dependencies in the handoff, leaving enough context for detailed explanations of the current page. Begin from prior knowledge and end with a brief transition to the next page. Use formulas, runnable code, Mermaid or illustrations where they help.

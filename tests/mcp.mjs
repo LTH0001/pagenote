@@ -51,6 +51,33 @@ try {
   assert.ok(client.getInstructions().includes('上一页知识交接'));
   const tools = await client.listTools();
   assert.equal(tools.tools.length, 17);
+  const resources = await client.listResources();
+  assert.ok(
+    resources.resources.some((r) => r.uri === 'page-notes://skills/page-tutor'),
+  );
+  const skill = await client.readResource({
+    uri: 'page-notes://skills/page-tutor',
+  });
+  const canonicalSkill = await fs.readFile(
+    path.join(root, 'skills/pagenote-page-tutor/SKILL.md'),
+    'utf8',
+  );
+  assert.equal(skill.contents[0].text, canonicalSkill);
+  const prompts = await client.listPrompts();
+  assert.ok(prompts.prompts.some((p) => p.name === 'pagenote-page-tutor'));
+  const prompt = await client.getPrompt({
+    name: 'pagenote-page-tutor',
+    arguments: {
+      learner: '大三，学过一点计算机网络',
+      pages: '6-7',
+      goal: '陈述式逐层解释',
+    },
+  });
+  assert.ok(prompt.messages[0].content.text.includes(canonicalSkill));
+  assert.ok(
+    prompt.messages[0].content.text.includes('大三，学过一点计算机网络'),
+  );
+  assert.ok(prompt.messages[0].content.text.includes('6-7'));
   const imported = json(
     await client.callTool({
       name: 'page_notes_import_document',

@@ -21,7 +21,8 @@ const server = new McpServer(
   {
     instructions:
       '控制本机pagenote桌面软件。先读取状态或文档列表；修改前读取页面并保留 revision，用 expectedRevision 避免覆盖用户的新修改。截图和拼图返回 image/png 图片内容，多模态模型可直接查看。操作只影响软件的文档、笔记和布局。截图在隐藏窗口生成，不切换用户的阅读页。\n\n' +
-      teachingPolicy,
+      teachingPolicy +
+      '\n逐页精讲任务开始前，读取资源 page-notes://skills/page-tutor，或调用提示模板 pagenote-page-tutor，按内置 SKILL.md 执行。For page-by-page teaching, load the built-in skill resource or prompt first.',
   },
 );
 const documentId = z
@@ -278,6 +279,85 @@ server.registerResource(
       ],
     };
   },
+);
+const readTutorSkill = () =>
+  fs.readFile(
+    path.join(
+      path.dirname(connectionFile),
+      'skills',
+      'pagenote-page-tutor',
+      'SKILL.md',
+    ),
+    'utf8',
+  );
+server.registerResource(
+  'page-tutor-skill',
+  'page-notes://skills/page-tutor',
+  {
+    title: '逐页精讲 / Page-by-page tutor',
+    description:
+      '内置学习技能：陈述式、逐页独立请求、递进讲解、图文与知识交接。',
+    mimeType: 'text/markdown',
+  },
+  async (uri) => ({
+    contents: [
+      {
+        uri: uri.href,
+        mimeType: 'text/markdown',
+        text: await readTutorSkill(),
+      },
+    ],
+  }),
+);
+server.registerPrompt(
+  'pagenote-page-tutor',
+  {
+    title: '逐页精讲 / Page-by-page tutor',
+    description:
+      '使用内置学习技能解释当前文档；每页单独请求，按学习基础逐层展开并承接前后页。',
+    argsSchema: {
+      learner: z
+        .string()
+        .max(4000)
+        .optional()
+        .describe('学习者已有基础 / Learner background'),
+      pages: z
+        .string()
+        .max(1000)
+        .optional()
+        .describe('实际页码范围；未指定时先确认任务范围 / Page range'),
+      goal: z
+        .string()
+        .max(4000)
+        .optional()
+        .describe('学习目标或额外要求 / Learning goal'),
+    },
+  },
+  async (args) => ({
+    description: '逐页精讲：先读取当前文档，再执行页级学习工作流。',
+    messages: [
+      {
+        role: 'user',
+        content: {
+          type: 'text',
+          text:
+            (await readTutorSkill()) +
+            '\n\n## 本次任务\n' +
+            JSON.stringify(
+              {
+                learner: args.learner || '依据用户已给出的学习背景',
+                pages: args.pages || '依据当前用户请求确定，不擅自扩大范围',
+                goal:
+                  args.goal ||
+                  '陈述式逐页递进精讲，结合合适的图像、流程图、代码和公式',
+              },
+              null,
+              2,
+            ),
+        },
+      },
+    ],
+  }),
 );
 server.connect(new StdioServerTransport()).catch((error) => {
   console.error(error);

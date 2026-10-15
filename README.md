@@ -54,6 +54,8 @@ AI 浪潮扑面而来，用 AI 辅助学习早已是寻常选择。大家常常�
 
 连接 AI 后，请按 [逐页精讲约定](docs/AI-TEACHING.zh-CN.md) 执行：每页单独发起讲解请求，给足本页上下文，并把上一页的知识交接带入下一页。不要一次生成整章后再拆页。
 
+开发版内置了 [逐页精讲技能](skills/pagenote-page-tutor/SKILL.md)。在 **AI 标注 → 复制逐页精讲提示词** 中复制后交给 AI，即可复用这些要求；支持 MCP 提示模板的客户端可调用 `pagenote-page-tutor`，填写学习基础、页码范围和目标。AI 也能直接读取资源 `page-notes://skills/page-tutor`。模板提供讲解要求，不会在本机自行调用大模型。
+
 **当前公开版本：2.0.0-beta.4。** 还在测试和改进中，欢迎拿真实的学习材料试用，也欢迎告诉我哪里用起来不顺。
 
 ## 下载与安装
@@ -123,6 +125,12 @@ npm run desktop
 术语和翻译集中在 `locales/catalog.json`，语言设置持久化保存；用户文档内容不参与界面翻译。详细术语依据见 [术语规范](docs/TERMINOLOGY.md)。
 
 验收范围及仍需完成的工作见 [发布准备报告](docs/RELEASE-READINESS.md)。提交问题时请注明版本、系统、复现步骤和脱敏日志；不要上传个人项目或 MCP 连接密钥。
+
+## 反馈与联系
+
+使用中遇到 Bug，欢迎[提交 Issue](https://github.com/laihong06/pagenote/issues/new)。附上软件版本、操作步骤和截图，会更方便我复现和排查。
+
+有建议，或想交流一下这个工具，也可以发邮件给我：[chennanfeng310@gmail.com](mailto:chennanfeng310@gmail.com)。
 
 ## 许可
 

@@ -9,7 +9,7 @@ $stream = [System.IO.File]::Open($zipPath, [System.IO.FileMode]::Create)
 $archive = [System.IO.Compression.ZipArchive]::new($stream, [System.IO.Compression.ZipArchiveMode]::Create)
 try {
     $files = [System.Collections.Generic.List[string]]::new()
-    foreach ($folder in @('src','desktop','mcp','scripts','docs','locales','build','.github','examples','tests/fixtures')) {
+    foreach ($folder in @('src','desktop','mcp','skills','scripts','docs','locales','build','.github','examples','tests/fixtures')) {
         $path = Join-Path $repoRoot $folder
         if (Test-Path -LiteralPath $path) {
             Get-ChildItem -LiteralPath $path -Recurse -File | ForEach-Object { $files.Add($_.FullName) }
