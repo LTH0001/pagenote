@@ -1,5 +1,9 @@
 # pagenote
 
+**[⬇ 下载完整软件包（Windows x64 · ZIP）](https://github.com/laihong06/pagenote/releases/download/v2.0.0-beta.4/pagenote-2.0.0-beta.4-windows-x64.zip)** · [下载安装版](https://github.com/laihong06/pagenote/releases/download/v2.0.0-beta.4/pagenote-2.0.0-beta.4-windows-x64-setup.exe) · [下载完整源码](https://github.com/laihong06/pagenote/archive/refs/heads/main.zip)
+
+想直接试用，下载完整软件包，全部解压后运行 `pagenote.exe` 即可。当前为 **2.0.0-beta.4 测试版**；想修改项目，可下载源码或 Fork 本仓库，按下方说明构建。
+
 <img src="build/icon.png" alt="pagenote 双页图标" width="88">
 
 [English](README.en.md) · 简体中文

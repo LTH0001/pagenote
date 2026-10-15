@@ -1,5 +1,9 @@
 # pagenote
 
+**[⬇ Download the complete app (Windows x64 · ZIP)](https://github.com/laihong06/pagenote/releases/download/v2.0.0-beta.4/pagenote-2.0.0-beta.4-windows-x64.zip)** · [Installer](https://github.com/laihong06/pagenote/releases/download/v2.0.0-beta.4/pagenote-2.0.0-beta.4-windows-x64-setup.exe) · [Full source code](https://github.com/laihong06/pagenote/archive/refs/heads/main.zip)
+
+To try the app, download and extract the complete ZIP, then run `pagenote.exe`. The current release is **2.0.0-beta.4 (beta)**. To make changes, download the source or fork this repository and follow the build instructions below.
+
 <img src="build/icon.png" alt="pagenote paired-page icon" width="88">
 
 English · [简体中文](README.md)
