@@ -109,8 +109,12 @@ try {
     );
     assert.equal(state.markdown, expected.get(p));
     if (iterations % 6 === 0) {
-      await w.evaluate(() => window.pageNotes.menuAction('chooseEditor'));
-      await w.locator('.note-pane .pane-heading').click();
+      if (
+        (await w.evaluate(() => window.pageNotes.getState())).mode !== 'edit'
+      ) {
+        await w.evaluate(() => window.pageNotes.menuAction('chooseEditor'));
+        await w.locator('.note-pane .pane-heading').click();
+      }
       await w.locator('#preview').click();
       await w.evaluate(() => {
         const el = document.querySelector('#preview'),
