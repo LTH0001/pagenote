@@ -114,21 +114,24 @@ Beta.3 fixes migration, staged file replacement and cross-volume copy failures i
 
 ## Requirements
 
-- Windows 10/11 x64. Other platforms and ARM64 are not yet validated.
-- Office is optional for PDF/Markdown; Word/PPT conversion requires Microsoft Office.
+- Windows 10/11, x64 with full functionality.
+- macOS 12 or later with Apple Silicon and Intel builds; supports PDF, Markdown and native Office integration.
+- ARM64 Windows is not yet verified.
+- PDF and Markdown do not require Office. Word/PPT import, project preview and post-save refresh need locally licensed **Microsoft Word / PowerPoint** on Windows and macOS.
+- On first Mac integration, allow pagenote to control Word / PowerPoint; if denied, enable it under **System Settings → Privacy & Security → Automation**. Mac Word editing uses a separate window with MCP read, selection, revision-checked replacement and PDF-rendered screenshots. See [Mac Office notes](docs/MAC-OFFICE.md).
 - The distribution includes the Node.js runtime used by MCP. End users do not need a Node.js installation.
 
 ## Build from source
 
 Install Node.js 22.13 or newer, then run:
 
-```powershell
+```bash
 npm ci
 npm run build
 npm run desktop
 ```
 
-Use `npm run dev` for browser development, `npm run package:desktop` for the Windows installer and ZIP, or `npm run package:dir` for a folder build.
+Use `npm run dev` for browser development, `npm run package:desktop` for the Windows installer and ZIP, or `npm run package:dir` for a folder build. Use `npm run package:mac` for macOS DMG and ZIP (Apple Silicon and Intel), or `npm run package:mac:local` for a local-arch folder build. The test suite runs on Windows and macOS.
 
 See the [release guide](docs/RELEASING.en-US.md), [terminology specification](docs/TERMINOLOGY.md) and [release-readiness report](docs/RELEASE-READINESS.md). Bug reports should include the version, Windows version, reproduction steps and redacted logs. Do not upload private projects or MCP connection keys.
 

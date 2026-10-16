@@ -3,11 +3,18 @@ import path from 'node:path';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 const root = path.resolve(import.meta.dirname, '..');
+const executable =
+  process.env.DESKTOP_EXE ||
+  path.join(
+    root,
+    process.platform === 'darwin'
+      ? 'node_modules/electron/dist/Electron.app/Contents/MacOS/Electron'
+      : 'node_modules/electron/dist/electron.exe',
+  );
+
 const app = await electron.launch({
-  executablePath:
-    process.env.DESKTOP_EXE ||
-    path.join(root, 'node_modules/electron/dist/electron.exe'),
-  args: process.env.DESKTOP_EXE ? [] : [root],
+  executablePath: executable,
+  args: [root],
   env: {
     ...process.env,
     PAGE_NOTES_USER_DATA: path.join(

@@ -1,4 +1,6 @@
 import fs from 'node:fs/promises';
+import path from 'node:path';
+import { spawnSync } from 'node:child_process';
 import { PNG } from 'pngjs';
 // A source page flows into structured knowledge on the facing page.
 const shapes = [];
@@ -111,3 +113,34 @@ await fs.mkdir('build', { recursive: true });
 await fs.writeFile('build/icon.ico', Buffer.concat([header, ...images]));
 await fs.writeFile('build/icon.png', images.at(-1));
 await fs.writeFile('build/icon.svg', svg);
+if (process.platform === 'darwin') {
+  // iconutil only accepts fixed iconset names, so write each size it expects.
+  const iconset = path.join('build', 'icon.iconset');
+  await fs.rm(iconset, { recursive: true, force: true });
+  await fs.mkdir(iconset, { recursive: true });
+  // raster() redraws the shapes at any size, so supersample instead of
+  // upscaling the 256px master, which would blur the 512px and 1024px layers.
+  for (const [name, size] of [
+    ['icon_16x16.png', 16],
+    ['icon_16x16@2x.png', 32],
+    ['icon_32x32.png', 32],
+    ['icon_32x32@2x.png', 64],
+    ['icon_128x128.png', 128],
+    ['icon_128x128@2x.png', 256],
+    ['icon_256x256.png', 256],
+    ['icon_256x256@2x.png', 512],
+    ['icon_512x512.png', 512],
+    ['icon_512x512@2x.png', 1024],
+  ])
+    await fs.writeFile(path.join(iconset, name), raster(size));
+  const result = spawnSync(
+    'iconutil',
+    ['-c', 'icns', iconset, '-o', 'build/icon.icns'],
+    { stdio: 'inherit' },
+  );
+  if (result.error) throw result.error;
+  if (result.status !== 0)
+    throw Error(`iconutil 失败，退出码 ${result.status}`);
+  await fs.rm(iconset, { recursive: true, force: true });
+  console.log('Collected icon.icns');
+}

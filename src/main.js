@@ -614,7 +614,7 @@ async function performOpenDocument(meta, fromWord = false) {
   if (wordBusy && !fromWord) await waitWordIdle();
   if (wordActive) await endWord();
   await flush();
-  if (meta.projectFile)
+  if (meta.projectFile && !new URLSearchParams(location.search).has('capture'))
     meta = await request('/api/projects/open', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -789,9 +789,13 @@ async function beginWord() {
     setMode('read');
     expandPanel('document');
     await new Promise((resolve) => setTimeout(resolve, 320));
-    await wordCall('open', { documentId: doc.id, rect: wordRect() });
+    const opened = await wordCall('open', {
+      documentId: doc.id,
+      rect: wordRect(),
+    });
     wordActive = true;
-    document.body.classList.add('word-active');
+    document.body.classList.toggle('word-active', opened.embedded !== false);
+    if (opened.embedded === false) restorePanels();
     editTools();
     await new Promise((resolve) => requestAnimationFrame(resolve));
     await wordCall('resize', { rect: wordRect() });
@@ -809,11 +813,17 @@ async function endWord() {
   updateControls();
   editTools();
   try {
-    await wordCall('close', { save: true });
+    const closed = await wordCall('close', { save: true });
     wordActive = false;
     document.body.classList.remove('word-active');
     editTools();
     restorePanels();
+    if (doc?.projectRoot && !closed.projectPersisted)
+      await request('/api/projects/' + doc.id + '/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ right: false }),
+      });
     const list = await refreshLibrary(),
       meta = list.find((d) => d.id === doc.id);
     await openDocument(meta, true);
@@ -1657,17 +1667,10 @@ window.pageNotes = {
   validateNote,
   openAISettings,
   finishEditing: async () => {
-    const hadWord = wordActive;
     await endMarkdownDocument();
     await waitWordIdle();
     if (wordActive) await endWord();
     await flush();
-    if (doc?.projectRoot && hadWord)
-      await request('/api/projects/' + doc.id + '/sync', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ right: false }),
-      });
   },
   beginWord,
   endWord,
@@ -1703,7 +1706,11 @@ window.pageNotes = {
     await endMarkdownDocument();
     await flush();
     if (doc?.projectRoot)
-      await request('/api/projects/' + doc.id + '/sync', { method: 'POST' });
+      await request('/api/projects/' + doc.id + '/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ source: !wordActive }),
+      });
   },
   resetNoteZoom: () => {
     noteZoom = 1;
@@ -1771,7 +1778,13 @@ window.pageNotes = {
     const list = await refreshLibrary();
     const meta = list.find((d) => d.id === id);
     if (!meta) throw Error('文档不存在');
-    if (doc?.id !== id || forceReload) await openDocument(meta);
+    if (
+      doc?.id !== id ||
+      forceReload ||
+      (new URLSearchParams(location.search).has('capture') &&
+        doc?.modified !== meta.modified)
+    )
+      await openDocument(meta);
     await goTo(p);
     await waitVisuals();
   },
@@ -1839,10 +1852,19 @@ window.pageNotes = {
     updateControls();
     growEditor();
   },
-  prepareCapture: async (id, p, settings) => {
+  prepareCapture: async (id, p, settings, sourceUrl) => {
     await window.pageNotes.ready;
     if (settings) applyLayout(settings);
-    await window.pageNotes.open(id, p);
+    if (sourceUrl) {
+      if (!new URLSearchParams(location.search).has('capture'))
+        throw Error('编辑预览仅用于隐藏截图窗口');
+      const meta = (await request('/api/documents')).find(
+        (item) => item.id === id,
+      );
+      if (!meta || meta.kind !== 'pdf') throw Error('截图文档不存在');
+      await openDocument({ ...meta, url: sourceUrl, modified: sourceUrl });
+      await goTo(p);
+    } else await window.pageNotes.open(id, p);
     setMode('read');
     await annotations.load(id);
     annotations.mountNote($('noteBody'), page);

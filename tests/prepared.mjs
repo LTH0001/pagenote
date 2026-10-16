@@ -66,7 +66,12 @@ const hash = (value) => createHash('sha256').update(value).digest('hex');
 const app = await electron.launch({
   executablePath:
     process.env.DESKTOP_EXE ||
-    path.join(root, 'node_modules/electron/dist/electron.exe'),
+    path.join(
+      root,
+      process.platform === 'darwin'
+        ? 'node_modules/electron/dist/Electron.app/Contents/MacOS/Electron'
+        : 'node_modules/electron/dist/electron.exe',
+    ),
   args: process.env.DESKTOP_EXE ? [] : [root],
   env: {
     ...process.env,

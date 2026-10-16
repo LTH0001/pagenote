@@ -318,7 +318,11 @@ export function createProjectStore({ app, data, convertOffice }) {
   });
   app.post('/api/projects/:id/sync', async (req, res, next) => {
     try {
-      await persist(req.params.id, true, req.body?.right !== false);
+      await persist(
+        req.params.id,
+        req.body?.source !== false,
+        req.body?.right !== false,
+      );
       res.json({ ok: true });
     } catch (e) {
       next(e);

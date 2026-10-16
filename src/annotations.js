@@ -618,14 +618,19 @@ export function createAnnotations({
     }
   };
   document.addEventListener('keydown', (e) => {
-    if (!active || e.target.closest('dialog,input,textarea')) return;
+    if (
+      !active ||
+      e.target.isContentEditable ||
+      e.target.closest('dialog,input,textarea')
+    )
+      return;
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
       e.preventDefault();
       undoRedo(!e.shiftKey);
     } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
       e.preventDefault();
       undoRedo(false);
-    } else if (e.key === 'Delete') {
+    } else if (selected && (e.key === 'Delete' || e.key === 'Backspace')) {
       e.preventDefault();
       document.getElementById('inkDelete').click();
     }

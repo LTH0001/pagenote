@@ -94,10 +94,10 @@ exports.createAIController = async function ({ win, url, data, word }) {
     if (!state.document) throw Error('请先打开文档，或者传入 documentId');
     return state.document.id;
   }
-  async function inspect(id, page = 1) {
+  async function inspect(id, page = 1, sourceUrl) {
     const window = await readyInspector();
     const layout = await api('/api/layout');
-    await invoke(window, 'prepareCapture', id, page, layout);
+    await invoke(window, 'prepareCapture', id, page, layout, sourceUrl);
     await invoke(window, 'syncNotes', id);
     await invoke(window, 'waitVisuals');
     return window;
@@ -220,8 +220,10 @@ exports.createAIController = async function ({ win, url, data, word }) {
     fullNote = false,
     maxHeight = 12000,
     startOffset = 0,
+    sourceUrl,
   ) {
-    const window = await inspect(id, page);
+    const window = await inspect(id, page, sourceUrl);
+    page = (await invoke(window, 'getState')).page;
     const cssKey =
       scope === 'note' && fullNote
         ? await window.webContents.insertCSS(
@@ -542,6 +544,33 @@ exports.createAIController = async function ({ win, url, data, word }) {
       if (args.scope === 'word') {
         if (word.active !== id)
           throw Error('请先使用 read_word 打开对应 Word 编辑器');
+        if (word.captureKind === 'pdf') {
+          const preview = await word.call('export-preview', { documentId: id });
+          const selected = await word.call('selection', { documentId: id });
+          readerSource = undefined;
+          try {
+            const result = await capture(
+              id,
+              selected.page || 1,
+              'document',
+              false,
+              12000,
+              0,
+              preview.url,
+            );
+            return saveImage(result.png, {
+              documentId: id,
+              page: result.page,
+              scope: 'word',
+              renderedFrom: 'pdf',
+              truncated: false,
+            });
+          } finally {
+            // The inspector temporarily rendered an uncommitted working copy.
+            // Force later source reads to reopen the committed document.
+            readerSource = undefined;
+          }
+        }
         return word.call('screenshot', { documentId: id });
       }
       await invoke(win, 'flush');

@@ -8,8 +8,13 @@ const userData = path.join(root, 'tests', 'markdown-data');
 await fs.mkdir(userData, { recursive: true });
 const executable =
   process.env.DESKTOP_EXE ||
-  path.join(root, 'node_modules', 'electron', 'dist', 'electron.exe');
-const args = process.env.DESKTOP_EXE ? [] : [root];
+  path.join(
+    root,
+    process.platform === 'darwin'
+      ? 'node_modules/electron/dist/Electron.app/Contents/MacOS/Electron'
+      : 'node_modules/electron/dist/electron.exe',
+  );
+const args = [root];
 const occupier = net.createServer();
 await new Promise((resolve, reject) => {
   occupier.once('error', (e) =>
