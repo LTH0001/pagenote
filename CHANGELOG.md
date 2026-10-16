@@ -4,7 +4,7 @@
 
 ## 1.0.0 — 2026-10-17
 
-- Attribute the Windows physical-machine evidence to LTH0001 (PR #4), with final release approval by the founder; no separate founder-run test is claimed. / Windows 真机证据归属 LTH0001，发起人负责审阅及最终放行，不虚构另一轮测试。
+- Attribute acceptance to LTH0001's Windows tests (PR #4) plus the founder's supplementary local tests, with final release approval by the founder. / 发布依据为 LTH0001 测试加发起人本机补测，由发起人综合结果放行。
 
 - Freeze Windows v1.0 under the founder-approved early-stage release baseline; macOS remains experimental (1.0.0-beta.1 builds). / 依据发起人确认的早期分级质量门槛冻结 Windows v1.0 正式版，Mac 继续作为测试版。
 - Integrate PR #3 and #4, preserve both test suites, and retain PR #2 regression coverage without replacing the equivalent existing formula fix. / 合入 Mac 适配与候选版验收，保留双方测试和公式修复回归。

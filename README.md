@@ -117,7 +117,7 @@ beta.3 修复了部分 Windows 加密或重定向数据目录中的迁移、临�
 
 ## 系统要求
 
-- Windows 10 / 11，x64：v1.0 正式版，LTH0001 提供 Windows 真机测试结果，发起人批准发布。
+- Windows 10 / 11，x64：v1.0 正式版，依据 LTH0001 测试与发起人本机补测，由发起人批准发布。
 - macOS 12 或更高：测试版，支持 Apple Silicon 与 Intel 构建；Windows 的正式版状态不适用于 Mac。
 - ARM64 Windows 暂未验证。
 - PDF 与 Markdown 不要求安装 Office。Word/PPT 导入、项目预览及保存后刷新需要本机已授权的 **Microsoft Word / PowerPoint**，Windows 与 macOS 均可使用。

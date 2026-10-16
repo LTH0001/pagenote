@@ -1,6 +1,6 @@
 # pagenote v1.0 — Windows 正式版 / Windows stable
 
-Windows v1.0 按项目发起人确认的分级质量门槛正式冻结。LTH0001 已提供 Windows 真机测试结果，发起人审阅后批准以此为基线发布。正式版不表示零 Bug，也不表示所有环境均已验证。macOS 适配保留为测试版，其构建版本为 1.0.0-beta.1。
+Windows v1.0 按项目发起人确认的分级质量门槛正式冻结。发布依据是 LTH0001 的 Windows 测试加上发起人本机补测，发起人综合结果批准发布。正式版不表示零 Bug，也不表示所有环境均已验证。macOS 适配保留为测试版，其构建版本为 1.0.0-beta.1。
 
 本版包含双栏逐页阅读、Markdown 公式与 Mermaid、本地图片、AI Tag 与 MCP 按需读取、提示词管理、OCR 和项目迁移。集成 Mac 适配与验收贡献，恢复文件菜单中的版本历史入口，保留公式跨行输入兼容及回归测试。
 
@@ -14,7 +14,7 @@ Windows 下载 setup.exe 安装，或将 ZIP 完整解压后运行 pagenote.exe�
 
 ## English
 
-Windows v1.0 is stable under the founder-approved early-stage release baseline, based on LTH0001's reported test on a physical Windows computer, accepted by the founder. macOS remains experimental (1.0.0-beta.1 builds). Stable is not a zero-bug or all-environments claim.
+Windows v1.0 is stable under the founder-approved early-stage release baseline, based on LTH0001's Windows tests plus the founder's supplementary local tests. macOS remains experimental (1.0.0-beta.1 builds). Stable is not a zero-bug or all-environments claim.
 
 Includes page-linked reading and Markdown notes, math/Mermaid/images, AI Tags/MCP, prompt management, local OCR, portable projects, the restored version-history menu, and contributor acceptance improvements. Exit the old app and back up projects before installing or extracting the entire ZIP. The earlier 2.0 beta numbering is intentionally replaced by the first stable 1.0 release; upgrade manually.
 

@@ -6,4 +6,4 @@ A source push is not a binary release. Before publishing a version, pass `npm ru
 
 After a release, advance package.json and package-lock.json to the next development version when changing runtime behavior. Keep README downloads pinned to the last published release until the next complete release is available.
 
-Release decisions follow docs/RELEASE-POLICY.md. The founder-approved early-stage gates supersede historical exhaustive acceptance checklists. Windows v1.0 is approved based on the LTH0001-reported physical-machine test accepted by the founder; macOS stays experimental. Record non-blocking defects/unverified environments in KNOWN_ISSUES.md; do not add indefinite all-environment gates or claim unperformed tests.
+Release decisions follow docs/RELEASE-POLICY.md. The founder-approved early-stage gates supersede historical exhaustive acceptance checklists. Windows v1.0 is approved based on LTH0001's Windows tests plus the founder's supplementary local tests; macOS stays experimental. Record non-blocking defects/unverified environments in KNOWN_ISSUES.md; do not add indefinite all-environment gates or claim unperformed tests.
