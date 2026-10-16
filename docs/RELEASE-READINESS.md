@@ -1,3 +1,5 @@
+> Current policy / 当前准则：以 [发起人确认的分级发布基准](RELEASE-POLICY.md) 为准。本文的历史验收条目不自动阻塞 Windows v1.0；未完成的非阻断工作记入 [KNOWN_ISSUES.md](../KNOWN_ISSUES.md)。
+
 # pagenote 2.0.0-beta.4 — 发布准备 / Release readiness
 
 检查日期 / Checked: 2026-10-15. 本报告描述本机检查结果，不等于完整安全审计或商业验收。 / Local validation is not a full security audit or commercial acceptance test.

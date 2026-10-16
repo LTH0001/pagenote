@@ -6,7 +6,7 @@ const { version } = JSON.parse(
   await fs.readFile(new URL('../package.json', import.meta.url), 'utf8'),
 );
 const files = (await fs.readdir(directory)).filter((name) =>
-  /^pagenote-.*\.(exe|zip)$/.test(name),
+  /^pagenote-.*\.(exe|zip|dmg)$/.test(name),
 );
 if (!files.length) throw Error('No release artifacts found.');
 if (files.some((name) => !name.startsWith('pagenote-' + version + '-')))

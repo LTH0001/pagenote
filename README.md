@@ -1,8 +1,11 @@
 # pagenote
 
-**[⬇ 下载完整软件包（Windows x64 · ZIP）](https://github.com/laihong06/pagenote/releases/download/v2.0.0-beta.5/pagenote-2.0.0-beta.5-windows-x64.zip)** · [下载安装版](https://github.com/laihong06/pagenote/releases/download/v2.0.0-beta.5/pagenote-2.0.0-beta.5-windows-x64-setup.exe) · [下载对应版本源码](https://github.com/laihong06/pagenote/releases/download/v2.0.0-beta.5/pagenote-2.0.0-beta.5-source.zip)
 
-想直接试用，下载完整软件包，全部解压后运行 `pagenote.exe` 即可。当前为 **2.0.0-beta.5 测试版**；想修改项目，可下载源码或 Fork 本仓库，按下方说明构建。
+**平台状态：Windows v1.0 正式版；macOS 测试版。** 本项目按阶段设定质量门槛，正式版不代表零 Bug 或所有环境均已验证。[发布基准](docs/RELEASE-POLICY.md) · [已知问题与未验证范围](KNOWN_ISSUES.md)。
+
+**[⬇ 下载完整软件包（Windows x64 · ZIP）](https://github.com/laihong06/pagenote/releases/download/v1.0.0/pagenote-1.0.0-windows-x64.zip)** · [下载安装版](https://github.com/laihong06/pagenote/releases/download/v1.0.0/pagenote-1.0.0-windows-x64-setup.exe) · [下载对应版本源码](https://github.com/laihong06/pagenote/releases/download/v1.0.0/pagenote-1.0.0-source.zip)
+
+想直接试用，下载完整软件包，全部解压后运行 `pagenote.exe` 即可。当前为 **1.0.0 Windows 正式版**；想修改项目，可下载源码或 Fork 本仓库，按下方说明构建。
 
 <img src="build/icon.png" alt="pagenote 双页图标" width="88">
 
@@ -66,11 +69,11 @@ beta.5支持按需读取当前页，原文与笔记分别获取，局部修改�
 
 beta.5还内置离线中英文 OCR，能为 AI 准备逐页文字、坐标和置信度、整页或区域图片，以及 Markdown 表格和 Mermaid 图像，结果随项目缓存。原文和原图保留，识别不准的公式或图表仍需核对，详见 [本地页面准备](docs/LOCAL-PREPARATION.md)。
 
-**当前公开版本：2.0.0-beta.5。** 已安装旧版的用户需要手动升级：关闭旧版后安装新版，ZIP 版请完整解压到新目录，不要只替换 EXE。 还在测试和改进中，欢迎拿真实的学习材料试用，也欢迎告诉我哪里用起来不顺。
+**当前公开版本：1.0.0。** 已安装旧版的用户需要手动升级：关闭旧版后安装新版，ZIP 版请完整解压到新目录，不要只替换 EXE。 后续继续改进，欢迎拿真实的学习材料试用，也欢迎告诉我哪里用起来不顺。
 
 ## 下载与安装
 
-[下载 Windows x64 安装包](https://github.com/laihong06/pagenote/releases/download/v2.0.0-beta.5/pagenote-2.0.0-beta.5-windows-x64-setup.exe) · [完整 ZIP 分发包](https://github.com/laihong06/pagenote/releases/download/v2.0.0-beta.5/pagenote-2.0.0-beta.5-windows-x64.zip) · [发布说明与校验值](https://github.com/laihong06/pagenote/releases/tag/v2.0.0-beta.5)
+[下载 Windows x64 安装包](https://github.com/laihong06/pagenote/releases/download/v1.0.0/pagenote-1.0.0-windows-x64-setup.exe) · [完整 ZIP 分发包](https://github.com/laihong06/pagenote/releases/download/v1.0.0/pagenote-1.0.0-windows-x64.zip) · [发布说明与校验值](https://github.com/laihong06/pagenote/releases/tag/v1.0.0)
 
 1. 在本仓库的 **Releases** 中下载 `pagenote-版本-windows-x64-setup.exe`。浏览源码时的 **Code → Download ZIP** 是源码包，不能直接安装。
 2. 双击安装包，按向导选择安装位置。安装仅针对当前用户，通常不需要管理员权限。
@@ -114,8 +117,8 @@ beta.3 修复了部分 Windows 加密或重定向数据目录中的迁移、临�
 
 ## 系统要求
 
-- Windows 10 / 11，x64，功能完整。
-- macOS 12 或更高，提供 Apple Silicon 与 Intel 构建；支持 PDF、Markdown 和本机 Office 接入。
+- Windows 10 / 11，x64：v1.0 正式版，发起人已完成一台 Windows 真机全量测试。
+- macOS 12 或更高：测试版，支持 Apple Silicon 与 Intel 构建；Windows 的正式版状态不适用于 Mac。
 - ARM64 Windows 暂未验证。
 - PDF 与 Markdown 不要求安装 Office。Word/PPT 导入、项目预览及保存后刷新需要本机已授权的 **Microsoft Word / PowerPoint**，Windows 与 macOS 均可使用。
 - macOS 首次接入时，在系统提示中允许 pagenote 控制 Word / PowerPoint；被拒绝后可在 **系统设置 → 隐私与安全性 → 自动化** 中开启。Mac 的 Word 编辑使用独立窗口，MCP 支持读取、选区、带版本检查的替换及 PDF 渲染截图。详见 [Mac Office 说明](docs/MAC-OFFICE.md)。

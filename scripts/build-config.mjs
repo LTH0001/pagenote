@@ -76,6 +76,8 @@ if (platform === 'win') {
     ],
   });
 } else {
+  // macOS remains a prerelease independently of the Windows stable channel.
+  build.extraMetadata = { ...build.extraMetadata, version: '1.0.0-beta.1' };
   build.files = build.files.filter(
     (file) =>
       !file.startsWith('!node_modules/onnxruntime-node/bin/napi-v6/darwin/'),

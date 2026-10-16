@@ -1,3 +1,5 @@
+> Current policy / 当前准则：以 [发起人确认的分级发布基准](RELEASE-POLICY.md) 为准。本文的历史验收条目不自动阻塞 Windows v1.0；未完成的非阻断工作记入 [KNOWN_ISSUES.md](../KNOWN_ISSUES.md)。
+
 # 2.0.0-rc.1 候选冻结范围
 
 基线为已发布的 `v2.0.0-beta.5`，提交 `d5bc5f3144fdf1e417d28e174ca9149123469081`。

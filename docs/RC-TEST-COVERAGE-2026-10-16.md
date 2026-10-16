@@ -1,3 +1,5 @@
+> Current policy / 当前准则：以 [发起人确认的分级发布基准](RELEASE-POLICY.md) 为准。本文的历史验收条目不自动阻塞 Windows v1.0；未完成的非阻断工作记入 [KNOWN_ISSUES.md](../KNOWN_ISSUES.md)。
+
 # Pagenote 2.0 RC 测试完备性审查
 
 日期：2026-10-16。结论：自动化基础较好，但当前发布门槛没有全部通过，尚不足以认定 RC 验收完成，更不能直接判为正式版可发布。

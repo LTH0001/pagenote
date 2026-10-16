@@ -1,8 +1,11 @@
 # pagenote
 
-**[⬇ Download the complete app (Windows x64 · ZIP)](https://github.com/laihong06/pagenote/releases/download/v2.0.0-beta.5/pagenote-2.0.0-beta.5-windows-x64.zip)** · [Installer](https://github.com/laihong06/pagenote/releases/download/v2.0.0-beta.5/pagenote-2.0.0-beta.5-windows-x64-setup.exe) · [Matching source archive](https://github.com/laihong06/pagenote/releases/download/v2.0.0-beta.5/pagenote-2.0.0-beta.5-source.zip)
 
-To try the app, download and extract the complete ZIP, then run `pagenote.exe`. The current release is **2.0.0-beta.5 (beta)**. To make changes, download the source or fork this repository and follow the build instructions below.
+**Platform status: Windows v1.0 stable; macOS experimental.** Stable means the agreed early-stage acceptance baseline, not zero bugs or validation on every environment. See [release policy](docs/RELEASE-POLICY.md) and [known issues](KNOWN_ISSUES.md).
+
+**[⬇ Download the complete app (Windows x64 · ZIP)](https://github.com/laihong06/pagenote/releases/download/v1.0.0/pagenote-1.0.0-windows-x64.zip)** · [Installer](https://github.com/laihong06/pagenote/releases/download/v1.0.0/pagenote-1.0.0-windows-x64-setup.exe) · [Matching source archive](https://github.com/laihong06/pagenote/releases/download/v1.0.0/pagenote-1.0.0-source.zip)
+
+To try the app, download and extract the complete ZIP, then run `pagenote.exe`. The current release is **1.0.0 (Windows stable)**. To make changes, download the source or fork this repository and follow the build instructions below.
 
 <img src="build/icon.png" alt="pagenote paired-page icon" width="88">
 
@@ -66,11 +69,11 @@ Beta.5 reads source and notes separately, fetches only the needed note passages,
 
 It also bundles offline Chinese/English OCR and prepares reusable positioned text, confidence, page/region images and native Markdown table/Mermaid assets. Sources and visuals remain available for checking uncertain formulas and charts. See [local page preparation](docs/LOCAL-PREPARATION.md).
 
-**Current public version: 2.0.0-beta.5.** Close the old app and upgrade manually. ZIP users should extract the complete archive into a new folder, rather than replacing only the EXE. It is still a beta. Try it with something you are actually learning, and let me know where it gets in your way.
+**Current Windows version: 1.0.0 stable**; macOS remains experimental.
 
 ## Download and install
 
-[Windows x64 installer](https://github.com/laihong06/pagenote/releases/download/v2.0.0-beta.5/pagenote-2.0.0-beta.5-windows-x64-setup.exe) · [Complete Windows ZIP](https://github.com/laihong06/pagenote/releases/download/v2.0.0-beta.5/pagenote-2.0.0-beta.5-windows-x64.zip) · [Release notes and checksums](https://github.com/laihong06/pagenote/releases/tag/v2.0.0-beta.5)
+[Windows x64 installer](https://github.com/laihong06/pagenote/releases/download/v1.0.0/pagenote-1.0.0-windows-x64-setup.exe) · [Complete Windows ZIP](https://github.com/laihong06/pagenote/releases/download/v1.0.0/pagenote-1.0.0-windows-x64.zip) · [Release notes and checksums](https://github.com/laihong06/pagenote/releases/tag/v1.0.0)
 
 1. Download `pagenote-VERSION-windows-x64-setup.exe` from this repository's **Releases**. **Code → Download ZIP** contains source code, not an installer.
 2. Run the installer and choose a location. Installation is per user and normally does not require administrator privileges.
@@ -114,8 +117,8 @@ Beta.3 fixes migration, staged file replacement and cross-volume copy failures i
 
 ## Requirements
 
-- Windows 10/11, x64 with full functionality.
-- macOS 12 or later with Apple Silicon and Intel builds; supports PDF, Markdown and native Office integration.
+- Windows 10/11, x64: v1.0 stable, approved by the founder after their full physical-machine test.
+- macOS 12 or later: experimental Apple Silicon and Intel builds; Windows stable acceptance does not apply to macOS.
 - ARM64 Windows is not yet verified.
 - PDF and Markdown do not require Office. Word/PPT import, project preview and post-save refresh need locally licensed **Microsoft Word / PowerPoint** on Windows and macOS.
 - On first Mac integration, allow pagenote to control Word / PowerPoint; if denied, enable it under **System Settings → Privacy & Security → Automation**. Mac Word editing uses a separate window with MCP read, selection, revision-checked replacement and PDF-rendered screenshots. See [Mac Office notes](docs/MAC-OFFICE.md).
