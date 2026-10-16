@@ -48,6 +48,11 @@ jobs:
       - run: npm run test:mcp
         env:
           DESKTOP_EXE: ${{ github.workspace }}/release/win-unpacked/pagenote.exe
+      - name: Soak harness restart smoke (not one-hour acceptance)
+        run: npm run test:soak
+        env:
+          DESKTOP_EXE: ${{ github.workspace }}/release/win-unpacked/pagenote.exe
+          TEST_SOAK_MINUTES: '0.2'
       - run: npm run package:source
       - run: node scripts/release-artifacts.mjs
       - uses: actions/upload-artifact@v4

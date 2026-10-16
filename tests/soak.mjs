@@ -158,9 +158,11 @@ try {
   w = await app.firstWindow();
   await w.waitForFunction(() => !!window.pageNotes);
   await w.evaluate(() => window.pageNotes.ready);
+  await w.evaluate((id) => window.pageNotes.open(id, 1), id);
   const persisted = await w.evaluate(() =>
     window.pageNotes.readPages(Array.from({ length: 60 }, (_, i) => i + 1)),
   );
+  assert.equal(persisted.length, 60);
   for (const note of persisted)
     assert.equal(
       note.markdown,
