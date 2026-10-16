@@ -31,6 +31,22 @@ node scripts/release-artifacts.mjs
 
 Verify the setup EXE, Windows ZIP and `SHA256SUMS.txt` under `release/`. Test installation, upgrades, removal and project round trips using an independent Windows account or a clean VM.
 
+## macOS build
+
+On a Mac with Node.js 22.13+:
+
+```sh
+npm ci
+npm run build
+npm run test:release
+npm run test:mcp
+npm run test:mac-office
+npm run package:mac
+node scripts/release-artifacts.mjs
+```
+
+The Office checks require locally activated Word / PowerPoint. `package:mac` produces Apple Silicon and Intel DMG / ZIP files; use `npm run package:mac:local` for a current-architecture application directory. Verify Finder project opens, Dock activation, Command menu shortcuts and Office automation permissions. The current configuration is unsigned and unnotarized; configure an Apple developer identity and validate on a clean machine before a signed public distribution.
+
 ## Publish
 
 1. Update the version and lockfile.

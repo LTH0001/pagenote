@@ -9,20 +9,24 @@
     "start": "node server.mjs",
     "test": "npm run test:release",
     "desktop": "electron .",
-    "package:desktop": "npm run build && electron-builder --win nsis zip --x64 --publish never",
+    "package:desktop": "npm run build && node scripts/build-config.mjs win && electron-builder --win nsis zip --x64 --config electron-builder.json --publish never",
+    "package:mac": "npm run build && node scripts/build-config.mjs mac && electron-builder --mac dmg zip --arm64 --x64 --config electron-builder.json --publish never",
+    "package:mac:local": "npm run build && node scripts/build-config.mjs mac && electron-builder --mac dir --config electron-builder.json --publish never",
     "test:desktop": "npm run test:release",
     "test:markdown": "node tests/rich-editor.mjs",
     "test:mcp": "node tests/mcp.mjs",
-    "package:dir": "npm run build && electron-builder --win dir --x64 --publish never",
-    "test:release": "node tests/project-launch.mjs && node tests/project-open.mjs && node tests/file-ops.mjs && node tests/external-project.mjs && node tests/external-documents.mjs && node tests/migration.mjs && node tests/menus.mjs && node tests/box-tag.mjs && node tests/projects.mjs && node tests/i18n.mjs && node tests/code-rendering.mjs && node tests/rich-editor.mjs",
+    "package:dir": "npm run build && node scripts/build-config.mjs win && electron-builder --win dir --x64 --config electron-builder.json --publish never",
+    "test:release": "node tests/mac-word-host.mjs && node tests/mac-native.mjs && node tests/project-launch.mjs && node tests/project-open.mjs && node tests/file-ops.mjs && node tests/external-project.mjs && node tests/external-documents.mjs && node tests/migration.mjs && node tests/menus.mjs && node tests/box-tag.mjs && node tests/projects.mjs && node tests/i18n.mjs && node tests/code-rendering.mjs && node tests/rich-editor.mjs",
     "format": "prettier --write src desktop mcp scripts server.mjs projects.mjs external-documents.mjs index.html locales tests/*.mjs",
     "format:check": "prettier --check src desktop mcp scripts server.mjs projects.mjs external-documents.mjs index.html locales",
     "package:source": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/source-archive.ps1",
     "test:word": "node tests/default-word.mjs",
+    "test:mac-office": "node tests/mac-word-host.mjs && node tests/mac-office.mjs && node tests/mac-office-app.mjs",
     "pretest:release": "node scripts/ensure-electron.mjs",
     "pretest:mcp": "node scripts/ensure-electron.mjs",
     "pretest:word": "node scripts/ensure-electron.mjs",
-    "pretest:markdown": "node scripts/ensure-electron.mjs"
+    "pretest:markdown": "node scripts/ensure-electron.mjs",
+    "pretest:mac-office": "node scripts/ensure-electron.mjs"
   },
   "dependencies": {
     "express": "^5.1.0",
@@ -68,79 +72,7 @@
       "locales/**",
       "external-documents.mjs"
     ],
-    "extraFiles": [
-      {
-        "from": "scripts/register-project-files.cmd",
-        "to": "register-project-files.cmd"
-      },
-      {
-        "from": "scripts/register-project-files.ps1",
-        "to": "register-project-files.ps1"
-      }
-    ],
-    "extraResources": [
-      {
-        "from": "desktop/word-host.ps1",
-        "to": "word-host.ps1"
-      },
-      {
-        "from": "convert-office.ps1",
-        "to": "convert-office.ps1"
-      },
-      {
-        "from": "mcp-dist/page-notes-mcp.cjs",
-        "to": "page-notes-mcp.cjs"
-      },
-      {
-        "from": "mcp-dist/node.exe",
-        "to": "mcp-node.exe"
-      },
-      {
-        "from": "mcp-dist/NODE-LICENSE.txt",
-        "to": "NODE-LICENSE.txt"
-      },
-      {
-        "from": "mcp-dist/node-runtime.json",
-        "to": "node-runtime.json"
-      },
-      {
-        "from": "THIRD-PARTY-NOTICES.txt",
-        "to": "THIRD-PARTY-NOTICES.txt"
-      },
-      {
-        "from": "LICENSE",
-        "to": "LICENSE-pagenote.txt"
-      }
-    ],
-    "win": {
-      "target": [
-        "nsis",
-        "zip"
-      ],
-      "icon": "build/icon.ico",
-      "signAndEditExecutable": true,
-      "signExecutable": false
-    },
-    "compression": "normal",
-    "nsis": {
-      "oneClick": false,
-      "perMachine": false,
-      "allowToChangeInstallationDirectory": true,
-      "createDesktopShortcut": true,
-      "createStartMenuShortcut": true,
-      "shortcutName": "pagenote",
-      "artifactName": "pagenote-${version}-windows-x64-setup.exe",
-      "deleteAppDataOnUninstall": false
-    },
-    "artifactName": "pagenote-${version}-windows-${arch}.${ext}",
-    "fileAssociations": [
-      {
-        "ext": "pagenote",
-        "name": "pagenote Project",
-        "description": "pagenote project",
-        "role": "Editor"
-      }
-    ]
+    "compression": "normal"
   },
   "engines": {
     "node": ">=22.13.0"

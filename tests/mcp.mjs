@@ -10,11 +10,16 @@ const userData = path.join(root, 'tests', 'mcp-data');
 await fs.mkdir(userData, { recursive: true });
 const executable =
   process.env.DESKTOP_EXE ||
-  path.join(root, 'node_modules', 'electron', 'dist', 'electron.exe');
+  path.join(
+    root,
+    process.platform === 'darwin'
+      ? 'node_modules/electron/dist/Electron.app/Contents/MacOS/Electron'
+      : 'node_modules/electron/dist/electron.exe',
+  );
 const launch = () =>
   electron.launch({
     executablePath: executable,
-    args: process.env.DESKTOP_EXE ? [] : [root],
+    args: [root],
     env: { ...process.env, PAGE_NOTES_USER_DATA: userData },
     timeout: 40000,
   });

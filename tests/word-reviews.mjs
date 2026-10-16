@@ -5,13 +5,19 @@ import assert from 'node:assert/strict';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 const root = path.resolve(import.meta.dirname, '..'),
-  folder = path.join(root, 'tests', `word-reviews-${Date.now()}`);
+  folder = path.join(root, 'tests', `word-reviews-${Date.now()}`),
+  executable =
+    process.env.DESKTOP_EXE ||
+    path.join(
+      root,
+      process.platform === 'darwin'
+        ? 'node_modules/electron/dist/Electron.app/Contents/MacOS/Electron'
+        : 'node_modules/electron/dist/electron.exe',
+    );
 await fs.mkdir(folder, { recursive: true });
 const app = await electron.launch({
-  executablePath:
-    process.env.DESKTOP_EXE ||
-    path.join(root, 'node_modules/electron/dist/electron.exe'),
-  args: process.env.DESKTOP_EXE ? [] : [root],
+  executablePath: executable,
+  args: [root],
   env: { ...process.env, PAGE_NOTES_USER_DATA: folder },
   timeout: 40000,
 });

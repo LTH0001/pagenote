@@ -40,3 +40,46 @@ jobs:
             release/*.zip
             release/SHA256SUMS.txt
           if-no-files-found: error
+
+  macos:
+    runs-on: macos-latest
+    timeout-minutes: 45
+    env:
+      ELECTRON_BUILDER_CACHE: ${{ github.workspace }}/.builder-cache
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - uses: actions/cache@v4
+        with:
+          path: .builder-cache
+          key: macos-builder-${{ hashFiles('package-lock.json') }}
+      - run: npm run format:check
+      - run: npm audit --omit=dev
+      - run: npm run build
+      # Word and PowerPoint conversion needs Microsoft Office, so the macOS job
+      # runs the tests that cover the shared reading, note and MCP surfaces.
+      - run: npm run test:release
+      - run: npm run test:mcp
+      - run: npm run package:mac
+      # Electron-builder's mac dir target builds for the runner's own arch, which
+      # is what the packaged-app test then launches.
+      - run: npx electron-builder --mac dir --publish never --config electron-builder.json
+      - run: npm run test:release
+        env:
+          DESKTOP_EXE: ${{ github.workspace }}/release/mac${{ runner.arch == 'ARM64' && '-arm64' || '' }}/pagenote.app/Contents/MacOS/pagenote
+      - run: npm run test:mcp
+        env:
+          DESKTOP_EXE: ${{ github.workspace }}/release/mac${{ runner.arch == 'ARM64' && '-arm64' || '' }}/pagenote.app/Contents/MacOS/pagenote
+      - run: node scripts/release-artifacts.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pagenote-macos
+          path: |
+            release/*.dmg
+            release/*.zip
+            release/SHA256SUMS.txt
+          if-no-files-found: error

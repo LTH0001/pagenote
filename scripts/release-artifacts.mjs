@@ -3,7 +3,7 @@ import path from 'node:path';
 import { createHash } from 'node:crypto';
 const directory = path.resolve(process.argv[2] || 'release');
 const files = (await fs.readdir(directory)).filter((name) =>
-  /^pagenote-.*\.(exe|zip)$/.test(name),
+  /^pagenote-.*\.(exe|zip|dmg|blockmap)$/.test(name),
 );
 if (!files.length) throw Error('No release artifacts found.');
 const lines = [];

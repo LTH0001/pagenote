@@ -6,7 +6,10 @@ const fs = require('node:fs/promises');
 const path = require('node:path');
 const { createHash, randomUUID } = require('node:crypto');
 const revision = (text) => createHash('sha256').update(text).digest('hex');
-exports.createWordHost = function ({ win, data, helper, converter }) {
+exports.createWordHost = function (options) {
+  if (process.platform === 'darwin')
+    return require('./mac-word.cjs').createMacWordHost(options);
+  const { win, data, helper, converter } = options;
   let child,
     session,
     sequence = 0,
@@ -15,6 +18,10 @@ exports.createWordHost = function ({ win, data, helper, converter }) {
     queue = Promise.resolve();
   const pending = new Map();
   function start() {
+    if (process.platform !== 'win32')
+      throw Error(
+        'Word 编辑需要 Windows 上的 Microsoft Office。当前平台请用本机默认应用编辑源文件，保存后回到 pagenote 更新预览。',
+      );
     child = spawn(
       'powershell.exe',
       [

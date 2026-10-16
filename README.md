@@ -100,21 +100,24 @@ beta.3 修复了部分 Windows 加密或重定向数据目录中的迁移、临�
 
 ## 系统要求
 
-- Windows 10 / 11，x64；其他系统与 ARM64 暂未验证。
-- PDF 与 Markdown 不要求安装 Office；Word/PPT 转换依赖 Microsoft Office。
+- Windows 10 / 11，x64，功能完整。
+- macOS 12 或更高，提供 Apple Silicon 与 Intel 构建；支持 PDF、Markdown 和本机 Office 接入。
+- ARM64 Windows 暂未验证。
+- PDF 与 Markdown 不要求安装 Office。Word/PPT 导入、项目预览及保存后刷新需要本机已授权的 **Microsoft Word / PowerPoint**，Windows 与 macOS 均可使用。
+- macOS 首次接入时，在系统提示中允许 pagenote 控制 Word / PowerPoint；被拒绝后可在 **系统设置 → 隐私与安全性 → 自动化** 中开启。Mac 的 Word 编辑使用独立窗口，MCP 支持读取、选区、带版本检查的替换及 PDF 渲染截图。详见 [Mac Office 说明](docs/MAC-OFFICE.md)。
 - 安装版包含 MCP 所需 Node.js 运行时，普通用户不需要安装 Node.js。
 
 ## 从源码运行
 
 安装 Node.js 22.13 或更高版本，然后在项目根目录执行：
 
-```powershell
+```bash
 npm ci
 npm run build
 npm run desktop
 ```
 
-开发网页模式：`npm run dev`。生成 Windows 安装包和 ZIP：`npm run package:desktop`。生成文件夹版：`npm run package:dir`。发布流程见 [中文发布教程](docs/RELEASING.zh-CN.md) 与 [English release guide](docs/RELEASING.en-US.md)。
+开发网页模式：`npm run dev`。生成 Windows 安装包和 ZIP：`npm run package:desktop`；文件夹版：`npm run package:dir`。生成 macOS DMG 与 ZIP（Apple Silicon 和 Intel 双架构）：`npm run package:mac`；仅本机架构的文件夹版：`npm run package:mac:local`。测试套件在 Windows 与 macOS 上均可运行。发布流程见 [中文发布教程](docs/RELEASING.zh-CN.md) 与 [English release guide](docs/RELEASING.en-US.md)。
 
 ## 工程与发布状态
 

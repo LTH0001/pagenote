@@ -3,6 +3,8 @@ dist/
 data/
 release/
 tmp/
+build/icon.icns
+build/icon.iconset/
 output/
 *.log
 ai-connection.json
@@ -10,6 +12,7 @@ ai-key.txt
 *.replace-backup-*
 *.migration/
 mcp-dist/
+electron-builder.json
 .builder-cache/
 .electron-cache/
 test-results/

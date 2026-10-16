@@ -2,6 +2,7 @@ import fileOps from './desktop/file-ops.cjs';
 const { moveFile, copyFileSafe } = fileOps;
 import { registerExternalDocuments } from './external-documents.mjs';
 import { createProjectStore } from './projects.mjs';
+import macOfficeModule from './desktop/mac-office.cjs';
 import express from 'express';
 import multer from 'multer';
 import path from 'node:path';
@@ -15,6 +16,10 @@ const root = path.dirname(fileURLToPath(import.meta.url));
 const data = process.env.PAGE_NOTES_DATA || path.join(root, 'data');
 await fs.mkdir(path.join(data, 'uploads'), { recursive: true });
 await fs.mkdir(path.join(data, 'documents'), { recursive: true });
+const macOffice =
+  process.platform === 'darwin'
+    ? macOfficeModule.createMacOffice({ data })
+    : null;
 const app = express();
 // Accept requests only from this local application's origin.
 app.use((req, res, next) => {
@@ -40,8 +45,13 @@ async function convertOffice(input, output) {
   await copyFileSafe(input, snapshot);
   const converter =
       process.env.PAGE_NOTES_CONVERTER || path.join(root, 'convert-office.ps1'),
-    convert = () =>
-      run(
+    convert = () => {
+      if (macOffice) return macOffice.convert(snapshot, output);
+      if (process.platform !== 'win32')
+        throw Error(
+          'Word 和 PowerPoint 转换需要 Windows 或 macOS 上的 Microsoft Office。请先导出 PDF 再导入。',
+        );
+      return run(
         'powershell.exe',
         [
           '-NoProfile',
@@ -57,6 +67,7 @@ async function convertOffice(input, output) {
         ],
         { timeout: 120000, windowsHide: true, maxBuffer: 1024 * 1024 },
       );
+    };
   const job = conversionQueue.then(convert, convert);
   conversionQueue = job.catch(() => {});
   try {
@@ -267,33 +278,11 @@ app.post('/api/documents', upload.single('file'), async (req, res, next) => {
     await moveFile(req.file.path, original);
     const kind = ['.md', '.markdown'].includes(ext) ? 'markdown' : 'pdf';
     if (kind === 'pdf' && ext !== '.pdf') {
-      const converter =
-        process.env.PAGE_NOTES_CONVERTER ||
-        path.join(root, 'convert-office.ps1');
-      const convert = () =>
-        run(
-          'powershell.exe',
-          [
-            '-NoProfile',
-            '-NonInteractive',
-            '-ExecutionPolicy',
-            'Bypass',
-            '-File',
-            converter,
-            '-InputFile',
-            original,
-            '-OutputFile',
-            path.join(dir, 'view.pdf'),
-          ],
-          { timeout: 120000, windowsHide: true, maxBuffer: 1024 * 1024 },
-        );
-      const job = conversionQueue.then(convert, convert);
-      conversionQueue = job.catch(() => {});
       try {
-        await job;
+        await convertOffice(original, path.join(dir, 'view.pdf'));
       } catch (e) {
         throw Error(
-          'Office 转换失败。请确认已安装并激活 Microsoft Office，或先在 WPS 中导出为 PDF。' +
+          'Office 转换失败。请确认已安装并激活 Microsoft Office，并允许必要的自动化和文件访问。' +
             (e.stderr || e.message).slice(0, 350),
         );
       }

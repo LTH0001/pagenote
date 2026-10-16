@@ -2,11 +2,18 @@ import { _electron as electron } from '@playwright/test';
 import path from 'node:path';
 import assert from 'node:assert/strict';
 const root = path.resolve(import.meta.dirname, '..');
+const executable =
+  process.env.DESKTOP_EXE ||
+  path.join(
+    root,
+    process.platform === 'darwin'
+      ? 'node_modules/electron/dist/Electron.app/Contents/MacOS/Electron'
+      : 'node_modules/electron/dist/electron.exe',
+  );
+
 const app = await electron.launch({
-  executablePath:
-    process.env.DESKTOP_EXE ||
-    path.join(root, 'node_modules/electron/dist/electron.exe'),
-  args: process.env.DESKTOP_EXE ? [] : [root],
+  executablePath: executable,
+  args: [root],
   env: {
     ...process.env,
     PAGE_NOTES_USER_DATA: path.join(root, 'tests', 'menus-' + Date.now()),
@@ -20,6 +27,7 @@ try {
   const menus = await app.evaluate(({ Menu }) =>
     Menu.getApplicationMenu().items.map((item) => ({
       label: item.label,
+      role: item.role,
       children: item.submenu?.items.map((i) => i.label),
     })),
   );
@@ -29,9 +37,16 @@ try {
   assert.ok(
     menus.find((m) => m.label === '文件').children.includes('导入笔记（右侧）'),
   );
-  assert.deepEqual(menus.find((m) => m.label === '编辑').children, [
-    '选择编辑区域',
-  ]);
+  const editMenu = menus.find((m) => m.label === '编辑');
+  assert.ok(editMenu.children.includes('选择编辑区域'));
+  if (process.platform === 'darwin') {
+    assert.equal(menus[0].role, 'appmenu');
+    assert.ok(menus.some((menu) => menu.role === 'windowmenu'));
+    assert.ok(
+      editMenu.children.length > 1,
+      'standard Mac editing commands are available',
+    );
+  } else assert.deepEqual(editMenu.children, ['选择编辑区域']);
   assert.ok(
     menus.find((m) => m.label === 'AI 标注').children.includes('文档标注画布'),
   );

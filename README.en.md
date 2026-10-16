@@ -100,23 +100,26 @@ Beta.3 fixes migration, staged file replacement and cross-volume copy failures i
 
 ## Requirements
 
-- Windows 10/11 x64. Other platforms and ARM64 are not yet validated.
-- Office is optional for PDF/Markdown; Word/PPT conversion requires Microsoft Office.
+- Windows 10/11 x64, with the full feature set.
+- macOS 12 or newer, with Apple Silicon and Intel builds; PDF, Markdown and local Office integration are supported.
+- ARM64 Windows is not yet validated.
+- Office is optional for PDF/Markdown. Word/PPT import, project previews and refresh after saving require locally licensed **Microsoft Word / PowerPoint** on Windows or macOS.
+- On macOS, allow pagenote to control Word / PowerPoint when prompted. If denied, enable it under **System Settings → Privacy & Security → Automation**. Mac Word editing uses a separate window; MCP supports text, selections, revision-checked replacements and PDF-rendered screenshots. See [Mac Office notes](docs/MAC-OFFICE.md).
 - The distribution includes the Node.js runtime used by MCP. End users do not need a Node.js installation.
 
 ## Build from source
 
 Install Node.js 22.13 or newer, then run:
 
-```powershell
+```bash
 npm ci
 npm run build
 npm run desktop
 ```
 
-Use `npm run dev` for browser development, `npm run package:desktop` for the Windows installer and ZIP, or `npm run package:dir` for a folder build.
+Use `npm run dev` for browser development, `npm run package:desktop` for the Windows installer and ZIP, or `npm run package:dir` for a folder build. Use `npm run package:mac` for the macOS DMG and ZIP (Apple Silicon and Intel), or `npm run package:mac:local` for a folder build of your machine's architecture. The test suite runs on both Windows and macOS.
 
-See the [release guide](docs/RELEASING.en-US.md), [terminology specification](docs/TERMINOLOGY.md) and [release-readiness report](docs/RELEASE-READINESS.md). Bug reports should include the version, Windows version, reproduction steps and redacted logs. Do not upload private projects or MCP connection keys.
+See the [release guide](docs/RELEASING.en-US.md), [terminology specification](docs/TERMINOLOGY.md) and [release-readiness report](docs/RELEASE-READINESS.md). Bug reports should include the version, operating-system version, reproduction steps and redacted logs. Do not upload private projects or MCP connection keys.
 
 ## License
 
