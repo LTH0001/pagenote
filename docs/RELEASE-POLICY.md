@@ -11,7 +11,7 @@ pagenote 采用分级质量门槛。正式版冻结表示功能范围和发布�
 
 ## 本次平台决策
 
-- **Windows：v1.0 正式版。** 发起人在会话中确认已在一台 Windows 真机完成全量测试，并明确批准冻结发布。这是本次放行依据；维护者不据此虚构独立虚拟机、其他设备或厂商复核结果。
+- **Windows：v1.0 正式版。** LTH0001 提供 Windows 真机全量测试结果（见 PR #4）；发起人确认以该轮结果为依据并批准冻结发布。这是本次放行依据；维护者不据此虚构独立虚拟机、其他设备或厂商复核结果。
 - **macOS：测试版。** 集成贡献的适配代码，构建包版本为 `1.0.0-beta.1`。尚不将 Windows 的验收结论推广至 Mac。后续按同一分级原则单独决定正式放行。
 - 本次从此前的 `2.0.0-beta.*` / RC 开发编号统一为首个正式版本 `1.0.0`。升级需退出旧程序后手动安装，不依赖版本数字大小自动升级。不替换历史包。
 
@@ -21,4 +21,4 @@ pagenote 采用分级质量门槛。正式版冻结表示功能范围和发布�
 
 Release gates are proportional to this early-stage project. Stable does not mean zero bugs or exhaustive environment validation. Clean VM snapshots are acceptable fresh-machine evidence. Freeze features and fix release-blocking defects; track other issues and unverified environments in `KNOWN_ISSUES.md`. The founder makes the final release decision.
 
-Windows v1.0 is approved based on the founder's reported full test on one physical Windows computer. No additional VM results are claimed. macOS remains experimental with version `1.0.0-beta.1`. Historical audit checklists do not override this policy. Earlier 2.0 beta numbering is intentionally reset to the first stable 1.0 release; use manual installation after exiting the previous app.
+Windows v1.0 is approved based on LTH0001's reported physical Windows test, reviewed and accepted by the founder. No additional VM results are claimed. macOS remains experimental with version `1.0.0-beta.1`. Historical audit checklists do not override this policy. Earlier 2.0 beta numbering is intentionally reset to the first stable 1.0 release; use manual installation after exiting the previous app.

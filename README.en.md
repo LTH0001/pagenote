@@ -117,7 +117,7 @@ Beta.3 fixes migration, staged file replacement and cross-volume copy failures i
 
 ## Requirements
 
-- Windows 10/11, x64: v1.0 stable, approved by the founder after their full physical-machine test.
+- Windows 10/11, x64: v1.0 stable, approved by the founder after accepting LTH0001's physical-machine test results.
 - macOS 12 or later: experimental Apple Silicon and Intel builds; Windows stable acceptance does not apply to macOS.
 - ARM64 Windows is not yet verified.
 - PDF and Markdown do not require Office. Word/PPT import, project preview and post-save refresh need locally licensed **Microsoft Word / PowerPoint** on Windows and macOS.
