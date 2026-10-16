@@ -18,11 +18,11 @@ const app = await electron.launch({
   timeout: 40000,
 });
 try {
+  const w = await app.firstWindow();
   // Keep the full footer controls visible on small CI desktops.
   await app.evaluate(({ BrowserWindow }) =>
     BrowserWindow.getAllWindows()[0].setSize(1600, 1000),
   );
-  const w = await app.firstWindow();
   await w.waitForFunction(() => !!window.pageNotes);
   await w.evaluate(() => window.pageNotes.ready);
   await w.evaluate(() => window.pageNotes.setLayout({ expandEditor: false }));
