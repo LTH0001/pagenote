@@ -115,16 +115,9 @@ try {
         await w.evaluate(() => window.pageNotes.menuAction('chooseEditor'));
         await w.locator('.note-pane .pane-heading').click();
       }
-      await w.locator('#preview').click();
-      await w.evaluate(() => {
-        const el = document.querySelector('#preview'),
-          r = document.createRange();
-        el.focus();
-        r.selectNodeContents(el);
-        r.collapse(false);
-        getSelection().removeAllRanges();
-        getSelection().addRange(r);
-      });
+      // Type in an ordinary paragraph rather than after a noneditable diagram.
+      await w.locator('#preview p').first().click();
+      await w.keyboard.press('End');
       await w.keyboard.insertText(` Saved iteration ${iterations}.`);
       await w.evaluate(() => window.pageNotes.finishEditing());
       const saved = await w.evaluate(() => window.pageNotes.getState());
