@@ -66,7 +66,8 @@ try {
     return clipboard.readText();
   });
   assert.ok(copiedSkill.includes('name: pagenote-page-tutor'));
-  assert.ok(copiedSkill.includes('每页作为独立的模型讲解请求'));
+  assert.ok(copiedSkill.includes('page-notes://prompts/index'));
+  assert.ok(copiedSkill.includes('tag-edit'));
   assert.ok(await w.locator('.titlebar').isHidden());
   assert.ok(await w.locator('#saveStatus').isHidden());
   assert.ok(await w.locator('#helpButton').isHidden());

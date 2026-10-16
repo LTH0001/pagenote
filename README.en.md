@@ -1,8 +1,8 @@
 # pagenote
 
-**[⬇ Download the complete app (Windows x64 · ZIP)](https://github.com/laihong06/pagenote/releases/download/v2.0.0-beta.4/pagenote-2.0.0-beta.4-windows-x64.zip)** · [Installer](https://github.com/laihong06/pagenote/releases/download/v2.0.0-beta.4/pagenote-2.0.0-beta.4-windows-x64-setup.exe) · [Full source code](https://github.com/laihong06/pagenote/archive/refs/heads/main.zip)
+**[⬇ Download the complete app (Windows x64 · ZIP)](https://github.com/laihong06/pagenote/releases/download/v2.0.0-beta.5/pagenote-2.0.0-beta.5-windows-x64.zip)** · [Installer](https://github.com/laihong06/pagenote/releases/download/v2.0.0-beta.5/pagenote-2.0.0-beta.5-windows-x64-setup.exe) · [Matching source archive](https://github.com/laihong06/pagenote/releases/download/v2.0.0-beta.5/pagenote-2.0.0-beta.5-source.zip)
 
-To try the app, download and extract the complete ZIP, then run `pagenote.exe`. The current release is **2.0.0-beta.4 (beta)**. To make changes, download the source or fork this repository and follow the build instructions below.
+To try the app, download and extract the complete ZIP, then run `pagenote.exe`. The current release is **2.0.0-beta.5 (beta)**. To make changes, download the source or fork this repository and follow the build instructions below.
 
 <img src="build/icon.png" alt="pagenote paired-page icon" width="88">
 
@@ -34,7 +34,7 @@ Notes support LaTeX, syntax-highlighted code, Mermaid diagrams, tables and paste
 
 Code highlighting runs locally, without downloading grammars. If rendering fails, include the app version, a minimal code block and a screenshot in your report; see the [rendering notes](docs/CODE-RENDERING.md).
 
-If formulas appear as backslash commands, copied TeX delimiters may be double-escaped. The development build now handles these forms; see the [formula compatibility notes](docs/FORMULA-RENDERING.md).
+If formulas appear as backslash commands, copied TeX delimiters may be double-escaped. Beta.5 now handles these forms; see the [formula compatibility notes](docs/FORMULA-RENDERING.md).
 
 ![Rendered formulas, Python highlighting and a Mermaid flowchart](docs/images/markdown-rendering.png)
 
@@ -58,19 +58,19 @@ Pagenote currently supports two-pane reading, page-linked notes and AI annotatio
 
 Follow the [page-by-page teaching workflow](docs/MCP.en-US.md#page-by-page-teaching): make a separate generation request for each page, give it sufficient current-page context and include the previous and next source pages without waiting for earlier explanations. Do not generate a whole chapter and split it into pages afterward.
 
-The development build includes a [page tutor skill](skills/pagenote-page-tutor/SKILL.md). Use **AI Annotations → Copy page-by-page teaching prompt**, or select the MCP prompt `pagenote-page-tutor` and supply a learner background, page range and goal. AI clients can also read `page-notes://skills/page-tutor`. The template guides a connected client; it does not call a model by itself.
+Beta.5 includes a [page tutor skill](skills/pagenote-page-tutor/SKILL.md). Use **AI Annotations → Copy page-by-page teaching prompt**, or select the MCP prompt `pagenote-page-tutor` and supply a learner background, page range and goal. AI clients can also read `page-notes://skills/page-tutor`. The template guides a connected client; it does not call a model by itself.
 
 Use **Settings → AI settings** to edit or restore the default system prompt. General document tasks keep their scope; the page tutor applies only to relevant learning requests. The prompt is saved locally. Reconnect the AI client after saving. MCP supplies the instructions; the client controls its actual system-prompt layer.
 
-The development build reads source and notes separately, fetches only the needed note passages, and saves concise page handoffs inside the project. Handoffs are marked stale when source or notes change, leaving more context for the current explanation. See the [MCP read options](docs/MCP.en-US.md#token-efficient-reads).
+Beta.5 reads source and notes separately, fetches only the needed note passages, and saves concise page handoffs inside the project. Handoffs are marked stale when source or notes change, leaving more context for the current explanation. See the [MCP read options](docs/MCP.en-US.md#token-efficient-reads).
 
 It also bundles offline Chinese/English OCR and prepares reusable positioned text, confidence, page/region images and native Markdown table/Mermaid assets. Sources and visuals remain available for checking uncertain formulas and charts. See [local page preparation](docs/LOCAL-PREPARATION.md).
 
-**Current public version: 2.0.0-beta.4.** It is still a beta. Try it with something you are actually learning, and let me know where it gets in your way.
+**Current public version: 2.0.0-beta.5.** Close the old app and upgrade manually. ZIP users should extract the complete archive into a new folder, rather than replacing only the EXE. It is still a beta. Try it with something you are actually learning, and let me know where it gets in your way.
 
 ## Download and install
 
-[Windows x64 installer](https://github.com/laihong06/pagenote/releases/download/v2.0.0-beta.4/pagenote-2.0.0-beta.4-windows-x64-setup.exe) · [Complete Windows ZIP](https://github.com/laihong06/pagenote/releases/download/v2.0.0-beta.4/pagenote-2.0.0-beta.4-windows-x64.zip) · [Release notes and checksums](https://github.com/laihong06/pagenote/releases/tag/v2.0.0-beta.4)
+[Windows x64 installer](https://github.com/laihong06/pagenote/releases/download/v2.0.0-beta.5/pagenote-2.0.0-beta.5-windows-x64-setup.exe) · [Complete Windows ZIP](https://github.com/laihong06/pagenote/releases/download/v2.0.0-beta.5/pagenote-2.0.0-beta.5-windows-x64.zip) · [Release notes and checksums](https://github.com/laihong06/pagenote/releases/tag/v2.0.0-beta.5)
 
 1. Download `pagenote-VERSION-windows-x64-setup.exe` from this repository's **Releases**. **Code → Download ZIP** contains source code, not an installer.
 2. Run the installer and choose a location. Installation is per user and normally does not require administrator privileges.
@@ -114,11 +114,11 @@ Beta.3 fixes migration, staged file replacement and cross-volume copy failures i
 
 ## Requirements
 
-- Windows 10/11 x64, with the full feature set.
-- macOS 12 or newer, with Apple Silicon and Intel builds; PDF, Markdown and local Office integration are supported.
-- ARM64 Windows is not yet validated.
-- Office is optional for PDF/Markdown. Word/PPT import, project previews and refresh after saving require locally licensed **Microsoft Word / PowerPoint** on Windows or macOS.
-- On macOS, allow pagenote to control Word / PowerPoint when prompted. If denied, enable it under **System Settings → Privacy & Security → Automation**. Mac Word editing uses a separate window; MCP supports text, selections, revision-checked replacements and PDF-rendered screenshots. See [Mac Office notes](docs/MAC-OFFICE.md).
+- Windows 10/11, x64 with full functionality.
+- macOS 12 or later with Apple Silicon and Intel builds; supports PDF, Markdown and native Office integration.
+- ARM64 Windows is not yet verified.
+- PDF and Markdown do not require Office. Word/PPT import, project preview and post-save refresh need locally licensed **Microsoft Word / PowerPoint** on Windows and macOS.
+- On first Mac integration, allow pagenote to control Word / PowerPoint; if denied, enable it under **System Settings → Privacy & Security → Automation**. Mac Word editing uses a separate window with MCP read, selection, revision-checked replacement and PDF-rendered screenshots. See [Mac Office notes](docs/MAC-OFFICE.md).
 - The distribution includes the Node.js runtime used by MCP. End users do not need a Node.js installation.
 
 ## Build from source
@@ -131,9 +131,9 @@ npm run build
 npm run desktop
 ```
 
-Use `npm run dev` for browser development, `npm run package:desktop` for the Windows installer and ZIP, or `npm run package:dir` for a folder build. Use `npm run package:mac` for the macOS DMG and ZIP (Apple Silicon and Intel), or `npm run package:mac:local` for a folder build of your machine's architecture. The test suite runs on both Windows and macOS.
+Use `npm run dev` for browser development, `npm run package:desktop` for the Windows installer and ZIP, or `npm run package:dir` for a folder build. Use `npm run package:mac` for macOS DMG and ZIP (Apple Silicon and Intel), or `npm run package:mac:local` for a local-arch folder build. The test suite runs on Windows and macOS.
 
-See the [release guide](docs/RELEASING.en-US.md), [terminology specification](docs/TERMINOLOGY.md) and [release-readiness report](docs/RELEASE-READINESS.md). Bug reports should include the version, operating-system version, reproduction steps and redacted logs. Do not upload private projects or MCP connection keys.
+See the [release guide](docs/RELEASING.en-US.md), [terminology specification](docs/TERMINOLOGY.md) and [release-readiness report](docs/RELEASE-READINESS.md). Bug reports should include the version, Windows version, reproduction steps and redacted logs. Do not upload private projects or MCP connection keys.
 
 ## Feedback and contact
 
@@ -150,4 +150,4 @@ MCP integration: [English](docs/MCP.en-US.md) · [中文](MCP接口说明.md)
 Editor and icon changes: [reference](docs/EDITOR-REFERENCE.md).
 Standalone imports edit the managed local copy; projects edit the linked file in `src`. Save, then return to pagenote.
 
-The development build routes tasks through `page-notes://prompts/index`. Read only relevant, changed modules via `page_notes_read_prompt`. AI settings can customize each module. Page requests may run concurrently: recommend `max(1, floor(total pages / 10))`, capped by remaining pages, client/service limits and available resources. `page_notes_validate_note` checks formatting and local image assets before publication; it is not a guarantee of factual correctness or cross-device rendering.
+Beta.5 routes tasks through `page-notes://prompts/index`. Read only relevant, changed modules via `page_notes_read_prompt`. AI settings can customize each module. Page requests may run concurrently: recommend `max(1, floor(total pages / 10))`, capped by remaining pages, client/service limits and available resources. `page_notes_validate_note` checks formatting and local image assets before publication; it is not a guarantee of factual correctness or cross-device rendering.

@@ -9,13 +9,13 @@
     "start": "node server.mjs",
     "test": "npm run test:release",
     "desktop": "electron .",
-    "package:desktop": "npm run build && node scripts/build-config.mjs win && electron-builder --win nsis zip --x64 --config electron-builder.json --publish never",
-    "package:mac": "npm run build && node scripts/build-config.mjs mac && electron-builder --mac dmg zip --arm64 --x64 --config electron-builder.json --publish never",
-    "package:mac:local": "npm run build && node scripts/build-config.mjs mac && electron-builder --mac dir --config electron-builder.json --publish never",
+    "package:desktop": "npm run build && node scripts/package-desktop.mjs",
+    "package:mac": "npm run build && node scripts/package-desktop.mjs --mac",
+    "package:mac:local": "npm run build && node scripts/package-desktop.mjs --mac --dir",
     "test:desktop": "npm run test:release",
     "test:markdown": "node tests/rich-editor.mjs",
     "test:mcp": "node tests/mcp.mjs",
-    "package:dir": "npm run build && node scripts/build-config.mjs win && electron-builder --win dir --x64 --config electron-builder.json --publish never",
+    "package:dir": "npm run build && node scripts/package-desktop.mjs --dir",
     "test:release": "node tests/mac-word-host.mjs && node tests/mac-native.mjs && node tests/project-launch.mjs && node tests/project-open.mjs && node tests/file-ops.mjs && node tests/external-project.mjs && node tests/external-documents.mjs && node tests/migration.mjs && node tests/ai-settings.mjs && node tests/menus.mjs && node tests/box-tag.mjs && node tests/projects.mjs && node tests/i18n.mjs && node tests/math-input.mjs && node tests/formula-rendering.mjs && node tests/code-rendering.mjs && node tests/rich-editor.mjs",
     "format": "prettier --write src desktop mcp scripts server.mjs projects.mjs external-documents.mjs index.html locales tests/*.mjs",
     "format:check": "prettier --check src desktop mcp scripts server.mjs projects.mjs external-documents.mjs index.html locales",
@@ -29,7 +29,9 @@
     "pretest:word": "node scripts/ensure-electron.mjs",
     "pretest:markdown": "node scripts/ensure-electron.mjs",
     "test:mac-office": "node tests/mac-word-host.mjs && node tests/mac-office.mjs && node tests/mac-office-app.mjs",
-    "pretest:mac-office": "node scripts/ensure-electron.mjs"
+    "pretest:mac-office": "node scripts/ensure-electron.mjs",
+    "test:version": "node tests/versioning.mjs && node scripts/check-release-version.mjs",
+    "check:release": "node scripts/check-release-version.mjs --release"
   },
   "dependencies": {
     "sharp": "0.35.5",

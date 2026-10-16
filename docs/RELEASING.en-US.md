@@ -51,7 +51,7 @@ The Office checks require locally activated Word / PowerPoint. `package:mac` pro
 
 1. Update the version and lockfile.
 2. Review tests and the readiness report.
-3. Create a version tag such as `v2.0.0-beta.4`.
+3. Create a version tag such as `v2.0.0-beta.5`.
 4. Run **Actions → Release artifacts**, or push the tag.
 5. The workflow builds artifacts only; it does not publish a public Release automatically.
 6. Download and inspect the artifacts. Create a draft Release with Chinese and English release notes, attach the EXE, ZIP and checksums, and mark beta versions as **pre-release**.
