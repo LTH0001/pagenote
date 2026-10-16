@@ -94,6 +94,8 @@ AI 浪潮扑面而来，用 AI 辅助学习早已是寻常选择。大家常常�
 4. 阅读 PDF、Markdown 不需要 Office。导入 Word/PPT 或刷新其预览，需要本机安装并激活 **Microsoft Word / PowerPoint**；首次调用按提示允许自动化与文件访问。
 5. 在 **设置 → 语言 / Language** 选择中文或英文。通过文件菜单导入文档、新建或打开项目，再为对应页填写笔记或连接自己的 AI 客户端。
 
+Mac 的 Office 接口只接入 Microsoft Word / PowerPoint，WPS、Pages、Keynote 不能替代。若提示超时，先检查 Office 是否弹出了授权、激活或文件访问对话框，再重试。MCP 的 Word 截图通过临时 PDF 生成，不需要屏幕录制权限；转换失败或源文件冲突时会保留临时编辑副本，方便恢复。
+
 [Mac 发布说明与 SHA256SUMS.txt](https://github.com/obroccolio/pagenote/releases/tag/v1.0.0) · [Office 接入与权限排查](docs/MAC-OFFICE.md)
 
 校验 DMG 可在终端运行 `shasum -a 256 下载文件路径`，与 Mac 发布页的校验清单比较；不要使用 Windows 发布页的校验清单核对 Mac 文件。
@@ -127,7 +129,7 @@ Mac 适配由 [obroccolio](https://github.com/obroccolio) 在 [PR #3](https://gi
     ai-reviews.json         # AI 标注（产生标注后保存）
 ```
 
-安装版可以双击 `project.pagenote` 打开；也可以在软件里用 **文件 → 打开项目**。ZIP 解压版若没有关联文件类型，在新版分发目录运行一次 `register-project-files.cmd`，之后再双击项目；移动软件后需要重新注册。Windows 若已有其他默认应用，请在“打开方式”里选择 pagenote。
+两个平台都可以从 **文件 → 打开项目** 读取 `project.pagenote`。Windows 安装版会注册双击打开；Windows ZIP 版若没有关联文件类型，在分发目录运行一次 `register-project-files.cmd`，移动软件后需重新注册。Windows 若已有其他默认应用，请在“打开方式”里选择 pagenote。Mac 将应用移入 Applications 后可使用 Finder 打开项目；若未关联，可在“打开方式”中选择 pagenote，无需运行 Windows 的 `.cmd` 脚本。
 
 旧版 `project.page-notes.json` 也可从软件里打开。入口中的 `left` 与 `right` 链接是文件来源，打开时按链接重新读取 `src`；不要只移动入口文件。
 

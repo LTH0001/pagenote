@@ -94,6 +94,8 @@ Releases should include `SHA256SUMS.txt` and pass security review. The current l
 4. PDF and Markdown need no Office. Word/PPT import and preview refresh require locally installed, activated **Microsoft Word / PowerPoint**. Allow the requested Automation and document access permissions.
 5. Choose your language in Settings, import a document or open a project, then add page notes or connect your external AI client.
 
+The Office bridge requires Microsoft Word / PowerPoint; WPS, Pages and Keynote are not replacements. If an operation times out, check Office for pending permission, activation or document dialogs before retrying. MCP Word screenshots render a temporary PDF without screen-recording permission. Conversion failures or source conflicts retain the working copy for recovery.
+
 [Mac release notes and checksums](https://github.com/obroccolio/pagenote/releases/tag/v1.0.0) · [Office setup and troubleshooting](docs/MAC-OFFICE.md)
 
 Use `shasum -a 256 PATH_TO_DOWNLOAD` and compare against the contributor's Mac checksum file, not the Windows manifest.
@@ -134,6 +136,8 @@ Legacy `project.page-notes.json` files remain supported through the app. The `le
 The brand is now pagenote. When the legacy document store exists and the new document store does not, data is copied while preserving the legacy folder. Existing projects do not need to be renamed or rebuilt.
 
 Beta.3 fixes migration, staged file replacement and cross-volume copy failures in some encrypted or redirected Windows data folders. Interrupted copies retain recovery files; these fallback paths cannot offer the same power-loss guarantees as atomic renames.
+
+On Mac, move pagenote to Applications and open projects through Finder or **File → Open project**. If needed, select pagenote under **Open With**; Windows `.cmd` registration scripts do not apply to Mac.
 
 ## Requirements
 
