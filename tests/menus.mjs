@@ -33,6 +33,9 @@ try {
     '选择编辑区域',
   ]);
   assert.ok(
+    menus.find((m) => m.label === '文件').children.includes('版本历史'),
+  );
+  assert.ok(
     menus.find((m) => m.label === 'AI 标注').children.includes('文档标注画布'),
   );
   const copiedSkill = await app.evaluate(async ({ Menu, clipboard }) => {
