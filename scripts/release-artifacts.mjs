@@ -2,10 +2,17 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
 const directory = path.resolve(process.argv[2] || 'release');
+const { version } = JSON.parse(
+  await fs.readFile(new URL('../package.json', import.meta.url), 'utf8'),
+);
 const files = (await fs.readdir(directory)).filter((name) =>
   /^pagenote-.*\.(exe|zip)$/.test(name),
 );
 if (!files.length) throw Error('No release artifacts found.');
+if (files.some((name) => !name.startsWith('pagenote-' + version + '-')))
+  throw Error(
+    'Mixed release versions; use a dedicated artifact directory for ' + version,
+  );
 const lines = [];
 for (const name of files) {
   const hash = createHash('sha256')

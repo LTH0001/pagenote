@@ -35,7 +35,7 @@ node scripts/release-artifacts.mjs
 
 1. 更新 `package.json` 与 `package-lock.json` 的版本。
 2. 验证本地或 CI 测试结果，并阅读发布准备报告。
-3. 在 GitHub 创建带版本号的 tag，例如 `v2.0.0-beta.4`。
+3. 在 GitHub 创建带版本号的 tag，例如 `v2.0.0-beta.5`。
 4. 使用 **Actions → Release artifacts** 手动运行工作流，或推送 tag。
 5. 工作流只生成构建产物，不自动公开发布。下载 artifacts，检查安装包、ZIP 和校验值。
 6. 在 **Releases → Draft a new release** 中填写中英文变更说明，上传 EXE、ZIP、`SHA256SUMS.txt`。测试版勾选 **pre-release**。
@@ -56,3 +56,16 @@ node scripts/release-artifacts.mjs
 - 项目文件夹必须整体移动；卸载程序不会删除项目和用户数据。
 
 当前构建配置显式设置了 `build.win.signExecutable: false`。准备正式签名时，先改为 `true`，再配置签名凭据并重新构建、验证签名。
+
+
+## 版本一致性与脚本发布
+
+源码推送不等于安装包发布。开发期间README可以继续指向已发布版本；发布新包时必须同步package.json、package-lock.json、README中英文下载入口、日期化更新日志及Git标签。
+
+1. `npm run test:version` 检查基础版本约束；`npm run check:release` 额外检查下载入口和已发布更新日志。
+2. 构建、测试最终包，将安装EXE、完整ZIP、源码ZIP放入独立 `release/publish-版本号/`，对该目录运行 `node scripts/release-artifacts.mjs 目录`。
+3. 提交发布改动，在该提交上创建并推送匹配的版本标签。发布脚本验证远端标签指向当前提交。
+4. 编写 `docs/RELEASE-NOTES-版本号.md`，执行 `node scripts/publish-release.mjs draft 产物目录` 上传并核验草稿；确认完整后执行同命令的 `publish` 模式。
+5. 确认Release已公开且资源齐全，再同步主分支下载入口。`status` 模式可读取发布状态。脚本从package.json推导版本，使用现有Git凭据或环境令牌，不在文件内保存密钥。
+
+已公开版本的安装包不可悄悄替换成另一份内容；有变化时发布新的版本号。测试版不会标为正式稳定版。
