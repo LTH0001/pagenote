@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "node server.mjs --dev",
-    "build": "node scripts/create-icon.mjs && node scripts/notices.mjs && vite build && node scripts/build-mcp.mjs",
+    "build": "node scripts/export-prompts.mjs && node scripts/create-icon.mjs && node scripts/notices.mjs && vite build && node scripts/build-mcp.mjs",
     "start": "node server.mjs",
     "test": "npm run test:release",
     "desktop": "electron .",
@@ -16,19 +16,24 @@
     "test:markdown": "node tests/rich-editor.mjs",
     "test:mcp": "node tests/mcp.mjs",
     "package:dir": "npm run build && node scripts/build-config.mjs win && electron-builder --win dir --x64 --config electron-builder.json --publish never",
-    "test:release": "node tests/mac-word-host.mjs && node tests/mac-native.mjs && node tests/project-launch.mjs && node tests/project-open.mjs && node tests/file-ops.mjs && node tests/external-project.mjs && node tests/external-documents.mjs && node tests/migration.mjs && node tests/menus.mjs && node tests/box-tag.mjs && node tests/projects.mjs && node tests/i18n.mjs && node tests/code-rendering.mjs && node tests/rich-editor.mjs",
+    "test:release": "node tests/mac-word-host.mjs && node tests/mac-native.mjs && node tests/project-launch.mjs && node tests/project-open.mjs && node tests/file-ops.mjs && node tests/external-project.mjs && node tests/external-documents.mjs && node tests/migration.mjs && node tests/ai-settings.mjs && node tests/menus.mjs && node tests/box-tag.mjs && node tests/projects.mjs && node tests/i18n.mjs && node tests/math-input.mjs && node tests/formula-rendering.mjs && node tests/code-rendering.mjs && node tests/rich-editor.mjs",
     "format": "prettier --write src desktop mcp scripts server.mjs projects.mjs external-documents.mjs index.html locales tests/*.mjs",
     "format:check": "prettier --check src desktop mcp scripts server.mjs projects.mjs external-documents.mjs index.html locales",
     "package:source": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/source-archive.ps1",
     "test:word": "node tests/default-word.mjs",
-    "test:mac-office": "node tests/mac-word-host.mjs && node tests/mac-office.mjs && node tests/mac-office-app.mjs",
+    "test:prepared": "node tests/prepared.mjs",
+    "test:page-breaks": "node tests/page-breaks.mjs",
+    "pretest:prepared": "node scripts/ensure-electron.mjs",
     "pretest:release": "node scripts/ensure-electron.mjs",
     "pretest:mcp": "node scripts/ensure-electron.mjs",
     "pretest:word": "node scripts/ensure-electron.mjs",
     "pretest:markdown": "node scripts/ensure-electron.mjs",
+    "test:mac-office": "node tests/mac-word-host.mjs && node tests/mac-office.mjs && node tests/mac-office-app.mjs",
     "pretest:mac-office": "node scripts/ensure-electron.mjs"
   },
   "dependencies": {
+    "sharp": "0.35.5",
+    "@gutenye/ocr-node": "1.4.9",
     "express": "^5.1.0",
     "multer": "^2.0.2",
     "pdfjs-dist": "^6.2.108",
@@ -52,6 +57,11 @@
     "vite": "^7.1.0",
     "zod": "^4.6.7"
   },
+  "overrides": {
+    "@gutenye/ocr-node": {
+      "sharp": "$sharp"
+    }
+  },
   "description": "Local-first document reading, page-linked Markdown notes and AI annotations",
   "author": "pagenote contributors",
   "main": "desktop/main.cjs",
@@ -63,16 +73,106 @@
     },
     "files": [
       "desktop/**",
+      "skills/**",
       "server.mjs",
       "dist/**",
       "package.json",
       "node_modules/**",
       "!node_modules/vite/**",
+      "!node_modules/onnxruntime-node/bin/napi-v6/darwin/**",
+      "!node_modules/onnxruntime-node/bin/napi-v6/linux/**",
+      "!node_modules/onnxruntime-node/bin/napi-v6/win32/arm64/**",
       "projects.mjs",
       "locales/**",
       "external-documents.mjs"
     ],
-    "compression": "normal"
+    "extraFiles": [
+      {
+        "from": "scripts/register-project-files.cmd",
+        "to": "register-project-files.cmd"
+      },
+      {
+        "from": "scripts/register-project-files.ps1",
+        "to": "register-project-files.ps1"
+      }
+    ],
+    "extraResources": [
+      {
+        "from": "desktop/word-host.ps1",
+        "to": "word-host.ps1"
+      },
+      {
+        "from": "convert-office.ps1",
+        "to": "convert-office.ps1"
+      },
+      {
+        "from": "mcp-dist/page-notes-mcp.cjs",
+        "to": "page-notes-mcp.cjs"
+      },
+      {
+        "from": "mcp-dist/node.exe",
+        "to": "mcp-node.exe"
+      },
+      {
+        "from": "mcp-dist/NODE-LICENSE.txt",
+        "to": "NODE-LICENSE.txt"
+      },
+      {
+        "from": "mcp-dist/node-runtime.json",
+        "to": "node-runtime.json"
+      },
+      {
+        "from": "THIRD-PARTY-NOTICES.txt",
+        "to": "THIRD-PARTY-NOTICES.txt"
+      },
+      {
+        "from": "LICENSE",
+        "to": "LICENSE-pagenote.txt"
+      },
+      {
+        "from": "build/licenses/PaddleOCR-LICENSE.txt",
+        "to": "LICENSE-PaddleOCR.txt"
+      },
+      {
+        "from": "build/licenses/Guten-OCR-LICENSE.txt",
+        "to": "LICENSE-Guten-OCR.txt"
+      }
+    ],
+    "win": {
+      "target": [
+        "nsis",
+        "zip"
+      ],
+      "icon": "build/icon.ico",
+      "signAndEditExecutable": true,
+      "signExecutable": false
+    },
+    "compression": "normal",
+    "asarUnpack": [
+      "node_modules/@gutenye/ocr-models/**",
+      "node_modules/onnxruntime-node/**",
+      "node_modules/sharp/**",
+      "node_modules/@img/**"
+    ],
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "pagenote",
+      "artifactName": "pagenote-${version}-windows-x64-setup.exe",
+      "deleteAppDataOnUninstall": false
+    },
+    "artifactName": "pagenote-${version}-windows-${arch}.${ext}",
+    "fileAssociations": [
+      {
+        "ext": "pagenote",
+        "name": "pagenote Project",
+        "description": "pagenote project",
+        "role": "Editor"
+      }
+    ]
   },
   "engines": {
     "node": ">=22.13.0"

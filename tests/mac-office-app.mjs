@@ -130,6 +130,20 @@ try {
     }),
   );
   const projectWord = json(await call('read_word', { documentId: projectId }));
+  const projectManifest = JSON.parse(await fs.readFile(projectFile, 'utf8'));
+  const linkedSource = path.join(
+    state.document.projectRoot,
+    projectManifest.left,
+  );
+  const cachedProjectSource = await fs.readFile(linkedSource);
+  await fs.writeFile(linkedSource, 'External source change during Word edit');
+  await call('get_state');
+  assert.equal(
+    await fs.readFile(linkedSource, 'utf8'),
+    'External source change during Word edit',
+    'an MCP read while Word is active must not publish stale cached source',
+  );
+  await fs.writeFile(linkedSource, cachedProjectSource);
   const projectImage = await call('screenshot', {
     documentId: projectId,
     scope: 'word',

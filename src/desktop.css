@@ -1695,28 +1695,30 @@ body {
   display: none;
 }
 #workspace {
-  margin-left: 76px;
-  width: calc(100% - 76px);
+  margin-left: 64px;
+  width: calc(100% - 64px);
 }
 #aiSharedTools {
   position: fixed;
   left: 0;
-  top: 12px;
+  top: 0;
   bottom: 0;
-  width: 72px;
+  width: 60px;
   flex-direction: column;
   gap: 6px;
   background: #fafafa;
   border: 0;
   border-right: 1px solid #e0e0e0;
   margin: 0;
-  padding: 12px 6px;
+  padding: 6px 4px;
   z-index: 20;
 }
 #aiSharedTools > button,
 #aiSharedTools > details > summary {
-  width: 58px;
-  min-height: 58px;
+  width: 50px;
+  min-height: 52px;
+  padding: 6px 2px;
+  font-size: 11px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1733,13 +1735,13 @@ body {
   stroke-linecap: round;
 }
 #aiSharedTools .menu-popover {
-  left: 66px;
+  left: 56px;
   top: 0;
   min-width: 190px;
 }
 .mouse-options {
   position: absolute;
-  left: 72px;
+  left: 60px;
   top: 12px;
   display: flex;
   flex-direction: column;

@@ -3,6 +3,11 @@ const { moveFile, copyFileSafe } = fileOps;
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { createHash, randomUUID } from 'node:crypto';
+export function splitPageNotes(text) {
+  return text.split(
+    /(?:\r?\n){2}<!--[ \t]*pagebreak[ \t]*-->(?:\r?\n){2}|^[ \t]*<!--[ \t]*pagebreak[ \t]*-->[ \t]*\r?$/gm,
+  );
+}
 export function createProjectStore({ app, data, convertOffice }) {
   const metaPath = (id) => path.join(data, 'documents', id, 'meta.json'),
     valid = (id) => /^[a-f0-9]{64}$/.test(id);
@@ -120,6 +125,7 @@ export function createProjectStore({ app, data, convertOffice }) {
           'notes.json',
           'annotations.json',
           'ai-reviews.json',
+          'ai-handoffs.json',
         ]) {
           try {
             await atomic(
@@ -185,12 +191,16 @@ export function createProjectStore({ app, data, convertOffice }) {
       }
     }
     const notes = Object.fromEntries(
-      (await importAssets(await fs.readFile(right, 'utf8'), root))
-        .split(/\n\s*<!--\s*pagebreak\s*-->\s*\r?\n/g)
-        .map((text, i) => [i + 1, text]),
+      splitPageNotes(
+        await importAssets(await fs.readFile(right, 'utf8'), root),
+      ).map((text, i) => [i + 1, text]),
     );
     await atomic(path.join(dir, 'notes.json'), JSON.stringify(notes));
-    for (const name of ['annotations.json', 'ai-reviews.json']) {
+    for (const name of [
+      'annotations.json',
+      'ai-reviews.json',
+      'ai-handoffs.json',
+    ]) {
       try {
         await atomic(
           path.join(dir, name),
@@ -201,6 +211,8 @@ export function createProjectStore({ app, data, convertOffice }) {
         );
       } catch (e) {
         if (e.code !== 'ENOENT') throw e;
+        if (name === 'ai-handoffs.json')
+          await atomic(path.join(dir, name), '{}');
       }
     }
     const meta = {
@@ -306,7 +318,11 @@ export function createProjectStore({ app, data, convertOffice }) {
   });
   app.post('/api/projects/:id/sync', async (req, res, next) => {
     try {
-      await persist(req.params.id, true, req.body?.right !== false);
+      await persist(
+        req.params.id,
+        req.body?.source !== false,
+        req.body?.right !== false,
+      );
       res.json({ ok: true });
     } catch (e) {
       next(e);

@@ -325,7 +325,40 @@
         左侧 Word
         编辑或右侧编辑时，默认展开。可拖动分界线拉回双栏，也可点击“返回双栏”。关闭后保持当前双栏宽度。设置会自动保存。
       </p>
+      <button id="aiSettingsButton">AI 设置</button>
       <button id="closeSettings" class="primary">完成</button>
+    </dialog>
+    <dialog id="aiSettings">
+      <h2>AI 设置</h2>
+      <label for="aiPromptModule">提示词模块</label>
+      <select id="aiPromptModule">
+        <option value="system">默认系统提示词</option>
+        <option value="learning">学习讲解</option>
+        <option value="page-tutor">逐页精讲</option>
+        <option value="output">输出格式</option>
+        <option value="tag-edit">AI Tag 修改</option>
+        <option value="learner">学习背景</option>
+      </select>
+      <label for="aiSystemPrompt">提示词内容</label>
+      <p>
+        系统提示词保存后重新连接客户端；模块修改在 AI
+        下次读取时生效。仅保存当前选中的模块。
+      </p>
+      <textarea
+        id="aiSystemPrompt"
+        rows="12"
+        maxlength="32768"
+        spellcheck="false"
+      ></textarea>
+      <p>
+        逐页精讲技能按任务启用，不会把摘要、翻译或简答强制变成讲课。此设置不改变工具权限。
+      </p>
+      <p id="aiSettingsStatus" role="status"></p>
+      <div class="history-actions">
+        <button id="aiPromptReset">恢复默认</button>
+        <button id="aiSettingsCancel">取消</button>
+        <button id="aiSettingsSave" class="primary">保存</button>
+      </div>
     </dialog>
     <dialog id="historyDialog">
       <div class="history-heading">

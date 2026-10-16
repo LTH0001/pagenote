@@ -1,4 +1,6 @@
 import fileOps from './desktop/file-ops.cjs';
+import aiSettingsStore from './desktop/ai-settings.cjs';
+import promptStoreModule from './desktop/prompts.cjs';
 const { moveFile, copyFileSafe } = fileOps;
 import { registerExternalDocuments } from './external-documents.mjs';
 import { createProjectStore } from './projects.mjs';
@@ -31,6 +33,51 @@ app.use((req, res, next) => {
   next();
 });
 app.use(express.json({ limit: '30mb' }));
+const aiSettingsFile = path.join(data, 'ai-settings.json');
+const prompts = promptStoreModule.createPromptStore(
+  path.join(root, 'skills'),
+  data,
+);
+app.get('/api/ai-prompts', (req, res, next) => {
+  try {
+    res.json(prompts.index());
+  } catch (e) {
+    next(e);
+  }
+});
+app.get('/api/ai-prompts/:id', (req, res, next) => {
+  try {
+    res.json(prompts.read(req.params.id));
+  } catch (e) {
+    next(e);
+  }
+});
+app.put('/api/ai-prompts/:id', async (req, res, next) => {
+  try {
+    res.json(await prompts.save(req.params.id, req.body?.text));
+  } catch (e) {
+    next(e);
+  }
+});
+app.get('/api/ai-settings', (req, res, next) => {
+  try {
+    res.json(aiSettingsStore.readAISettings(aiSettingsFile));
+  } catch (error) {
+    next(error);
+  }
+});
+app.put('/api/ai-settings', async (req, res, next) => {
+  try {
+    res.json(
+      await aiSettingsStore.saveAISettings(
+        aiSettingsFile,
+        req.body?.systemPrompt,
+      ),
+    );
+  } catch (error) {
+    next(error);
+  }
+});
 const projects = createProjectStore({
   app,
   data,
@@ -358,6 +405,74 @@ app.get('/api/documents/:id/notes', async (req, res, next) => {
   }
 });
 let writeQueue = Promise.resolve();
+async function readHandoffs(id) {
+  const file = path.join(path.dirname(metaFile(id)), 'ai-handoffs.json');
+  try {
+    return JSON.parse(await fs.readFile(file, 'utf8'));
+  } catch (e) {
+    if (e.code !== 'ENOENT') throw e;
+    return {};
+  }
+}
+app.get('/api/documents/:id/handoffs/:page', async (req, res, next) => {
+  try {
+    const { id, page } = req.params;
+    if (!validId(id) || !/^[1-9]\d{0,3}$|^10000$/.test(page))
+      return res.sendStatus(400);
+    await fs.access(metaFile(id));
+    const handoff = (await readHandoffs(id))[page] || null;
+    const current = noteRevision((await readNotes(id))[page] || '');
+    res.json({
+      documentId: id,
+      page: Number(page),
+      handoff,
+      stale: handoff ? handoff.noteRevision !== current : false,
+    });
+  } catch (e) {
+    next(e);
+  }
+});
+app.put('/api/documents/:id/handoffs/:page', async (req, res, next) => {
+  try {
+    const { id, page } = req.params;
+    const { summary, expectedRevision, sourceRevision } = req.body || {};
+    if (
+      !validId(id) ||
+      !/^[1-9]\d{0,3}$|^10000$/.test(page) ||
+      typeof summary !== 'string' ||
+      !summary.trim() ||
+      summary.length > 4000 ||
+      typeof expectedRevision !== 'string' ||
+      !/^[a-f0-9]{64}$/.test(expectedRevision) ||
+      typeof sourceRevision !== 'string' ||
+      !/^[a-f0-9]{64}$/.test(sourceRevision)
+    )
+      return res.status(400).json({ error: '交接内容、页码或版本无效' });
+    await fs.access(metaFile(id));
+    const job = writeQueue.then(async () => {
+      const current = noteRevision((await readNotes(id))[page] || '');
+      if (current !== expectedRevision)
+        throw Error('笔记已变化，请重新读取后保存交接');
+      const records = await readHandoffs(id);
+      records[page] = {
+        summary,
+        noteRevision: current,
+        sourceRevision,
+        updated: new Date().toISOString(),
+      };
+      const file = path.join(path.dirname(metaFile(id)), 'ai-handoffs.json');
+      const temp = file + '.' + randomUUID() + '.tmp';
+      await fs.writeFile(temp, JSON.stringify(records));
+      await moveFile(temp, file);
+      await projects.persist(id);
+    });
+    writeQueue = job.catch(() => {});
+    await job;
+    res.json({ documentId: id, page: Number(page), saved: true });
+  } catch (e) {
+    next(e);
+  }
+});
 async function readReviews(id) {
   if (!validId(id)) throw Error('文档 ID 无效');
   await fs.access(metaFile(id));

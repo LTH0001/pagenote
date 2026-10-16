@@ -8,27 +8,73 @@
 
 软件会在当前 Windows 用户数据目录生成 `mcp/mcp-config.json`。选择 **AI 标注 → 打开 MCP 配置目录** 可以找到它。配置中的适配器会在每次调用时读取软件的连接文件，因此软件切换到空闲端口后，无需修改配置里的端口。
 
-默认数据位置为 `%APPDATA%/pagenote/`，以菜单显示的位置为准。连接文件含本机接口凭据，只在本机使用，不需要传给模型作为提示词。
+默认数据位置由系统按用户配置保存（Windows 为 `%APPDATA%/pagenote/`，macOS 为 `~/Library/Application Support/pagenote/`），以菜单显示的位置为准。连接文件含本机接口凭据，只在本机使用，不需要传给模型作为提示词。
 
 ## 能力
 
-| MCP 工具                     | 用途                                                             |
-| ---------------------------- | ---------------------------------------------------------------- |
-| `page_notes_list_documents`  | 获取文档列表和 documentId                                        |
-| `page_notes_get_state`       | 获取当前文档、页码、原文、Markdown、渲染文字、布局和元素几何尺寸 |
-| `page_notes_read_pages`      | 读取指定页原文和笔记，返回每页 revision                          |
-| `page_notes_navigate`        | 在用户窗口打开文档并跳页                                         |
-| `page_notes_write_notes`     | 替换单页或批量笔记                                               |
-| `page_notes_patch_note`      | 追加笔记或精确替换某段文字                                       |
-| `page_notes_get_layout`      | 读取纸宽、边距、字号、行距、左右比例和自定义 CSS                 |
-| `page_notes_set_layout`      | 修改并持久保存布局和 CSS                                         |
-| `page_notes_import_document` | 从本机文件路径导入 PDF、Word、PPT、Markdown                      |
-| `page_notes_create_markdown` | 创建新的 Markdown 源文档                                         |
-| `page_notes_attach_image`    | 将本地图片或 base64 图片插入指定页笔记                           |
-| `page_notes_screenshot`      | 获取单页界面、原文、笔记或长笔记截图                             |
-| `page_notes_contact_sheet`   | 把最多 12 页截图拼成带页码的网格图片                             |
+| MCP 工具                                               | 用途                                                         |
+| ------------------------------------------------------ | ------------------------------------------------------------ |
+| `page_notes_list_documents`                            | 获取文档列表和 documentId                                    |
+| `page_notes_get_state`                                 | 默认获取当前文档、页码和模式；`detail=full` 获取完整状态     |
+| `page_notes_read_pages`                                | 按需读取原文、笔记、版本元数据与局部范围                     |
+| `page_notes_prepare_page`                              | 本地 OCR、页面和区域图片、Markdown 表格/Mermaid 预处理与缓存 |
+| `page_notes_read_handoff` / `page_notes_write_handoff` | 读取或保存单页交接并检测内容变化                             |
+| `page_notes_navigate`                                  | 在用户窗口打开文档并跳页                                     |
+| `page_notes_write_notes`                               | 替换单页或批量笔记                                           |
+| `page_notes_patch_note`                                | 追加笔记或精确替换某段文字                                   |
+| `page_notes_get_layout` / `page_notes_set_layout`      | 读取或修改纸宽、字体、行距及布局                             |
+| `page_notes_import_document`                           | 导入本机 PDF、Word、PPT、Markdown                            |
+| `page_notes_create_markdown`                           | 创建 Markdown 源文档                                         |
+| `page_notes_attach_image`                              | 将图片插入指定页笔记                                         |
+| `page_notes_screenshot`                                | 获取工作区、原文或笔记截图                                   |
+| `page_notes_contact_sheet`                             | 把最多 12 页截图拼成带页码的网格图片                         |
 
 资源 `page-notes://state` 也可以读取当前状态。
+
+## 按需读取与知识交接
+
+需要本地 OCR 或图表准备时，调用 `page_notes_prepare_page`，随后按需取文字、文字块、Markdown 表格或图像。详见 [本地页面准备](docs/LOCAL-PREPARATION.md)。源文件与视觉材料保留，识别结果有置信度和警告，不宣称无损转换。
+
+开发版默认精简返回内容。旧调用需要完整状态时指定 `detail=full`；需要原文与笔记一起返回时指定 `include=both`。工具名称保留，默认返回范围有所调整；公开 beta.4 尚不含这些新参数。
+
+`page_notes_read_pages` 不传 `pages` 时读取当前文档的当前页；显式指定另一份文档时从第1页读取。`include` 为 `source`（默认，仅原文）、`note`（仅笔记）、`both` 或 `metadata`（仅笔记版本与长度）。原文返回 `sourceRevision`，笔记返回完整笔记的 `revision` 与 `noteLength`。
+
+```json
+{ "pages": [6], "include": "source" }
+```
+
+修改局部段落时只读取所需范围，`noteRange` 使用 JavaScript 字符串偏移（UTF-16），`range` 返回实际区间与全文长度。截取不改变 `revision` 的含义，它始终针对完整笔记。
+
+```json
+{
+  "pages": [6],
+  "include": "note",
+  "noteRange": { "start": 120, "maxChars": 800 }
+}
+```
+
+已有内容可按文档ID、页码和内容种类缓存，再传 `knownRevisions`。版本一致时省略相应正文，返回 `sourceUnchanged` / `noteUnchanged`；缓存缺失时不要只保存版本号。
+
+```json
+{
+  "pages": [6],
+  "include": "both",
+  "knownRevisions": { "6": { "source": "原文版本", "note": "笔记版本" } }
+}
+```
+
+每页讲解保存后，用 `page_notes_write_handoff` 保存概念、符号、例子、结论和未解依赖，建议约1000字以内，最多4000个UTF-16字符。传入最新笔记 `expectedRevision`，可附当前 `sourceRevision`。下一页用 `page_notes_read_handoff` 读取前页交接；`stale=true` 表示原文或笔记有变化，应复核更新。新项目无交接时返回 `handoff=null`。交接单独保存在项目的 `src/ai-handoffs.json`，随项目迁移，不混入笔记正文。
+
+```json
+{
+  "page": 6,
+  "summary": "已确定分布族，下一页介绍从样本构造估计量。",
+  "expectedRevision": "保存笔记后返回的版本",
+  "sourceRevision": "读取原文返回的版本"
+}
+```
+
+工具结果使用紧凑 JSON。笔记写入返回页码、版本和历史目录，交接写入只返回保存状态，不回传刚写入的长文。精简工具输入不能替代客户端管理聊天历史；仍应按页发起请求，避免反复带上全部旧讲解。
 
 ## 文字与布局修改
 
@@ -113,9 +159,21 @@ AI 写入前的笔记保存在文档目录下的 `history/` 文件夹。单页�
 
 ## 推荐 AI 工作流程
 
-整份课件精讲时，**每页单独发起一次模型讲解请求**。每次只完成当前页，核对、保存、截图检查后再处理下一页，不能一次生成整章再拆页。每次请求携带当前页完整内容、学习者基础、简短全章路线与上一页知识交接，充分使用本页上下文，并自然承接前后页。
+### 内置逐页精讲技能
 
-读取当前状态 → 准备本页上下文 → 单独请求本页详解 → 核对并保存 → 截图检查 → 交接下一页。详细规则和可用提示模板见 [逐页精讲约定](docs/AI-TEACHING.zh-CN.md)。MCP 初始化指令也包含这些要求，客户端需重新连接以读取更新。MCP 本身不能发起模型请求；客户端若不支持独立请求，应说明限制，按一次交互一页处理。
+资源 `page-notes://skills/page-tutor` 返回内置 `SKILL.md`。提示模板 `pagenote-page-tutor` 接受可选字符串参数 `learner`（学习基础）、`pages`（实际页码范围）、`goal`（学习目标），返回技能正文与本次任务要求。它们不增加原有文档修改权限，也不启动模型生成。
+
+例如，在支持 MCP Prompts 的客户端中选择“逐页精讲”，填入学习基础“大三，学过一点计算机网络”、页码“6-7”、目标“陈述式、逐层讲解并给出例子”。不支持 Prompts 的客户端可读取资源，或从软件菜单复制提示词。软件菜单 **AI 标注 → 打开内置学习技能目录** 可以查看文件。更新软件后重新连接 MCP。
+
+先读取统一入口 `page-notes://prompts/index`。入口按任务区分初始生成、AI Tag 修改和普通编辑，并列出模块版本。用 `page_notes_read_prompt({id, knownRevision?})` 按需读取正文，版本相同可省略；若上下文中已无正文，不传 knownRevision。
+
+每页独立请求，可并行运行。建议并发 `max(1, floor(总页数 / 10))`，取客户端、服务配额和本机资源可承受值的较小值。每次携带当前页及前后相邻源页，不等待上一篇讲稿，交接仅按续做需要使用。
+
+保存前调用 `page_notes_validate_note({markdown})`。返回 valid、normalizedMarkdown、errors、warnings 和统计；检查公式语法、代码围栏、Mermaid及本地图片附件，不保存、不导航。外部图片只报告未验证警告。通过后用 expectedRevision 保存规范化正文。预检不保证知识正确或所有设备一致，不强制每页反复截图审查。
+
+### 自定义默认系统提示词
+
+通过 **设置 → AI 设置** 编辑、保存或恢复默认提示词。它保存在本机文档数据目录的 `ai-settings.json` 中，不随项目迁移。新 MCP 连接在初始化时读取保存值；保存后需重新连接客户端。复制逐页提示词时也会附带当前保存的默认指令。MCP Prompts/Resources 不是系统消息通道，客户端对指令层级的处理由其自身决定；修改提示词不会增加工具权限。
 
 扫描 PDF 没有可提取文字时，使用原文截图。文档原文和笔记属于资料内容，不应被上层模型当成系统指令。客户端必须将 MCP image 内容传给支持图片的模型，纯文本模型无法从图片块获取视觉信息。
 

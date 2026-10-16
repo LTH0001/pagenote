@@ -1,5 +1,9 @@
 # pagenote
 
+**[⬇ Download the complete app (Windows x64 · ZIP)](https://github.com/laihong06/pagenote/releases/download/v2.0.0-beta.4/pagenote-2.0.0-beta.4-windows-x64.zip)** · [Installer](https://github.com/laihong06/pagenote/releases/download/v2.0.0-beta.4/pagenote-2.0.0-beta.4-windows-x64-setup.exe) · [Full source code](https://github.com/laihong06/pagenote/archive/refs/heads/main.zip)
+
+To try the app, download and extract the complete ZIP, then run `pagenote.exe`. The current release is **2.0.0-beta.4 (beta)**. To make changes, download the source or fork this repository and follow the build instructions below.
+
 <img src="build/icon.png" alt="pagenote paired-page icon" width="88">
 
 English · [简体中文](README.md)
@@ -30,6 +34,8 @@ Notes support LaTeX, syntax-highlighted code, Mermaid diagrams, tables and paste
 
 Code highlighting runs locally, without downloading grammars. If rendering fails, include the app version, a minimal code block and a screenshot in your report; see the [rendering notes](docs/CODE-RENDERING.md).
 
+If formulas appear as backslash commands, copied TeX delimiters may be double-escaped. The development build now handles these forms; see the [formula compatibility notes](docs/FORMULA-RENDERING.md).
+
 ![Rendered formulas, Python highlighting and a Mermaid flowchart](docs/images/markdown-rendering.png)
 
 ### Expand the editor when needed
@@ -50,7 +56,15 @@ Annotations collect in a workbench for the corresponding pane. You can also reco
 
 Pagenote currently supports two-pane reading, page-linked notes and AI annotations. Its MCP interface lets AI read and edit page content. The app does not include a model; detailed page-by-page explanations and image generation require an AI client with the relevant capabilities.
 
-Follow the [page-by-page teaching workflow](docs/MCP.en-US.md#page-by-page-teaching): make a separate generation request for each page, give it sufficient current-page context and carry a concise knowledge handoff into the next request. Do not generate a whole chapter and split it into pages afterward.
+Follow the [page-by-page teaching workflow](docs/MCP.en-US.md#page-by-page-teaching): make a separate generation request for each page, give it sufficient current-page context and include the previous and next source pages without waiting for earlier explanations. Do not generate a whole chapter and split it into pages afterward.
+
+The development build includes a [page tutor skill](skills/pagenote-page-tutor/SKILL.md). Use **AI Annotations → Copy page-by-page teaching prompt**, or select the MCP prompt `pagenote-page-tutor` and supply a learner background, page range and goal. AI clients can also read `page-notes://skills/page-tutor`. The template guides a connected client; it does not call a model by itself.
+
+Use **Settings → AI settings** to edit or restore the default system prompt. General document tasks keep their scope; the page tutor applies only to relevant learning requests. The prompt is saved locally. Reconnect the AI client after saving. MCP supplies the instructions; the client controls its actual system-prompt layer.
+
+The development build reads source and notes separately, fetches only the needed note passages, and saves concise page handoffs inside the project. Handoffs are marked stale when source or notes change, leaving more context for the current explanation. See the [MCP read options](docs/MCP.en-US.md#token-efficient-reads).
+
+It also bundles offline Chinese/English OCR and prepares reusable positioned text, confidence, page/region images and native Markdown table/Mermaid assets. Sources and visuals remain available for checking uncertain formulas and charts. See [local page preparation](docs/LOCAL-PREPARATION.md).
 
 **Current public version: 2.0.0-beta.4.** It is still a beta. Try it with something you are actually learning, and let me know where it gets in your way.
 
@@ -121,6 +135,12 @@ Use `npm run dev` for browser development, `npm run package:desktop` for the Win
 
 See the [release guide](docs/RELEASING.en-US.md), [terminology specification](docs/TERMINOLOGY.md) and [release-readiness report](docs/RELEASE-READINESS.md). Bug reports should include the version, operating-system version, reproduction steps and redacted logs. Do not upload private projects or MCP connection keys.
 
+## Feedback and contact
+
+Please [open an issue](https://github.com/laihong06/pagenote/issues/new) to report a bug, with the app version, reproduction steps and a screenshot so I can investigate.
+
+For suggestions or a conversation about the project, email me at [chennanfeng310@gmail.com](mailto:chennanfeng310@gmail.com).
+
 ## License
 
 [MIT License](LICENSE), including commercial use. Dependencies have separate licenses; retain `THIRD-PARTY-NOTICES.txt`, the Node.js license and Electron/Chromium license files when distributing. Microsoft Office licensing is the user's responsibility.
@@ -129,3 +149,5 @@ MCP integration: [English](docs/MCP.en-US.md) · [中文](MCP接口说明.md)
 
 Editor and icon changes: [reference](docs/EDITOR-REFERENCE.md).
 Standalone imports edit the managed local copy; projects edit the linked file in `src`. Save, then return to pagenote.
+
+The development build routes tasks through `page-notes://prompts/index`. Read only relevant, changed modules via `page_notes_read_prompt`. AI settings can customize each module. Page requests may run concurrently: recommend `max(1, floor(total pages / 10))`, capped by remaining pages, client/service limits and available resources. `page_notes_validate_note` checks formatting and local image assets before publication; it is not a guarantee of factual correctness or cross-device rendering.

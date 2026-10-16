@@ -40,6 +40,14 @@ if (platform === 'win') {
       { from: 'mcp-dist/node-runtime.json', to: 'node-runtime.json' },
       { from: 'THIRD-PARTY-NOTICES.txt', to: 'THIRD-PARTY-NOTICES.txt' },
       { from: 'LICENSE', to: 'LICENSE-pagenote.txt' },
+      {
+        from: 'build/licenses/PaddleOCR-LICENSE.txt',
+        to: 'LICENSE-PaddleOCR.txt',
+      },
+      {
+        from: 'build/licenses/Guten-OCR-LICENSE.txt',
+        to: 'LICENSE-Guten-OCR.txt',
+      },
     ],
     win: {
       target: ['nsis', 'zip'],
@@ -68,6 +76,10 @@ if (platform === 'win') {
     ],
   });
 } else {
+  build.files = build.files.filter(
+    (file) =>
+      !file.startsWith('!node_modules/onnxruntime-node/bin/napi-v6/darwin/'),
+  );
   Object.assign(build, {
     extraResources: [
       { from: 'mcp-dist/page-notes-mcp.cjs', to: 'page-notes-mcp.cjs' },
@@ -81,6 +93,14 @@ if (platform === 'win') {
       { from: 'mcp-dist/node-runtime.json', to: 'node-runtime.json' },
       { from: 'THIRD-PARTY-NOTICES.txt', to: 'THIRD-PARTY-NOTICES.txt' },
       { from: 'LICENSE', to: 'LICENSE-pagenote.txt' },
+      {
+        from: 'build/licenses/PaddleOCR-LICENSE.txt',
+        to: 'LICENSE-PaddleOCR.txt',
+      },
+      {
+        from: 'build/licenses/Guten-OCR-LICENSE.txt',
+        to: 'LICENSE-Guten-OCR.txt',
+      },
     ],
     // macOS uses the AppleScript bridge; omit Windows-only helpers.
     files: build.files.concat([

@@ -4,12 +4,13 @@ import './desktop.css';
 import 'katex/dist/katex.min.css';
 import * as pdfjs from 'pdfjs-dist';
 import worker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
-import { renderMarkdown } from './markdown.js';
+import { renderMarkdown, validateNote } from './markdown.js';
 import { createAnnotations } from './annotations.js';
 import { setupMarkdownTools, htmlToMarkdown } from './editing.js';
 import { createReviews } from './reviews.js';
 import { createAITools } from './ai-tools.js';
 import { createRichEditor } from './rich-editor.js';
+import { preparePageData } from './page-data.js';
 
 pdfjs.GlobalWorkerOptions.workerSrc = worker;
 const $ = (id) => document.getElementById(id);
@@ -1134,6 +1135,74 @@ $('helpButton').onclick = () => $('help').showModal();
 $('closeHelp').onclick = () => $('help').close();
 $('settingsButton').onclick = () => $('settings').showModal();
 $('closeSettings').onclick = () => $('settings').close();
+let defaultAIPrompt = '';
+let promptDrafts = {},
+  selectedPrompt = 'system';
+async function loadPromptModule(id) {
+  selectedPrompt = id;
+  if (!promptDrafts[id]) {
+    const value = await request('/api/ai-prompts/' + id);
+    promptDrafts[id] = { text: value.text, defaultText: value.defaultText };
+  }
+  defaultAIPrompt = promptDrafts[id].defaultText;
+  $('aiSystemPrompt').value = promptDrafts[id].text;
+  $('aiSettingsStatus').textContent = '';
+}
+$('aiPromptModule').onchange = safely(async () => {
+  promptDrafts[selectedPrompt].text = $('aiSystemPrompt').value;
+  await loadPromptModule($('aiPromptModule').value);
+});
+async function openAISettings() {
+  const settings = await request('/api/ai-settings');
+  promptDrafts = {
+    system: {
+      text: settings.systemPrompt,
+      defaultText: settings.defaultSystemPrompt,
+    },
+  };
+  selectedPrompt = 'system';
+  $('aiPromptModule').value = 'system';
+  defaultAIPrompt = settings.defaultSystemPrompt;
+  $('aiSystemPrompt').value = settings.systemPrompt;
+  $('aiSettingsStatus').textContent = '';
+  if ($('settings').open) $('settings').close();
+  $('aiSettings').showModal();
+}
+$('aiSettingsButton').onclick = safely(openAISettings);
+$('aiSettingsCancel').onclick = () => $('aiSettings').close();
+$('aiPromptReset').onclick = () => {
+  $('aiSystemPrompt').value = defaultAIPrompt;
+  $('aiSettingsStatus').textContent = t('已恢复默认内容，保存后生效');
+};
+$('aiSettingsSave').onclick = async () => {
+  $('aiSettingsSave').disabled = true;
+  try {
+    await request(
+      selectedPrompt === 'system'
+        ? '/api/ai-settings'
+        : '/api/ai-prompts/' + selectedPrompt,
+      {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(
+          selectedPrompt === 'system'
+            ? { systemPrompt: $('aiSystemPrompt').value }
+            : { text: $('aiSystemPrompt').value },
+        ),
+      },
+    );
+    promptDrafts[selectedPrompt].text = $('aiSystemPrompt').value;
+    $('aiSettingsStatus').textContent = t(
+      selectedPrompt === 'system'
+        ? '已保存，请重新连接 AI 客户端'
+        : '已保存，AI 下次读取模块时生效',
+    );
+  } catch (error) {
+    $('aiSettingsStatus').textContent = error.message;
+  } finally {
+    $('aiSettingsSave').disabled = false;
+  }
+};
 $('expandEditorSetting').onchange = safely(async () => {
   const next = $('expandEditorSetting').checked;
   $('expandEditorSetting').disabled = true;
@@ -1595,6 +1664,8 @@ function geometry(selector) {
   };
 }
 window.pageNotes = {
+  validateNote,
+  openAISettings,
   finishEditing: async () => {
     await endMarkdownDocument();
     await waitWordIdle();
@@ -1635,12 +1706,32 @@ window.pageNotes = {
     await endMarkdownDocument();
     await flush();
     if (doc?.projectRoot)
-      await request('/api/projects/' + doc.id + '/sync', { method: 'POST' });
+      await request('/api/projects/' + doc.id + '/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ source: !wordActive }),
+      });
   },
   resetNoteZoom: () => {
     noteZoom = 1;
     applyNoteZoom();
     updatePreview();
+  },
+  getSummary: () => ({
+    document: doc ? { id: doc.id, name: doc.name, kind: doc.kind } : null,
+    page,
+    total,
+    mode,
+    wordEditing: wordActive,
+  }),
+  preparePageData: async (p) => {
+    if (!Number.isInteger(p) || p < 1 || p > total) throw Error('页码超出范围');
+    return preparePageData({
+      pdf,
+      pdfjs,
+      markdown: mdPages[p - 1] || '',
+      page: p,
+    });
   },
   getState: async () => ({
     document: doc,
@@ -1682,13 +1773,14 @@ window.pageNotes = {
     },
   }),
   refreshLibrary,
-  open: async (id, p = 1) => {
+  open: async (id, p = 1, forceReload = false) => {
     if (wordBusy || wordActive) await window.pageNotes.finishEditing();
     const list = await refreshLibrary();
     const meta = list.find((d) => d.id === id);
     if (!meta) throw Error('文档不存在');
     if (
       doc?.id !== id ||
+      forceReload ||
       (new URLSearchParams(location.search).has('capture') &&
         doc?.modified !== meta.modified)
     )
@@ -1696,14 +1788,18 @@ window.pageNotes = {
     await goTo(p);
     await waitVisuals();
   },
-  readPages: async (pages) => {
+  readPages: async (pages, include = 'both') => {
     const results = [];
     for (const p of pages) {
       if (p < 1 || p > total) throw Error('页码超出范围');
       results.push({
         page: p,
-        sourceText: await sourceText(p),
-        markdown: notes[p] || '',
+        ...(['source', 'both'].includes(include)
+          ? { sourceText: await sourceText(p) }
+          : {}),
+        ...(['note', 'both'].includes(include)
+          ? { markdown: notes[p] || '' }
+          : {}),
       });
     }
     return results;
@@ -1720,8 +1816,24 @@ window.pageNotes = {
   },
   syncNotes: async (id) => {
     if (doc?.id === id) {
-      notes = await request(`/api/documents/${id}/notes`);
-      loadNote();
+      const incoming = await request(`/api/documents/${id}/notes`);
+      if (doc?.id !== id) return;
+      const previous = notes[page] || '';
+      notes = incoming;
+      // Background writes to other pages must not rebuild the reader's DOM,
+      // clear their selection or move either pane.
+      if ((notes[page] || '') !== previous) {
+        const scroll = $('noteScroll');
+        const { scrollTop, scrollLeft } = scroll;
+        const editorTop = $('editor').scrollTop;
+        $('editor').value = notes[page] || '';
+        updatePreview();
+        annotations.mountNote($('noteBody'), page);
+        reviews?.refresh();
+        scroll.scrollTop = scrollTop;
+        scroll.scrollLeft = scrollLeft;
+        $('editor').scrollTop = editorTop;
+      }
     }
   },
   lockEditing: async () => {

@@ -122,6 +122,23 @@ export function createAITools({ annotations, isReading, hasDocument, toast }) {
   mousePanel.innerHTML =
     '<button data-mouse-mode="text">文字选择</button><button data-mouse-mode="rect">框选</button>';
   tools.append(mousePanel);
+  const mouseButton = tools.querySelector('[data-ai-pointer=mouse]');
+  mouseButton.setAttribute('aria-haspopup', 'true');
+  function showMousePanel(open) {
+    mousePanel.hidden = !open;
+    mouseButton.setAttribute('aria-expanded', String(open));
+  }
+  showMousePanel(false);
+  document.addEventListener(
+    'pointerdown',
+    (event) => {
+      if (!tools.contains(event.target)) showMousePanel(false);
+    },
+    true,
+  );
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') showMousePanel(false);
+  });
   mousePanel.querySelectorAll('button').forEach(
     (b) =>
       (b.onclick = () => {
@@ -135,18 +152,18 @@ export function createAITools({ annotations, isReading, hasDocument, toast }) {
           );
           document.body.dataset.aiPointer = 'rect';
         }
-        mousePanel.hidden = true;
+        showMousePanel(false);
       }),
   );
   tools
     .querySelector('[data-ai-pointer=mouse]')
-    .addEventListener('click', () => (mousePanel.hidden = !mousePanel.hidden));
+    .addEventListener('click', () => showMousePanel(mousePanel.hidden));
   tools
     .querySelector('[data-ai-pointer=hand]')
-    .addEventListener('click', () => (mousePanel.hidden = true));
+    .addEventListener('click', () => showMousePanel(false));
   tools
     .querySelector('[data-ai-pointer=pen]')
-    .addEventListener('click', () => (mousePanel.hidden = true));
+    .addEventListener('click', () => showMousePanel(false));
   const icons = {
     mouse: 'M5 3l13 9-7 1-3 6z',
     hand: 'M7 11V5a2 2 0 014 0v6V4a2 2 0 014 0v8V6a2 2 0 014 0v9c0 5-3 7-7 7-3 0-6-2-8-6l-2-4a2 2 0 013-2l2 3',

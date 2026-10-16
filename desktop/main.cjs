@@ -11,6 +11,8 @@ const fs = require('node:fs/promises');
 const { pathToFileURL } = require('node:url');
 const { randomBytes } = require('node:crypto');
 const { execFileSync } = require('node:child_process');
+const aiSettingsStore = require('./ai-settings.cjs');
+const promptStoreModule = require('./prompts.cjs');
 const {
   projectArgument,
   createProjectLauncher,
@@ -121,6 +123,35 @@ if (!app.requestSingleInstanceLock()) {
       const url = `http://127.0.0.1:${server.address().port}`;
       const mcpFolder = path.join(app.getPath('userData'), 'mcp');
       await fs.mkdir(mcpFolder, { recursive: true });
+      const tutorFolder = path.join(
+        app.getPath('userData'),
+        'skills',
+        'pagenote-page-tutor',
+      );
+      await fs.mkdir(tutorFolder, { recursive: true });
+      const tutorSkillFile = path.join(tutorFolder, 'SKILL.md');
+      await fs.copyFile(
+        path.join(
+          app.getAppPath(),
+          'skills',
+          'pagenote-page-tutor',
+          'SKILL.md',
+        ),
+        tutorSkillFile,
+      );
+      // Copy explicit files: recursive fs.cp is not supported reliably inside ASAR.
+      for (const item of promptStoreModule.modules) {
+        const folder = path.join(
+          app.getPath('userData'),
+          'skills',
+          item.folder,
+        );
+        await fs.mkdir(folder, { recursive: true });
+        await fs.copyFile(
+          path.join(app.getAppPath(), 'skills', item.folder, 'SKILL.md'),
+          path.join(folder, 'SKILL.md'),
+        );
+      }
       const adapter = path.join(mcpFolder, 'page-notes-mcp.cjs');
       await fs.copyFile(
         app.isPackaged
@@ -564,6 +595,38 @@ if (!app.requestSingleInstanceLock()) {
                   },
                   { type: 'separator' },
                   {
+                    label: '复制逐页精讲提示词',
+                    click: async () =>
+                      clipboard.writeText(
+                        '# 默认系统提示词 / Default AI instructions\n\n' +
+                          aiSettingsStore.readAISettings(
+                            path.join(data, 'ai-settings.json'),
+                          ).systemPrompt +
+                          '\n\n' +
+                          JSON.stringify(
+                            promptStoreModule
+                              .createPromptStore(
+                                path.join(app.getPath('userData'), 'skills'),
+                                data,
+                              )
+                              .index(),
+                            null,
+                            2,
+                          ) +
+                          '\n\n' +
+                          promptStoreModule
+                            .createPromptStore(
+                              path.join(app.getPath('userData'), 'skills'),
+                              data,
+                            )
+                            .read('page-tutor').text,
+                      ),
+                  },
+                  {
+                    label: '打开内置学习技能目录',
+                    click: () => shell.openPath(path.dirname(tutorFolder)),
+                  },
+                  {
                     label: '复制 MCP 配置',
                     click: () =>
                       clipboard.writeText(JSON.stringify(mcpConfig, null, 2)),
@@ -588,6 +651,13 @@ if (!app.requestSingleInstanceLock()) {
               {
                 label: '设置',
                 submenu: [
+                  {
+                    label: 'AI 设置',
+                    click: () =>
+                      win.webContents.executeJavaScript(
+                        'window.pageNotes.openAISettings()',
+                      ),
+                  },
                   {
                     label: '语言 / Language',
                     submenu: [

@@ -37,6 +37,18 @@ try {
     await window.pageNotes.syncNotes(s.document.id);
   });
   await w.waitForTimeout(400);
+  assert.equal(await w.evaluate(()=>document.body.dataset.aiPointer),'mouse');
+  for(const selector of ['#preview p','.document-sheet[data-page="1"] .textLayer span']){
+    await w.locator('#aiSharedTools [data-ai-pointer=mouse]').click();
+    assert.ok(await w.locator('.mouse-options').isVisible());
+    await w.locator(selector).first().click();
+    assert.ok(await w.locator('.mouse-options').isHidden());
+    assert.equal(await w.evaluate(()=>document.body.dataset.aiPointer),'mouse');
+    assert.equal(await w.locator('#aiSharedTools [data-ai-pointer=mouse]').getAttribute('aria-expanded'),'false');
+  }
+  await w.locator('#aiSharedTools [data-ai-pointer=mouse]').click();
+  await w.keyboard.press('Escape');
+  assert.ok(await w.locator('.mouse-options').isHidden());
   await w.locator('#aiSharedTools [data-ai-pointer=mouse]').click();
   assert.equal(await w.locator('[data-mouse-mode]').count(), 2);
   assert.equal(await w.locator('[data-mouse-mode=highlight]').count(), 0);
@@ -122,7 +134,7 @@ try {
   assert.ok(await w.locator('#aiPenColor').isVisible(), 'pen controls open');
   await w.screenshot({ path: path.join(root, 'tests/pen-menu-preview.png') });
   console.log(
-    'PASS compact icon menus; only two mouse choices and three pen choices; box selection on both sides; optional tag; captured text/coordinates persisted.',
+    'PASS default text selection; click-outside and Escape dismiss menus; compact icon menus; box selection on both sides; optional tag; captured text/coordinates persisted.',
   );
 } finally {
   await app.close();

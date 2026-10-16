@@ -1,5 +1,9 @@
 # pagenote
 
+**[⬇ 下载完整软件包（Windows x64 · ZIP）](https://github.com/laihong06/pagenote/releases/download/v2.0.0-beta.4/pagenote-2.0.0-beta.4-windows-x64.zip)** · [下载安装版](https://github.com/laihong06/pagenote/releases/download/v2.0.0-beta.4/pagenote-2.0.0-beta.4-windows-x64-setup.exe) · [下载完整源码](https://github.com/laihong06/pagenote/archive/refs/heads/main.zip)
+
+想直接试用，下载完整软件包，全部解压后运行 `pagenote.exe` 即可。当前为 **2.0.0-beta.4 测试版**；想修改项目，可下载源码或 Fork 本仓库，按下方说明构建。
+
 <img src="build/icon.png" alt="pagenote 双页图标" width="88">
 
 [English](README.en.md) · 简体中文
@@ -30,6 +34,8 @@ AI 浪潮扑面而来，用 AI 辅助学习早已是寻常选择。大家常常�
 
 代码高亮在本机完成，不需要联网下载语法。显示异常时，可参考 [代码渲染说明](docs/CODE-RENDERING.md) 提供版本和最小示例，便于排查。
 
+公式若显示成一串反斜杠源码，可能是复制后的转义格式没有被识别。开发版已补充这类兼容处理，具体范围见 [公式渲染说明](docs/FORMULA-RENDERING.md)。
+
 ![Markdown 中的公式、Python 代码高亮和 Mermaid 流程图](docs/images/markdown-rendering.png)
 
 ### 需要修改时，再展开编辑
@@ -50,7 +56,15 @@ AI 浪潮扑面而来，用 AI 辅助学习早已是寻常选择。大家常常�
 
 目前的 Pagenote，支持双栏阅读、逐页笔记和 AI 标注，借助 MCP 接口，允许 AI 读取和修改页面内容。软件本身并不内置大模型，逐页精讲、图像生成这类功能，需要搭配具备对应能力的 AI 客户端配合使用。
 
-连接 AI 后，请按 [逐页精讲约定](docs/AI-TEACHING.zh-CN.md) 执行：每页单独发起讲解请求，给足本页上下文，并把上一页的知识交接带入下一页。不要一次生成整章后再拆页。
+连接 AI 后，请按 [逐页精讲约定](docs/AI-TEACHING.zh-CN.md) 执行：每页单独发起讲解请求，给足本页上下文，带入当前页及前后相邻源页，不等待上一页讲稿。不要一次生成整章后再拆页。
+
+开发版内置了 [逐页精讲技能](skills/pagenote-page-tutor/SKILL.md)。在 **AI 标注 → 复制逐页精讲提示词** 中复制后交给 AI，即可复用这些要求；支持 MCP 提示模板的客户端可调用 `pagenote-page-tutor`，填写学习基础、页码范围和目标。AI 也能直接读取资源 `page-notes://skills/page-tutor`。模板提供讲解要求，不会在本机自行调用大模型。
+
+**设置 → AI 设置** 可以分别修改系统提示词、学习讲解、逐页精讲、AI Tag 修改、输出格式与学习背景模块，也可以恢复默认。它适用于通用的文档协作；逐页精讲技能只在相关学习任务中使用，不会把摘要、翻译或简答强行变成长篇讲解。提示词保存在本机；系统提示词保存后需重新连接客户端，模块修改在下次读取时生效。MCP 会提供这份默认指令，实际系统提示层由客户端决定。
+
+开发版支持按需读取当前页，原文与笔记分别获取，局部修改只读相关段落。AI 可以把简短的页间知识交接单独保存到项目，需要跨会话续做时使用，不作为并行生成前提；原文或笔记变化后会提示交接过期。减少重复读取，让上下文留给当前页的详细解释，具体参数见 [MCP 接口说明](MCP接口说明.md#按需读取与知识交接)。
+
+开发版还内置离线中英文 OCR，能为 AI 准备逐页文字、坐标和置信度、整页或区域图片，以及 Markdown 表格和 Mermaid 图像，结果随项目缓存。原文和原图保留，识别不准的公式或图表仍需核对，详见 [本地页面准备](docs/LOCAL-PREPARATION.md)。
 
 **当前公开版本：2.0.0-beta.4。** 还在测试和改进中，欢迎拿真实的学习材料试用，也欢迎告诉我哪里用起来不顺。
 
@@ -125,6 +139,12 @@ npm run desktop
 
 验收范围及仍需完成的工作见 [发布准备报告](docs/RELEASE-READINESS.md)。提交问题时请注明版本、系统、复现步骤和脱敏日志；不要上传个人项目或 MCP 连接密钥。
 
+## 反馈与联系
+
+使用中遇到 Bug，欢迎[提交 Issue](https://github.com/laihong06/pagenote/issues/new)。附上软件版本、操作步骤和截图，会更方便我复现和排查。
+
+有建议，或想交流一下这个工具，也可以发邮件给我：[chennanfeng310@gmail.com](mailto:chennanfeng310@gmail.com)。
+
 ## 许可
 
 本项目采用 [MIT License](LICENSE)，允许商业使用。依赖组件有各自的许可；分发时须保留生成的 `THIRD-PARTY-NOTICES.txt`、Node.js 许可及 Electron/Chromium 许可。Microsoft Office 的授权由使用者负责。
@@ -133,3 +153,5 @@ MCP 接入文档：[中文](MCP接口说明.md) · [English](docs/MCP.en-US.md)
 
 编辑方式和图标说明：[本轮调整](docs/EDITOR-REFERENCE.md)。
 单独导入的文件编辑的是 pagenote 的本地副本；项目编辑打开 `src` 中链接的文件。保存后切回 pagenote。
+
+开发版提供统一提示词索引 `page-notes://prompts/index`：初始生成、AI Tag 修改和普通编辑按不同流程读取模块，正文按版本复用。逐页建议并发数为 `max(1, floor(总页数 / 10))`，受客户端、服务配额及本机资源限制。提交前可调用本地 `page_notes_validate_note` 检查格式与附件，避免把截图返工当成固定流程。它不保证知识正确或所有设备渲染一致。完整文字见 [提示词清单](docs/PROMPTS.zh-CN.md)。

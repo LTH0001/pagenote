@@ -474,6 +474,20 @@ dialog {
 dialog::backdrop {
   background: #1e293b55;
 }
+#aiSettings {
+  width: min(780px, calc(100vw - 48px));
+  max-height: calc(100vh - 48px);
+  overflow: auto;
+}
+#aiSystemPrompt {
+  display: block;
+  width: 100%;
+  min-height: 240px;
+  max-height: 50vh;
+  padding: 12px;
+  resize: vertical;
+  line-height: 1.7;
+}
 dialog h2 {
   margin-top: 0;
   font-size: 22px;
