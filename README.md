@@ -1,11 +1,8 @@
 # pagenote
 
+**[⬇ Windows 安装包](https://github.com/laihong06/pagenote/releases/download/v1.0.0/pagenote-1.0.0-windows-x64-setup.exe)** · [Windows 免安装 ZIP](https://github.com/laihong06/pagenote/releases/download/v1.0.0/pagenote-1.0.0-windows-x64.zip) · **[⬇ Mac Apple Silicon](https://github.com/obroccolio/pagenote/releases/download/v1.0.0/pagenote-1.0.0-mac-arm64.dmg)** · **[⬇ Mac Intel](https://github.com/obroccolio/pagenote/releases/download/v1.0.0/pagenote-1.0.0-mac-x64.dmg)** · [源码包](https://github.com/laihong06/pagenote/releases/download/v1.0.0/pagenote-1.0.0-source.zip)
 
-**平台状态：Windows v1.0 正式版；macOS 测试版。** 本项目按阶段设定质量门槛，正式版不代表零 Bug 或所有环境均已验证。[发布基准](docs/RELEASE-POLICY.md) · [已知问题与未验证范围](KNOWN_ISSUES.md)。
-
-**[⬇ 下载完整软件包（Windows x64 · ZIP）](https://github.com/laihong06/pagenote/releases/download/v1.0.0/pagenote-1.0.0-windows-x64.zip)** · [下载安装版](https://github.com/laihong06/pagenote/releases/download/v1.0.0/pagenote-1.0.0-windows-x64-setup.exe) · [下载对应版本源码](https://github.com/laihong06/pagenote/releases/download/v1.0.0/pagenote-1.0.0-source.zip)
-
-想直接试用，下载完整软件包，全部解压后运行 `pagenote.exe` 即可。当前为 **1.0.0 Windows 正式版**；想修改项目，可下载源码或 Fork 本仓库，按下方说明构建。
+Windows 为 **v1.0 正式版**；Mac 在本项目中仍按**测试版**提供。Mac 下载来自贡献者 [obroccolio 的发布页](https://github.com/obroccolio/pagenote/releases/tag/v1.0.0)，文件编号为 1.0.0，属于贡献者独立构建，不等同于本仓库 Windows v1.0 的发布包或最新源码构建。想直接使用请下载安装包；想修改代码，可以下载源码或 Fork 本仓库。
 
 <img src="build/icon.png" alt="pagenote 双页图标" width="88">
 
@@ -23,7 +20,7 @@ AI 浪潮扑面而来，用 AI 辅助学习早已是寻常选择。大家常常�
 
 ## 功能一览
 
-以下为当前beta.5的实际截图，使用自编的学习示例。
+以下截图使用自编学习示例，拍摄于 beta.5 阶段；用于展示双栏阅读、编辑与标注流程，不代表 Mac 的原生窗口外观。
 
 ### 原文与讲解，按页对照
 
@@ -37,7 +34,7 @@ AI 浪潮扑面而来，用 AI 辅助学习早已是寻常选择。大家常常�
 
 代码高亮在本机完成，不需要联网下载语法。显示异常时，可参考 [代码渲染说明](docs/CODE-RENDERING.md) 提供版本和最小示例，便于排查。
 
-公式若显示成一串反斜杠源码，可能是复制后的转义格式没有被识别。beta.5已补充这类兼容处理，具体范围见 [公式渲染说明](docs/FORMULA-RENDERING.md)。
+公式若显示成一串反斜杠源码，可能是复制后的转义格式没有被识别。当前版本已补充这类兼容处理，具体范围见 [公式渲染说明](docs/FORMULA-RENDERING.md)。
 
 ![Markdown 中的公式、Python 代码高亮和 Mermaid 流程图](docs/images/markdown-rendering.png)
 
@@ -61,13 +58,13 @@ AI 浪潮扑面而来，用 AI 辅助学习早已是寻常选择。大家常常�
 
 连接 AI 后，请按 [逐页精讲约定](docs/AI-TEACHING.zh-CN.md) 执行：每页单独发起讲解请求，给足本页上下文，带入当前页及前后相邻源页，不等待上一页讲稿。不要一次生成整章后再拆页。
 
-beta.5内置了 [逐页精讲技能](skills/pagenote-page-tutor/SKILL.md)。在 **AI 标注 → 复制逐页精讲提示词** 中复制后交给 AI，即可复用这些要求；支持 MCP 提示模板的客户端可调用 `pagenote-page-tutor`，填写学习基础、页码范围和目标。AI 也能直接读取资源 `page-notes://skills/page-tutor`。模板提供讲解要求，不会在本机自行调用大模型。
+当前版本内置了 [逐页精讲技能](skills/pagenote-page-tutor/SKILL.md)。在 **AI 标注 → 复制逐页精讲提示词** 中复制后交给 AI，即可复用这些要求；支持 MCP 提示模板的客户端可调用 `pagenote-page-tutor`，填写学习基础、页码范围和目标。AI 也能直接读取资源 `page-notes://skills/page-tutor`。模板提供讲解要求，不会在本机自行调用大模型。
 
 **设置 → AI 设置** 可以分别修改系统提示词、学习讲解、逐页精讲、AI Tag 修改、输出格式与学习背景模块，也可以恢复默认。它适用于通用的文档协作；逐页精讲技能只在相关学习任务中使用，不会把摘要、翻译或简答强行变成长篇讲解。提示词保存在本机；系统提示词保存后需重新连接客户端，模块修改在下次读取时生效。MCP 会提供这份默认指令，实际系统提示层由客户端决定。
 
-beta.5支持按需读取当前页，原文与笔记分别获取，局部修改只读相关段落。AI 可以把简短的页间知识交接单独保存到项目，需要跨会话续做时使用，不作为并行生成前提；原文或笔记变化后会提示交接过期。减少重复读取，让上下文留给当前页的详细解释，具体参数见 [MCP 接口说明](MCP接口说明.md#按需读取与知识交接)。
+当前版本支持按需读取当前页，原文与笔记分别获取，局部修改只读相关段落。AI 可以把简短的页间知识交接单独保存到项目，需要跨会话续做时使用，不作为并行生成前提；原文或笔记变化后会提示交接过期。减少重复读取，让上下文留给当前页的详细解释，具体参数见 [MCP 接口说明](MCP接口说明.md#按需读取与知识交接)。
 
-beta.5还内置离线中英文 OCR，能为 AI 准备逐页文字、坐标和置信度、整页或区域图片，以及 Markdown 表格和 Mermaid 图像，结果随项目缓存。原文和原图保留，识别不准的公式或图表仍需核对，详见 [本地页面准备](docs/LOCAL-PREPARATION.md)。
+当前版本还内置离线中英文 OCR，能为 AI 准备逐页文字、坐标和置信度、整页或区域图片，以及 Markdown 表格和 Mermaid 图像，结果随项目缓存。原文和原图保留，识别不准的公式或图表仍需核对，详见 [本地页面准备](docs/LOCAL-PREPARATION.md)。
 
 **当前公开版本：1.0.0。** 已安装旧版的用户需要手动升级：关闭旧版后安装新版，ZIP 版请完整解压到新目录，不要只替换 EXE。 后续继续改进，欢迎拿真实的学习材料试用，也欢迎告诉我哪里用起来不顺。
 
@@ -83,6 +80,29 @@ beta.5还内置离线中英文 OCR，能为 AI 准备逐页文字、坐标和置
 也可下载 Windows ZIP 分发包，解压整个文件夹，再运行其中的 `pagenote.exe`。不要单独移动 EXE，它依赖同目录的资源。
 
 正式上传 Release 前，应公布 `SHA256SUMS.txt` 并完成安全扫描。当前构建没有发行者签名；如果杀毒软件拦截，请停止运行并向维护者提供日志，**不要关闭防护或添加排除项**。
+
+### Mac 安装与使用（测试版）
+
+| 你的 Mac | 安装包 | ZIP 备用包 |
+|---|---|---|
+| Apple Silicon，M 系列芯片 | [arm64 DMG](https://github.com/obroccolio/pagenote/releases/download/v1.0.0/pagenote-1.0.0-mac-arm64.dmg) | [arm64 ZIP](https://github.com/obroccolio/pagenote/releases/download/v1.0.0/pagenote-1.0.0-mac-arm64.zip) |
+| Intel 处理器 | [x64 DMG](https://github.com/obroccolio/pagenote/releases/download/v1.0.0/pagenote-1.0.0-mac-x64.dmg) | [x64 ZIP](https://github.com/obroccolio/pagenote/releases/download/v1.0.0/pagenote-1.0.0-mac-x64.zip) |
+
+1. 点左上角 ** → 关于本机**，查看“芯片”或“处理器”，选择对应安装包。
+2. 打开 DMG，把 **pagenote.app** 拖入 **应用程序 / Applications**，然后从应用程序启动。ZIP 包解压后也将完整应用移入应用程序。
+3. 当前 Mac 包未签名、公证。首次被系统阻止时，先确认下载来源与校验值，再按 macOS 提示在 **系统设置 → 隐私与安全性** 中处理；不要全局关闭 Gatekeeper。不同系统版本的提示可能不同。
+4. 阅读 PDF、Markdown 不需要 Office。导入 Word/PPT 或刷新其预览，需要本机安装并激活 **Microsoft Word / PowerPoint**；首次调用按提示允许自动化与文件访问。
+5. 在 **设置 → 语言 / Language** 选择中文或英文。通过文件菜单导入文档、新建或打开项目，再为对应页填写笔记或连接自己的 AI 客户端。
+
+[Mac 发布说明与 SHA256SUMS.txt](https://github.com/obroccolio/pagenote/releases/tag/v1.0.0) · [Office 接入与权限排查](docs/MAC-OFFICE.md)
+
+校验 DMG 可在终端运行 `shasum -a 256 下载文件路径`，与 Mac 发布页的校验清单比较；不要使用 Windows 发布页的校验清单核对 Mac 文件。
+
+### 这次 Mac 适配带来的变化
+
+Mac 适配由 [obroccolio](https://github.com/obroccolio) 在 [PR #3](https://github.com/laihong06/pagenote/pull/3) 中贡献：Finder 打开项目、Dock 唤回窗口、原生菜单与 Command 快捷键，以及本机 Word/PPT 转换和保存刷新。MCP 可使用独立 Word 窗口读取和进行带版本检查的修改，Word 截图通过临时 PDF 渲染。Apple Silicon 与 Intel 均有构建入口，普通用户无需另装 Node.js。
+
+本仓库已合入适配代码；上方 Mac 包由贡献者单独发布，可能与合并后的源码存在差异。Windows 的验收结果不直接适用于 Mac，具体限制与待办统一记在 [KNOWN_ISSUES.md](KNOWN_ISSUES.md)。
 
 ## 其他操作
 
@@ -158,3 +178,9 @@ MCP 接入文档：[中文](MCP接口说明.md) · [English](docs/MCP.en-US.md)
 单独导入的文件编辑的是 pagenote 的本地副本；项目编辑打开 `src` 中链接的文件。保存后切回 pagenote。
 
 beta.5提供统一提示词索引 `page-notes://prompts/index`：初始生成、AI Tag 修改和普通编辑按不同流程读取模块，正文按版本复用。逐页建议并发数为 `max(1, floor(总页数 / 10))`，受客户端、服务配额及本机资源限制。提交前可调用本地 `page_notes_validate_note` 检查格式与附件，避免把截图返工当成固定流程。它不保证知识正确或所有设备渲染一致。完整文字见 [提示词清单](docs/PROMPTS.zh-CN.md)。
+
+## 贡献与致谢
+
+感谢 [obroccolio](https://github.com/obroccolio) 完成 Mac 适配与安装包分发；感谢 [LTH0001](https://github.com/LTH0001) 提供公式修复回归、RC 验收与测试改进。Windows v1.0 的发布依据是 LTH0001 的测试加上项目发起人的本机补测，由发起人综合结果批准。欢迎 Fork 修改，也欢迎提交 PR；请同时更新变更日志，并注明验证过的平台和范围。
+
+[发布基准](docs/RELEASE-POLICY.md) · [已知问题](KNOWN_ISSUES.md)
