@@ -1,4 +1,4 @@
-import { _electron as electron } from '@playwright/test';
+import { _electron as electron, expect } from '@playwright/test';
 import path from 'node:path';
 import assert from 'node:assert/strict';
 const root = path.resolve(import.meta.dirname, '..');
@@ -120,21 +120,35 @@ try {
   await w.locator('#reviewInstruction').fill('整体减少公式，多讲直觉。');
   await w.locator('#reviewSave').click();
   await w.locator('#reviewDialog').waitFor({ state: 'hidden' });
-  assert.equal(await board.locator('.improvement-card').count(), 2);
+  await expect(board.locator('.improvement-card')).toHaveCount(2);
   const card = board.locator('.improvement-card').first(),
     title = await card.locator('header').boundingBox();
+  const draggedId = await card.getAttribute('data-record-id');
+  const savedPosition = w.waitForResponse(
+    (response) =>
+      response.url().endsWith('/ai-reviews/' + draggedId) &&
+      response.request().method() === 'PATCH',
+  );
   await w.mouse.move(title.x + 30, title.y + 10);
   await w.mouse.down();
   await w.mouse.move(title.x + 140, title.y + 45, { steps: 8 });
   await w.mouse.up();
-  await w.waitForFunction(async () => {
-    const state = await window.pageNotes.getState();
-    return (
-      await (
-        await fetch('/api/documents/' + state.document.id + '/ai-reviews')
-      ).json()
-    ).some((r) => r.boardPosition?.x > 50);
-  });
+  const savedResponse = await savedPosition;
+  assert.ok(savedResponse.ok());
+  const position = (await savedResponse.json()).boardPosition;
+  assert.ok(position.x > 50);
+  await expect
+    .poll(async () =>
+      w.evaluate(async (draggedId) => {
+        const state = await window.pageNotes.getState();
+        return (
+          await (
+            await fetch('/api/documents/' + state.document.id + '/ai-reviews')
+          ).json()
+        ).find((r) => r.id === draggedId)?.boardPosition;
+      }, draggedId),
+    )
+    .toEqual(position);
   await board.locator('.board-close').click();
   await w.locator('.ai-workbench[data-side=document] .board-close').click();
   await w.locator('#aiSharedTools [data-ai-pointer=pen]').click();
@@ -281,18 +295,12 @@ try {
   await w.reload();
   await w.evaluate(() => window.pageNotes.ready);
   await w.evaluate(() => window.pageNotes.menuAction('reviewRight'));
-  assert.equal(
-    await w.locator('.ai-workbench[data-side=note] .improvement-card').count(),
-    2,
-  );
-  assert.ok(
-    parseFloat(
-      await w
-        .locator('.ai-workbench[data-side=note] .improvement-card')
-        .first()
-        .evaluate((e) => e.style.left),
-    ) > 50,
-  );
+  await expect(
+    w.locator('.ai-workbench[data-side=note] .improvement-card'),
+  ).toHaveCount(2);
+  await expect(
+    w.locator(`.improvement-card[data-record-id="${draggedId}"]`),
+  ).toHaveCSS('left', position.x + 'px');
   await w.waitForFunction(
     () =>
       document.querySelector('.ai-workbench[data-side=note] .board-body')

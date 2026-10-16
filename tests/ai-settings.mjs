@@ -20,6 +20,10 @@ try {
   let w = await app.firstWindow();
   await w.waitForFunction(() => !!window.pageNotes);
   await w.evaluate(() => window.pageNotes.ready);
+  await w.evaluate(
+    (locale) => window.pageNotes.setLanguage(locale),
+    process.env.TEST_LOCALE || 'zh-CN',
+  );
   await w.evaluate(() => window.pageNotes.openAISettings());
   const defaults = await w.locator('#aiSystemPrompt').inputValue();
   if (process.env.AI_SETTINGS_SCREENSHOT)
@@ -28,10 +32,21 @@ try {
   const custom =
     '先遵守本次任务范围。用简洁中文解释；遇到论文先区分结论与证据。';
   await w.locator('#aiSystemPrompt').fill(custom);
-  await w.locator('#aiSettingsSave').click();
-  await w.waitForFunction(() =>
-    document.querySelector('#aiSettingsStatus').textContent.includes('已保存'),
-  );
+  const savePrompt = async () => {
+    const saved = w.waitForResponse(
+      (response) =>
+        /\/api\/(?:ai-settings|ai-prompts\/[^/]+)$/.test(
+          new URL(response.url()).pathname,
+        ) && response.request().method() === 'PUT',
+    );
+    await w.locator('#aiSettingsSave').click();
+    assert.ok((await saved).ok(), 'prompt save request succeeds');
+    await w.waitForFunction(
+      () => !document.querySelector('#aiSettingsSave').disabled,
+    );
+    assert.ok((await w.locator('#aiSettingsStatus').textContent()).trim());
+  };
+  await savePrompt();
   assert.equal(
     JSON.parse(
       await fs.readFile(
@@ -65,10 +80,7 @@ try {
   const moduleDefault = await w.locator('#aiSystemPrompt').inputValue();
   const moduleCustom = moduleDefault + '\n本机测试偏好：先给直觉。';
   await w.locator('#aiSystemPrompt').fill(moduleCustom);
-  await w.locator('#aiSettingsSave').click();
-  await w.waitForFunction(() =>
-    document.querySelector('#aiSettingsStatus').textContent.includes('已保存'),
-  );
+  await savePrompt();
   const indexAfter = JSON.parse(
     (await client.readResource({ uri: 'page-notes://prompts/index' }))
       .contents[0].text,
@@ -134,10 +146,7 @@ try {
   await w.evaluate(() => window.pageNotes.openAISettings());
   assert.equal(await w.locator('#aiSystemPrompt').inputValue(), custom);
   await w.locator('#aiPromptReset').click();
-  await w.locator('#aiSettingsSave').click();
-  await w.waitForFunction(() =>
-    document.querySelector('#aiSettingsStatus').textContent.includes('已保存'),
-  );
+  await savePrompt();
   assert.equal(
     JSON.parse(
       await fs.readFile(

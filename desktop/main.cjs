@@ -343,6 +343,13 @@ if (!app.requestSingleInstanceLock()) {
                           .catch(() => {});
                     },
                   },
+                  {
+                    label: '历史版本',
+                    click: () =>
+                      win.webContents.executeJavaScript(
+                        'document.getElementById("historyButton").click()',
+                      ),
+                  },
                   { type: 'separator' },
                   {
                     label: '打开数据文件夹',
